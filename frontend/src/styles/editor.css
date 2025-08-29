@@ -1,0 +1,554 @@
+/* BlockNote Editor Styles */
+.blocknote-editor-container {
+  width: 100%;
+  height: 100%;
+  min-height: 500px;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+/* Typography Settings Inheritance */
+[data-editor-container] {
+  font-family: var(--editor-font-family, 'Inter');
+  font-size: var(--editor-font-size, 16px);
+  line-height: var(--editor-line-height, 1.6);
+}
+
+[data-editor-container] .bn-editor,
+[data-editor-container] .ProseMirror,
+[data-editor-container] .bn-block-content,
+[data-editor-container] p,
+[data-editor-container] span,
+[data-editor-container] div {
+  font-family: inherit !important;
+  font-size: inherit !important;
+  line-height: inherit !important;
+}
+
+/* Apply typography to the main editor specifically */
+#new-bt-editor .bn-editor,
+#new-bt-editor .ProseMirror,
+#new-bt-editor .bn-block-content,
+#new-bt-editor p {
+  font-family: var(--editor-font-family, 'Inter') !important;
+  font-size: var(--editor-font-size, 16px) !important;
+  line-height: var(--editor-line-height, 1.6) !important;
+}
+
+/* More specific selectors to override any external CSS */
+[data-editor-container] #new-bt-editor .bn-editor *,
+[data-editor-container] #new-bt-editor .ProseMirror *,
+[data-editor-container] #new-bt-editor .bn-block-content * {
+  line-height: inherit !important;
+}
+
+/* Ensure BlockNote specific elements inherit typography */
+.bn-container[data-editor-container] .bn-editor,
+.bn-container[data-editor-container] .ProseMirror {
+  font-family: var(--editor-font-family, 'Inter') !important;
+  font-size: var(--editor-font-size, 16px) !important;
+  line-height: var(--editor-line-height, 1.6) !important;
+}
+
+/* Target BlockNote container directly */
+[data-blocknote-container] .bn-editor,
+[data-blocknote-container] .ProseMirror,
+[data-blocknote-container] .bn-block-content,
+[data-blocknote-container] p,
+[data-blocknote-container] div {
+  font-family: inherit !important;
+  font-size: inherit !important;
+  line-height: inherit !important;
+}
+
+/* Very specific selectors to ensure line height is applied */
+#new-bt-editor .ProseMirror p,
+#new-bt-editor .ProseMirror div,
+#new-bt-editor .bn-block-content,
+#new-bt-editor .bn-block-content p {
+  line-height: var(--editor-line-height, 1.6) !important;
+  font-family: var(--editor-font-family, 'Inter') !important;
+  font-size: var(--editor-font-size, 16px) !important;
+}
+
+/* Editor toolbar styling */
+.bn-toolbar {
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+  padding: 0.5rem;
+}
+
+.bn-formatting-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+}
+
+/* Custom AI button styling */
+.ai-toolbar-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.ai-toolbar-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.ai-toolbar-button .bn-button-icon {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Comment button styling */
+.bn-button {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  padding: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bn-button:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+/* Editor content area */
+.bn-editor:not(#new-bt-editor > .bn-editor) {
+  min-height: 400px;
+  padding: 1.5rem 1.25rem !important;
+  background: #f9fafb !important;
+  border-radius: 0.75rem;
+  /* border: 1px solid #e5e7eb; */
+  font-size: inherit;
+  line-height: inherit;
+  font-family: inherit;
+  color: #222;
+  word-break: break-word;
+  white-space: pre-line;
+  max-width: 100%;
+}
+
+.bn-editor h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: var(--editor-block-spacing, 1.25em);
+  margin-top: calc(var(--editor-block-spacing, 1.25em) * 1.2);
+  line-height: calc(var(--editor-line-height, 1.6) * 0.8) !important;
+}
+.bn-editor h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: var(--editor-block-spacing, 1.25em);
+  margin-top: calc(var(--editor-block-spacing, 1.25em) * 1.2);
+  line-height: calc(var(--editor-line-height, 1.6) * 0.9) !important;
+}
+.bn-editor h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: calc(var(--editor-block-spacing, 1.25em) * 0.8);
+  margin-top: var(--editor-block-spacing, 1.25em);
+  line-height: calc(var(--editor-line-height, 1.6) * 0.95) !important;
+}
+.bn-editor h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: calc(var(--editor-block-spacing, 1.25em) * 0.6);
+  margin-top: calc(var(--editor-block-spacing, 1.25em) * 0.8);
+  line-height: var(--editor-line-height, 1.6) !important;
+}
+.bn-editor p {
+  margin-bottom: var(--editor-block-spacing, 1.25em);
+  margin-top: 0;
+}
+.bn-editor ul,
+.bn-editor ol {
+  margin-bottom: var(--editor-block-spacing, 1.25em);
+  margin-top: 0;
+  padding-left: 1.5em;
+}
+.bn-editor ul {
+  list-style-type: disc;
+}
+.bn-editor ol {
+  list-style-type: decimal;
+}
+.bn-editor li {
+  margin-bottom: calc(var(--editor-block-spacing, 1.25em) * 0.4);
+}
+.bn-editor strong {
+  font-weight: 700;
+}
+.bn-editor em {
+  font-style: italic;
+}
+.bn-editor blockquote {
+  /* border-left: 4px solid #d1d5db; */
+  padding-left: 1em;
+  color: #6b7280;
+  font-style: italic;
+  margin: var(--editor-block-spacing, 1.25em) 0;
+}
+.bn-editor code {
+  background: #f3f4f6;
+  color: #d6336c;
+  padding: 0.2em 0.4em;
+  border-radius: 0.3em;
+  font-size: 0.95em;
+}
+.bn-editor pre {
+  background: #f3f4f6;
+  color: #222;
+  padding: 1em;
+  border-radius: 0.5em;
+  overflow-x: auto;
+  font-size: 0.95em;
+  margin-bottom: var(--editor-block-spacing, 1.25em);
+}
+.bn-editor a {
+  color: #2563eb;
+  text-decoration: underline;
+  word-break: break-all;
+}
+
+/* Comment marker styling */
+[data-comment-marker='true'] {
+  background-color: #fef3c7;
+  border-bottom: 2px dotted #f59e0b;
+  padding: 1px 2px;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+[data-comment-marker='true']:hover {
+  background-color: #fde68a;
+}
+
+/* AI Popup styling */
+.ai-popup-container {
+  backdrop-filter: blur(4px);
+}
+
+.ai-popup-content {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* Comment popup styling */
+.comment-modal-backdrop {
+  backdrop-filter: blur(4px);
+}
+
+.comment-popup-modal {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* Loading states */
+.comment-popup-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .blocknote-editor-container {
+    min-height: 300px;
+  }
+
+  .bn-formatting-toolbar {
+    gap: 0.125rem;
+  }
+
+  .ai-toolbar-button,
+  .bn-button {
+    padding: 0.375rem 0.5rem;
+    font-size: 0.75rem;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .blocknote-editor-container {
+    border-color: #fff;
+  }
+
+  .bn-toolbar {
+    background: #1f2937;
+    border-color: #374151;
+  }
+
+  .bn-editor {
+    background: #fff;
+    color: #000;
+  }
+
+  [data-comment-marker='true'] {
+    background-color: #451a03;
+    border-bottom-color: #d97706;
+  }
+
+  [data-comment-marker='true']:hover {
+    background-color: #78350f;
+  }
+}
+
+/* Class-based dark mode support */
+.dark .blocknote-editor-container {
+  border-color: hsl(var(--border));
+  background: hsl(var(--background));
+}
+
+.dark .bn-toolbar {
+  background: hsl(var(--muted));
+  border-color: hsl(var(--border));
+  color: hsl(var(--foreground));
+}
+
+.dark .bn-editor:not(#new-bt-editor > .bn-editor) {
+  background: hsl(var(--foreground)) !important;
+  color: hsl(var(--background));
+}
+
+.dark #new-bt-editor .bn-editor {
+  background: hsl(var(--background)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.dark [data-comment-marker='true'] {
+  background-color: #451a03;
+  border-bottom-color: #d97706;
+}
+
+.dark [data-comment-marker='true']:hover {
+  background-color: #78350f;
+}
+
+/* Razorcopy BlockNote Toolbar Customization */
+.bn-toolbar.bn-formatting-toolbar {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 12px rgba(80, 80, 120, 0.06);
+  border: 1px solid #e5e7eb;
+  padding: 0.5rem 0.5rem;
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.bn-toolbar.bn-formatting-toolbar .bn-button,
+.bn-toolbar.bn-formatting-toolbar button,
+.bn-toolbar.bn-formatting-toolbar select {
+  background: none;
+  border: none;
+  border-radius: 6px;
+  margin: 0 2px;
+  font-size: 1rem;
+  color: #222;
+  transition: background 0.15s, color 0.15s;
+  min-width: 32px;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bn-toolbar.bn-formatting-toolbar .bn-button:hover,
+.bn-toolbar.bn-formatting-toolbar button:hover,
+.bn-toolbar.bn-formatting-toolbar select:hover {
+  background: #f3f4f6;
+  color: #6d28d9; /* Razorcopy accent */
+}
+
+.bn-toolbar.bn-formatting-toolbar .bn-button[aria-pressed='true'],
+.bn-toolbar.bn-formatting-toolbar .bn-button.active {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+.bn-toolbar.bn-formatting-toolbar .bn-button:focus {
+  outline: 2px solid #a78bfa;
+  outline-offset: 2px;
+}
+
+.bn-toolbar.bn-formatting-toolbar .bn-dropdown,
+.bn-toolbar.bn-formatting-toolbar select {
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: #222;
+  font-size: 1rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.bn-toolbar.bn-formatting-toolbar .bn-button svg {
+  width: 18px;
+  height: 18px;
+}
+
+.bn-toolbar.bn-formatting-toolbar .bn-button .bn-button-icon {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* --- Razorcopy BlockNote Toolbar Customization (continued) --- */
+
+/* AI Button: Make it compact and special */
+.bn-toolbar.bn-formatting-toolbar .ai-toolbar-button {
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  background: #f5f3ff;
+  color: #7c3aed;
+  font-weight: 500;
+  font-size: 0.98rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  box-shadow: 0 1px 4px rgba(124, 58, 237, 0.04);
+  border: 1px solid #ede9fe;
+  transition: background 0.15s, color 0.15s, border 0.15s;
+}
+
+.bn-toolbar.bn-formatting-toolbar .ai-toolbar-button:hover,
+.bn-toolbar.bn-formatting-toolbar .ai-toolbar-button:focus {
+  background: #ede9fe;
+  color: #6d28d9;
+  border: 1px solid #c4b5fd;
+}
+
+.bn-toolbar.bn-formatting-toolbar .ai-toolbar-button .bn-button-icon {
+  font-size: 1.05rem;
+  gap: 0.2rem;
+}
+
+.bn-toolbar.bn-formatting-toolbar
+  .ai-toolbar-button
+  .bn-button-icon
+  span:first-child {
+  font-size: 1.1rem;
+  margin-right: 0.1rem;
+}
+
+/* Block Type Dropdown: Make it smaller and aligned */
+.bn-toolbar.bn-formatting-toolbar .bn-block-type-select,
+.bn-toolbar.bn-formatting-toolbar select {
+  font-size: 0.98rem !important;
+  min-height: 32px !important;
+  height: 32px !important;
+  padding: 0.15rem 0.7rem !important;
+  border-radius: 6px !important;
+  background: #fafafa !important;
+  border: 1px solid #e5e7eb !important;
+  color: #222 !important;
+  box-shadow: none !important;
+  margin-right: 0.1rem;
+}
+
+.bn-toolbar.bn-formatting-toolbar .bn-block-type-select:focus,
+.bn-toolbar.bn-formatting-toolbar select:focus {
+  border: 1.5px solid #a78bfa !important;
+  outline: none !important;
+}
+
+/* Fix Mantine dropdown height - cap it and make it scrollable */
+#mantine-04teyv80p-dropdown,
+[id*='mantine'][id*='dropdown'] {
+  max-width: fit-content !important;
+  max-height: fit-content !important;
+  min-height: 30px !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  border-radius: 6px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  position: absolute !important;
+  top: 100% !important;
+  bottom: auto !important;
+  transform: none !important;
+  margin-top: 4px !important;
+}
+
+/* Style the dropdown options */
+#mantine-04teyv80p-dropdown .mantine-Select-item,
+[id*='mantine'][id*='dropdown'] .mantine-Select-item {
+  padding: 0.5rem 0.75rem !important;
+  font-size: 0.95rem !important;
+  border-radius: 4px !important;
+  margin: 2px 4px !important;
+}
+
+#mantine-04teyv80p-dropdown .mantine-Select-item:hover,
+[id*='mantine'][id*='dropdown'] .mantine-Select-item:hover {
+  background: #f3f4f6 !important;
+}
+
+/* Add max constraint even with fit-content to prevent excessive height */
+#mantine-04teyv80p-dropdown:has(.mantine-Select-item:nth-child(n + 8)),
+[id*='mantine'][id*='dropdown']:has(.mantine-Select-item:nth-child(n + 8)) {
+  max-height: 250px !important;
+}
+
+/* Force dropdown direction and positioning */
+.mantine-Select-dropdown,
+[data-mantine-color-scheme] .mantine-Select-dropdown {
+  position: absolute !important;
+  top: 100% !important;
+  bottom: auto !important;
+  transform: translateY(0) !important;
+  margin-top: 4px !important;
+}
+
+/* Mobile responsive for dropdown */
+@media (max-width: 768px) {
+  #mantine-04teyv80p-dropdown,
+  [id*='mantine'][id*='dropdown'] {
+    max-height: 180px !important;
+    font-size: 0.9rem !important;
+  }
+
+  #mantine-04teyv80p-dropdown .mantine-Select-item,
+  [id*='mantine'][id*='dropdown'] .mantine-Select-item {
+    padding: 0.4rem 0.6rem !important;
+    font-size: 0.85rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  #mantine-04teyv80p-dropdown,
+  [id*='mantine'][id*='dropdown'] {
+    max-height: 150px !important;
+  }
+
+  #mantine-04teyv80p-dropdown .mantine-Select-item,
+  [id*='mantine'][id*='dropdown'] .mantine-Select-item {
+    padding: 0.3rem 0.5rem !important;
+    font-size: 0.8rem !important;
+  }
+}

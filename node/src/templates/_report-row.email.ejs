@@ -1,0 +1,65 @@
+<tr style="border-bottom: 1px solid #e2e8f0">
+  <td
+    style="
+      padding: 16px;
+      text-align: left;
+      font-size: 16px;
+      color: #1e293b;
+      font-weight: 500;
+    "
+  >
+    <%= metric %>
+  </td>
+  <td
+    style="
+      padding: 16px;
+      text-align: center;
+      font-size: 16px;
+      color: #1e293b;
+      font-weight: 500;
+    "
+  >
+    <%= data.current %>
+  </td>
+  <td
+    style="
+      padding: 16px;
+      text-align: center;
+      font-size: 16px;
+      color: #64748b;
+      font-weight: 400;
+    "
+  >
+    <%= data.previous %>
+  </td>
+  <td
+    style="
+      padding: 16px;
+      text-align: center;
+      font-size: 16px;
+      color: #64748b;
+      font-weight: 400;
+    "
+  >
+    <%= data.totalTillLastWeek %>
+  </td>
+  <td
+    style="
+      padding: 16px;
+      text-align: center;
+      font-size: 16px;
+      font-weight: 600;
+      color: #16a34a;
+    "
+  >
+    <span>+<%= data.changePercentage %></span>
+  </td>
+</tr>
+<style>
+  .change-positive {
+    color: #16a34a;
+  }
+  .change-negative {
+    color: #dc2626;
+  }
+</style>

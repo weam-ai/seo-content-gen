@@ -1,0 +1,44 @@
+/* Grammar marker styles - stable styling to prevent flickering */
+[data-grammar-issue-id] {
+  cursor: pointer;
+  /* No transitions to prevent any layout shifts or flickering */
+}
+
+/* Hover effects disabled to prevent flickering between marker and tooltip */
+
+[data-grammar-type='spelling'] {
+  border-bottom: 2px wavy #ef4444;
+  background-color: rgba(239, 68, 68, 0.1);
+}
+
+[data-grammar-type='grammar'] {
+  border-bottom: 2px wavy #3b82f6;
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+[data-grammar-type='punctuation'] {
+  border-bottom: 2px wavy #a855f7;
+  background-color: rgba(168, 85, 247, 0.1);
+}
+
+[data-grammar-type='style'] {
+  border-bottom: 2px wavy #22c55e;
+  background-color: rgba(34, 197, 94, 0.1);
+}
+
+/* Dark theme adjustments */
+.dark [data-grammar-type='spelling'] {
+  background-color: rgba(239, 68, 68, 0.2);
+}
+
+.dark [data-grammar-type='grammar'] {
+  background-color: rgba(59, 130, 246, 0.2);
+}
+
+.dark [data-grammar-type='punctuation'] {
+  background-color: rgba(168, 85, 247, 0.2);
+}
+
+.dark [data-grammar-type='style'] {
+  background-color: rgba(34, 197, 94, 0.2);
+}

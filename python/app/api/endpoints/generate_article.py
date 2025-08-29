@@ -1,0 +1,252 @@
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+from typing import Optional, List
+from app.models.schemas import ArticleRequest
+from app.core.database import get_database
+from bson import ObjectId
+import logging
+import os
+from dotenv import load_dotenv
+from openai import OpenAI
+import google.generativeai as genai
+import anthropic
+import re
+import asyncio
+
+load_dotenv()
+
+# Initialize API clients
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+CLAUDE_API_KEY = os.getenv("CLAUDE_API_KEY")
+CUSTOM_GOOGLE_SEARCH = os.getenv("CUSTOM_GOOGLE_SEARCH")
+CX_ID = os.getenv("CX_ID")
+
+logger = logging.getLogger(__name__)
+
+# Initialize clients
+client = OpenAI(api_key=OPENAI_API_KEY) if OPENAI_API_KEY else None
+genai.configure(api_key=GEMINI_API_KEY) if GEMINI_API_KEY else None
+claude_client = anthropic.Anthropic(api_key=CLAUDE_API_KEY) if CLAUDE_API_KEY else None
+
+router = APIRouter()
+
+@router.get("/test")
+async def test_endpoint():
+    return {"message": "Router is working!"}
+
+class ArticleResponse(BaseModel):
+    article: str
+    avg_word_count: float
+
+async def extract_content_google(query, api_key, cx, num=5):
+    """Extract content from Google search results."""
+    try:
+        # For now, return mock data to avoid any external API calls
+        mock_links = [
+            "https://example.com/article1",
+            "https://example.com/article2",
+            "https://example.com/article3"
+        ]
+        
+        content = f"Reference content for query: {query}\n\nThis is mock reference content about {query}. It includes relevant information and context for article generation."
+        avg_word_count = 500
+        
+        return content, avg_word_count, mock_links
+    except Exception as e:
+        logger.error(f"Error in extract_content_google: {e}")
+        return "No reference content available", 0, []
+
+def truncate_text(text, max_words=500):
+    """Truncate text to specified word limit"""
+    if isinstance(text, (tuple, list)):
+        text = " ".join(map(str, text))
+    text = str(text)
+    words = text.split()[:max_words]
+    return " ".join(words)
+
+def get_openai_summary(prompt: str, citations: list = None) -> str:
+    """Generate content using OpenAI"""
+    try:
+        if not client:
+            return "OpenAI Error: API key not configured"
+        
+        completion = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": "You are an AI assistant."},
+                {"role": "user", "content": prompt},
+            ],
+        )
+        output = completion.choices[0].message.content
+        
+        if citations:
+            output += "\n\nReferences\n"
+            output += "\n".join(
+                [f"{i+1}. [{url}]({url})" for i, url in enumerate(citations)]
+            )
+        return output
+    except Exception as e:
+        return f"OpenAI Error: {str(e)}"
+
+def get_gemini_summary(prompt: str, formatted_references: List[str]):
+    """Generate content using Gemini"""
+    try:
+        if not GEMINI_API_KEY:
+            return "Gemini Error: API key not configured"
+        
+        formatted_prompt = (
+            "\n".join([item["content"] for item in prompt])
+            if isinstance(prompt, list)
+            else prompt
+        )
+        
+        model = genai.GenerativeModel("gemini-1.5-pro")
+        response = model.generate_content(formatted_prompt)
+        
+        output = response.text if response else "Error: No response from Gemini AI."
+        
+        # Remove AI-generated intro line if present
+        intro_pattern = r"^Okay, here's a blog article.*?(?=\n\n|$)"
+        output, num_subs = re.subn(
+            intro_pattern, "", output, flags=re.IGNORECASE | re.DOTALL
+        )
+        
+        output = output.lstrip()
+        
+        if formatted_references:
+            references_to_append = "\n\nReferences\n" + "\n".join(
+                [f"{i+1}. [{url}]({url})" for i, url in enumerate(formatted_references)]
+            )
+            output += references_to_append
+        
+        return output
+    except Exception as e:
+        return f"Gemini Error: {str(e)}"
+
+def get_claude_summary(prompt: str, formatted_references: list = None) -> str:
+    """Generate content using Claude"""
+    try:
+        if not claude_client:
+            return "Claude Error: API key not configured"
+        
+        response = claude_client.messages.create(
+            model="claude-3-5-sonnet-20241022",
+            max_tokens=2048,
+            messages=[{"role": "user", "content": prompt}],
+            system="You are a helpful assistant.",
+        )
+        output = (
+            response.content[0].text
+            if hasattr(response, "content")
+            else response.get("completion", "")
+        )
+        
+        if formatted_references:
+            output += "\n\nReferences\n"
+            output += "\n".join(
+                [f"{i+1}. [{url}]({url})" for i, url in enumerate(formatted_references)]
+            )
+        return output
+    except Exception as e:
+        return f"Claude Error: {str(e)}"
+
+@router.post("/generate-article-test")
+async def generate_article_test(request_data: ArticleRequest):
+    return {"message": "Test endpoint working", "articleId": request_data.articleId}
+
+@router.post("/generate-article-simple")
+async def generate_article_simple(request_data: ArticleRequest):
+    return {"article": "Simple test content", "avg_word_count": 100.0}
+
+@router.post("/generate-article")
+async def generate_article(request_data: ArticleRequest):
+    try:
+        # Use mock data for testing - no database calls
+        article_info = {
+            "title": "Sample Article Title",
+            "keywords": ["technology", "innovation", "future"],
+            "secondary_keywords": ["digital", "transformation"],
+            "company_name": "Tech Company",
+            "website_url": "https://example.com",
+            "description": "A comprehensive article about technology trends",
+            "guidelines": "Write in a professional, informative tone. Include relevant examples and maintain SEO best practices."
+        }
+        
+        # Note: Using mock data above instead of database fetch for now
+        
+        # Generate search query
+        search_query = f"{article_info['title']} {' '.join(article_info['keywords'][:3])}"
+        
+        # Get reference links using Google Search
+        content, avg_word_count, reference_links = await extract_content_google(
+            query=search_query,
+            api_key=CUSTOM_GOOGLE_SEARCH,
+            cx=CX_ID,
+            num=5
+        )
+        
+        # Create prompt for AI models
+        prompt = f"""
+Write a comprehensive blog article about: {article_info['title']}
+
+Keywords to include: {', '.join(article_info['keywords'])}
+Secondary keywords: {', '.join(article_info['secondary_keywords'])}
+Company: {article_info['company_name']}
+Website: {article_info['website_url']}
+Description: {article_info['description']}
+
+Guidelines:
+{article_info['guidelines']}
+
+Reference content:
+{truncate_text(content, 1000)}
+
+Please write a well-structured, informative article that incorporates the keywords naturally and follows the guidelines provided.
+"""
+        
+        # Generate content based on model - only one model at a time
+        summaries = {}
+        word_counts = []
+        
+        # Default to OpenAI if no model specified
+        model_to_use = request_data.model if request_data.model and request_data.model.strip() else "open_ai"
+        
+        if model_to_use == "open_ai":
+            content = get_openai_summary(prompt, reference_links)
+            summaries["open_ai"] = content
+            word_counts.append(len(content.split()))
+        elif model_to_use == "gemini":
+            content = get_gemini_summary(prompt, reference_links)
+            summaries["gemini"] = content
+            word_counts.append(len(content.split()))
+        elif model_to_use == "claude":
+            content = get_claude_summary(prompt, reference_links)
+            summaries["claude"] = content
+            word_counts.append(len(content.split()))
+        else:
+            # Fallback to OpenAI for unknown models
+            content = get_openai_summary(prompt, reference_links)
+            summaries["open_ai"] = content
+            word_counts.append(len(content.split()))
+        
+        # Calculate average word count
+        calculated_avg_word_count = sum(word_counts) / len(word_counts) if word_counts else 0
+        
+        # Mock webhook responses for testing
+        webhook_responses = {}
+        for model_name, summary in summaries.items():
+            word_count = len(summary.split())
+            # Mock successful webhook response
+            webhook_responses[model_name] = 200
+            logger.info(f"Mock webhook sent for {model_name} with {word_count} words")
+        
+        return {
+            "message": "Article generation completed",
+            "webhook_responses": webhook_responses,
+            "avg_word_count": calculated_avg_word_count
+        }
+        
+    except Exception as e:
+        logger.error(f"Error in generate_article: {e}")
+        raise HTTPException(status_code=500, detail=str(e))

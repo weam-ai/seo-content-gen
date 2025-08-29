@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <%- include('layouts/head.email.ejs') %>
+  <body
+    style="
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+      min-height: 100vh;
+    "
+  >
+    <center class="email-wrapper" style="width: 100%; padding: 30px 15px">
+      <table
+        width="100%"
+        cellpadding="0"
+        cellspacing="0"
+        border="0"
+        class="email-container"
+        style="
+          max-width: 600px;
+          background-color: #ffffff;
+          margin: 0 auto;
+          border-radius: 16px;
+          overflow: hidden;
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+        "
+      >
+        <!-- Header -->
+        <%- include('layouts/header.email.ejs') %>
+
+        <!-- Main Content -->
+        <tr>
+          <td class="content-container" style="padding: 40px 30px">
+            <div
+              class="security-header"
+              style="text-align: center; margin-bottom: 30px"
+            >
+              <div
+                class="security-icon"
+                style="font-size: 48px; margin-bottom: 16px"
+              >
+                🔐
+              </div>
+              <h1
+                class="title"
+                style="
+                  font-size: 28px;
+                  font-weight: 700;
+                  color: #1e293b;
+                  margin: 0 0 8px;
+                  line-height: 1.2;
+                "
+              >
+                Verification Code
+              </h1>
+              <p
+                class="subtitle"
+                style="
+                  font-size: 16px;
+                  color: #64748b;
+                  margin: 0;
+                  font-weight: 400;
+                "
+              >
+                Secure your account with two-factor authentication
+              </p>
+            </div>
+
+            <div
+              class="verification-card"
+              style="
+                background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+                border: 1px solid #e2e8f0;
+                border-radius: 12px;
+                padding: 32px;
+                margin-bottom: 30px;
+                text-align: center;
+              "
+            >
+              <p
+                class="instruction"
+                style="
+                  font-size: 16px;
+                  color: #475569;
+                  margin: 0 0 24px;
+                  font-weight: 500;
+                "
+              >
+                Enter this verification code to complete your login:
+              </p>
+
+              <div
+                class="code-container"
+                style="
+                  background: #ffffff;
+                  border: 2px solid #e5e7eb;
+                  border-radius: 12px;
+                  padding: 24px;
+                  margin: 0 auto;
+                  display: inline-block;
+                  min-width: 200px;
+                "
+              >
+                <div
+                  class="verification-code"
+                  style="
+                    font-size: 32px;
+                    font-weight: 700;
+                    color: #1e293b;
+                    letter-spacing: 8px;
+                    font-family: 'Courier New', monospace;
+                  "
+                >
+                  <%= code %>
+                </div>
+              </div>
+
+              <div
+                class="security-notice"
+                style="
+                  margin-top: 24px;
+                  padding: 16px;
+                  background: #fef3c7;
+                  border: 1px solid #f59e0b;
+                  border-radius: 8px;
+                "
+              >
+                <p
+                  style="
+                    font-size: 14px;
+                    color: #92400e;
+                    margin: 0;
+                    font-weight: 500;
+                  "
+                >
+                  ⚠️ This code will expire in 10 minutes for security reasons
+                </p>
+              </div>
+            </div>
+
+            <div
+              class="security-tips"
+              style="
+                background: #f0f9ff;
+                border: 1px solid #0ea5e9;
+                border-radius: 8px;
+                padding: 20px;
+                margin-bottom: 20px;
+              "
+            >
+              <h3
+                style="
+                  font-size: 16px;
+                  font-weight: 600;
+                  color: #0369a1;
+                  margin: 0 0 12px;
+                "
+              >
+                🛡️ Security Tips
+              </h3>
+              <ul
+                style="
+                  margin: 0;
+                  padding-left: 20px;
+                  color: #0369a1;
+                  font-size: 14px;
+                "
+              >
+                <li style="margin-bottom: 8px">
+                  Never share this code with anyone
+                </li>
+                <li style="margin-bottom: 8px">
+                  Razorcopy will never ask for this code via email or phone
+                </li>
+                <li>
+                  If you didn't request this code, please contact support
+                  immediately
+                </li>
+              </ul>
+            </div>
+
+            <div
+              class="signature"
+              style="
+                border-top: 1px solid #e2e8f0;
+                padding-top: 20px;
+                text-align: center;
+              "
+            >
+              <p
+                style="
+                  color: #64748b;
+                  font-size: 14px;
+                  margin: 0;
+                  font-weight: 500;
+                "
+              >
+                Best regards,<br />
+                <span style="color: #0ea5e9; font-weight: 600"
+                  >The Razorcopy Security Team</span
+                >
+              </p>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <%- include('layouts/footer.email.ejs') %>
+      </table>
+    </center>
+  </body>
+</html>
