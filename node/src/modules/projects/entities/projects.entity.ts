@@ -4,7 +4,7 @@ import { BaseEntity } from '@shared/entities/basic.entity';
 import { Exclude, Transform } from 'class-transformer';
 import { KeywordMetric } from '@shared/types/dataForSeo.t';
 
-@Schema({ collection: 'projects', toJSON: { virtuals: true } })
+@Schema({ collection: 'solution_seo_projects', toJSON: { virtuals: true } })
 export class Project extends BaseEntity {
   @Prop({ required: true, maxlength: 191 })
   name: string;
@@ -83,16 +83,10 @@ export class Project extends BaseEntity {
 
 export const ProjectSchema = SchemaFactory.createForClass(Project);
 
-// Add virtual id field that transforms _id to string
-ProjectSchema.virtual('id').get(function() {
-  return this._id?.toString();
-});
-
-// Ensure virtual fields are serialized
+// Ensure proper JSON serialization without _id to id transformation
 ProjectSchema.set('toJSON', {
-  virtuals: true,
   transform: function(doc: any, ret: any) {
-    ret.id = ret._id?.toString();
+    delete ret.__v;
     return ret;
   }
 });

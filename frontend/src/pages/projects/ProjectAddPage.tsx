@@ -72,8 +72,7 @@ const validationSchema = Yup.object({
         promptTypeId: Yup.string().required('Article type is required'),
       })
     )
-    .min(1, 'At least one targeted keyword is required')
-    .required('Targeted keywords are required'),
+    .default([]),
   guideline_id: Yup.string().required('An industry guideline must be selected'),
   guideline_description: Yup.string(),
   targeted_audience: Yup.array()

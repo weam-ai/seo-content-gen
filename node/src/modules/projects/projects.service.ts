@@ -168,7 +168,7 @@ export class ProjectsService {
     // Add keywords lookup
     pipeline.push({
       $lookup: {
-        from: 'recommendedkeywords',
+        from: 'solution_seo_recommended_keywords',
         localField: '_id',
         foreignField: 'project',
         as: 'keywords'
@@ -247,12 +247,8 @@ export class ProjectsService {
   async findOne(id: string, user?: User): Promise<ProjectDocument> {
     const pipeline: any[] = [];
 
-    // Match the specific project
+    // Match the specific project - removed user filtering for single-user application
     const matchStage: any = { _id: new Types.ObjectId(id) };
-    // For single-user application: only filter by user if user is provided and has valid ID
-    if (user && (user._id || user.id)) {
-      matchStage.user = new Types.ObjectId(user._id || user.id);
-    }
     pipeline.push({ $match: matchStage });
 
     // Lookup project creator
@@ -278,7 +274,7 @@ export class ProjectsService {
     // Lookup guidelines
     pipeline.push({
       $lookup: {
-        from: 'guidelines',
+        from: 'solution_seo_guidelines',
         localField: 'guideline',
         foreignField: '_id',
         as: 'guidelines'
@@ -288,7 +284,7 @@ export class ProjectsService {
     // Lookup articles for keywords and progress
     pipeline.push({
       $lookup: {
-        from: 'articles',
+        from: 'solution_seo_articles',
         localField: '_id',
         foreignField: 'project',
         as: 'articles',

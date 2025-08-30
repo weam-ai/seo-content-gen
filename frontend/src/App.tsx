@@ -8,12 +8,9 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/toaster';
 import { Toaster as SonnerToaster } from '@/components/ui/sonner';
 
-import PrivateRoute from '@/components/PrivateRoute';
+import { PrivateRoute } from '@/components/auth/private-route';
 import { useEffect } from 'react';
 import { useSessionStore } from '@/lib/store/session-store';
-// Removed PERMISSIONS import - not needed in single-user application
-
-// Removed auth pages - single user application
 
 // Main Pages
 import Projects from '@/pages/projects/ProjectListPage';
@@ -69,126 +66,61 @@ function App() {
             }}
           >
             <Routes>
-              {/* All routes are now accessible - single user application */}
+              {/* Protected Routes */}
               <Route
                 path="/"
-                element={<MainLayout children={<PrivateRoute />} />}
+                element={
+                  <PrivateRoute>
+                    <MainLayout />
+                  </PrivateRoute>
+                }
               >
                 <Route index element={<Navigate to="/projects" replace />} />
 
-                {/* Projects - Single user has access to all */}
-                <Route
-                  path="projects"
-                  element={<PrivateRoute />}
-                >
+                {/* Projects */}
+                <Route path="projects">
                   <Route index element={<Projects />} />
-                  <Route
-                    path="new"
-                    element={<PrivateRoute />}
-                  >
-                    <Route index element={<ProjectNew />} />
-                  </Route>
+                  <Route path="new" element={<ProjectNew />} />
                   <Route path=":id" element={<ProjectDetail />} />
-                  <Route
-                    path=":id/edit"
-                    element={<PrivateRoute />}
-                  >
-                    <Route index element={<ProjectEdit />} />
-                  </Route>
+                  <Route path=":id/edit" element={<ProjectEdit />} />
                 </Route>
 
-                {/* Articles - Single user has access to all */}
-                <Route
-                  path="articles"
-                  element={<PrivateRoute />}
-                >
+                {/* Articles */}
+                <Route path="articles">
                   <Route index element={<Articles />} />
-                  <Route
-                    path="new"
-                    element={<PrivateRoute />}
-                  >
-                    <Route index element={<ArticleAddPage />} />
-                  </Route>
+                  <Route path="new" element={<ArticleAddPage />} />
                   <Route path=":id" element={<ArticleDetail />} />
                 </Route>
 
-                {/* Topics - Single user has access to all */}
-                <Route
-                  path="topics"
-                  element={<PrivateRoute />}
-                >
+                {/* Topics */}
+                <Route path="topics">
                   <Route index element={<Topics />} />
-                  <Route
-                    path="new"
-                    element={<PrivateRoute />}
-                  >
-                    <Route index element={<TopicAddPage />} />
-                  </Route>
+                  <Route path="new" element={<TopicAddPage />} />
                   <Route path=":id" element={<TopicDetail />} />
                 </Route>
 
                 {/* Settings */}
                 <Route path="settings" element={<Settings />} />
 
-                {/* Setup Routes - Single User Application */}
-                <Route path="/setup" element={<PrivateRoute />}>
+                {/* Setup Routes */}
+                <Route path="/setup">
                   {/* Article Types */}
-                  <Route
-                    path="article-types"
-                    element={<PrivateRoute />}
-                  >
+                  <Route path="article-types">
                     <Route index element={<ArticleTypes />} />
-                    <Route
-                      path="new"
-                      element={<PrivateRoute />}
-                    >
-                      <Route index element={<NewArticleTypePage />} />
-                    </Route>
-                    <Route
-                      path=":id/edit"
-                      element={<PrivateRoute />}
-                    >
-                      <Route index element={<EditArticleTypePage />} />
-                    </Route>
+                    <Route path="new" element={<NewArticleTypePage />} />
+                    <Route path=":id/edit" element={<EditArticleTypePage />} />
                   </Route>
                   {/* System Prompts */}
-                  <Route
-                    path="system-prompts"
-                    element={<PrivateRoute />}
-                  >
+                  <Route path="system-prompts">
                     <Route index element={<SystemPrompts />} />
-                    <Route
-                      path="new"
-                      element={<PrivateRoute />}
-                    >
-                      <Route index element={<NewSystemPromptPage />} />
-                    </Route>
-                    <Route
-                      path=":id/edit"
-                      element={<PrivateRoute />}
-                    >
-                      <Route index element={<EditSystemPromptPage />} />
-                    </Route>
+                    <Route path="new" element={<NewSystemPromptPage />} />
+                    <Route path=":id/edit" element={<EditSystemPromptPage />} />
                   </Route>
-
                   {/* Industry Guidelines */}
-                  <Route
-                    path="industry-guidelines"
-                    element={<PrivateRoute />}
-                  >
+                  <Route path="industry-guidelines">
                     <Route index element={<IndustryGuidelines />} />
-                    <Route
-                      path="new"
-                      element={<PrivateRoute />}
-                    >
-                      <Route index element={<NewIndustryGuidelinePage />} />
-                    </Route>
-                    <Route
-                      path=":id/edit"
-                      element={<PrivateRoute />}
-                    >
-                      <Route index element={<EditIndustryGuidelinePage />} />
-                    </Route>
+                    <Route path="new" element={<NewIndustryGuidelinePage />} />
+                    <Route path=":id/edit" element={<EditIndustryGuidelinePage />} />
                   </Route>
                 </Route>
               </Route>

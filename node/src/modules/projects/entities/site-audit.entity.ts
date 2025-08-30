@@ -10,7 +10,7 @@ export enum SiteAuditStatus {
   FAILED = 'failed',
 }
 
-@Schema({ collection: 'site_audit' })
+@Schema({ collection: 'solution_seo_site_audit' })
 export class SiteAudit extends BaseEntity {
   @Prop({ required: true, maxlength: 500 })
   url: string;

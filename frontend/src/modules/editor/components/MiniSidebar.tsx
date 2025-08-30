@@ -40,7 +40,8 @@ export const MiniSidebar: React.FC = () => {
 
   const activeSection = rightSidebarSection;
 
-  const getInitials = (firstname: string, lastname: string) => {
+  const getInitials = (firstname?: string, lastname?: string) => {
+    if (!firstname || !lastname) return 'U';
     return `${firstname.charAt(0)}${lastname.charAt(0)}`.toUpperCase();
   };
 

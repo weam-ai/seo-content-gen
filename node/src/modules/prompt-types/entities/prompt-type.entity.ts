@@ -6,7 +6,7 @@ export type PromptTypeDocument = PromptType & Document;
 
 @Schema({ 
   timestamps: true,
-  collection: 'prompt_types'
+  collection: 'solution_seo_prompt_types'
 })
 export class PromptType extends BaseEntity {
   @Prop({ required: true })

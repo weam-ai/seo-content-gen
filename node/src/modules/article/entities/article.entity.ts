@@ -8,7 +8,7 @@ import {
 } from '@shared/types/articles.t';
 import { Exclude } from 'class-transformer';
 
-@Schema({ collection: 'articles' })
+@Schema({ collection: 'solution_seo_articles' })
 export class Article extends BaseEntity {
   @Prop({ maxlength: 191 })
   name?: string;
@@ -91,19 +91,9 @@ export class Article extends BaseEntity {
 
 export const ArticleSchema = SchemaFactory.createForClass(Article);
 
-// Add virtual field to transform _id to id for frontend compatibility
-ArticleSchema.virtual('id').get(function(this: any) {
-  return this._id ? this._id.toHexString() : undefined;
-});
-
-// Ensure virtual fields are serialized
+// Ensure proper JSON serialization without _id to id transformation
 ArticleSchema.set('toJSON', {
-  virtuals: true,
   transform: function(doc: any, ret: any) {
-    if (ret._id) {
-      ret.id = ret._id.toString();
-      delete ret._id;
-    }
     delete ret.__v;
     return ret;
   }

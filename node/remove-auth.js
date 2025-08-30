@@ -18,7 +18,7 @@ const controllerFiles = [
   'src/modules/collab/collab.controller.ts',
   'src/modules/comments/comments.controller.ts',
   'src/modules/openai/openai.controller.ts',
-  'src/modules/meeting-notes/meeting-note.controller.ts',
+  
   'src/modules/article-documents/article-documents.controller.ts',
   'src/modules/chat-history/chat-history.controller.ts'
 ];

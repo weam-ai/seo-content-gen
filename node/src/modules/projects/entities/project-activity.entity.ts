@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import { BaseEntity } from '@shared/entities/basic.entity';
 
-@Schema({ collection: 'project_activity' })
+@Schema({ collection: 'solution_seo_project_activity' })
 export class ProjectActivity extends BaseEntity {
   @Prop({ type: Types.ObjectId, ref: 'Project' })
   project?: Types.ObjectId;

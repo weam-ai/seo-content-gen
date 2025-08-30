@@ -1,86 +1,66 @@
 import { create } from 'zustand';
-
-// Role interface removed for single-user application
+import { persist } from 'zustand/middleware';
 
 interface Designation {
-  id: string;
-  created_at: string;
+  _id: string;
   name: string;
+  description?: string;
 }
 
 export interface User {
-  id: string;
-  created_at: string;
-  email: string;
-  firstname: string;
-  lastname: string;
-  phonenumber: string;
-  profile_image: string;
-  dob: string;
-  gender: string;
-  active: boolean;
-  two_factor_auth_enabled: boolean;
-  email_signature: string;
-  is_wfh: boolean;
-  date_of_joining: string;
-  agency_profile_preferences: string;
-  calendly_url: string;
-  google_drive: string;
-  // role property removed for single-user application
-  agency_detail: any;
-  designation: Designation;
-  timezone: string;
-  country: string;
-  state: string;
-  city: string;
+  _id: string;
+  id?: string; // For backward compatibility
+  name?: string;
+  email?: string;
+  firstname?: string;
+  lastname?: string;
+  designation?: Designation;
+  profile_image?: string;
 }
 
 interface AuthState {
   user: User;
-  isAuthenticated: boolean;
   token: string;
   refreshToken: string;
-  updateUser: (user: Partial<User>) => void;
+  isAuthenticated: boolean;
+  logout: () => void;
 }
 
-// Static user data for single-user application
+// Static user and JWT token for single-user application
 const staticUser: User = {
-  id: 'static-user-1',
-  created_at: new Date().toISOString(),
-  email: 'user@seo-content-gen.local',
+  _id: '68b36dc217326325f119e817',
+  id: '68b36dc217326325f119e817', // For backward compatibility
+  name: 'SEO User',
+  email: 'drabadiya@taskme.biz',
   firstname: 'SEO',
   lastname: 'User',
-  phonenumber: '+1234567890',
-  profile_image: '',
-  dob: '1990-01-01',
-  gender: 'other',
-  active: true,
-  two_factor_auth_enabled: false,
-  email_signature: '',
-  is_wfh: false,
-  date_of_joining: new Date().toISOString(),
-  agency_profile_preferences: '',
-  calendly_url: '',
-  google_drive: '',
-  // role property removed for single-user application
-  agency_detail: null,
   designation: {
-    id: 'content-creator',
-    created_at: new Date().toISOString(),
-    name: 'Content Creator'
+    _id: '66e01d4145567d34d663bdae',
+    name: 'Super Admin'
   },
-  timezone: 'UTC',
-  country: 'US',
-  state: 'CA',
-  city: 'San Francisco'
+  profile_image: '/placeholder-user.jpg'
 };
 
-export const useAuthStore = create<AuthState>()(() => ({
-  user: staticUser,
-  isAuthenticated: true,
-  token: 'static-jwt-token-for-local-testing',
-  refreshToken: 'static-refresh-token-for-local-testing',
-  updateUser: () => {
-    // No-op for static user - could be enhanced to update static data if needed
-  },
-}));
+const staticToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2OGIzNmRjMjE3MzI2MzI1ZjExOWU4MTciLCJ1c2VySWQiOiI2OGIzNmRjMjE3MzI2MzI1ZjExOWU4MTciLCJlbWFpbCI6ImRyYWJhZGl5YUB0YXNrbWUuYml6Iiwicm9sZUNvZGUiOiJTVVBFUl9BRE1JTiIsImlhdCI6MTc1NjU4OTU0NywiZXhwIjoxNzU2Njc1OTQ3fQ.j85kIwMM4eUUNF-410Rg3j-ofEYWHDjMyeucThhmenU';
+
+export const useAuthStore = create<AuthState>()(persist(
+  (set) => ({
+    user: staticUser,
+    token: staticToken,
+    refreshToken: 'static-refresh-token',
+    isAuthenticated: true,
+    
+    logout: () => {
+      // For single-user app, logout just resets to the same static user
+      set({
+        user: staticUser,
+        token: staticToken,
+        refreshToken: 'static-refresh-token',
+        isAuthenticated: true
+      });
+    }
+  }),
+  {
+    name: 'auth-storage',
+  }
+));

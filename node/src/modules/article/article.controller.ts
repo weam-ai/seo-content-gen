@@ -133,19 +133,9 @@ export class ArticleController {
       req.user as any,
     );
 
-    // Convert ObjectIds to strings for proper serialization
-    const serializedArticles = articles.map(article => ({
-      ...article,
-      _id: article._id?.toString() || article._id,
-      project: article.project ? {
-        ...article.project,
-        _id: article.project._id?.toString() || article.project._id
-      } : null,
-      user: article.user ? {
-        ...article.user,
-        _id: article.user._id?.toString() || article.user._id
-      } : null
-    }));
+    // Articles already have proper id transformation from service
+    // No need to override the id field transformation
+    const serializedArticles = articles;
 
 
     if (query?.limit !== 0 && query?.limit !== -1) {

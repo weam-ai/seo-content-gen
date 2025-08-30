@@ -82,7 +82,7 @@
   "phone": "string" (optional),
   "gender": "string" (optional),
   "dob": "string" (optional),
-  "agencyId": "string" (optional)
+
 }
 ```
 
@@ -96,8 +96,7 @@
 #### DELETE `/users/:id`
 - **Description:** Delete user
 
-#### GET `/users/agency-members`
-- **Description:** Get agency members
+
 
 #### GET `/users/staff-members`
 - **Description:** Get staff members
@@ -268,30 +267,7 @@
 #### GET `/time-tracking/stats`
 - **Description:** Get time tracking statistics
 
-### 9. Meeting Notes (`/meeting-notes`)
-
-#### GET `/meeting-notes`
-- **Description:** Get meeting notes
-
-#### POST `/meeting-notes`
-- **Description:** Create meeting note
-- **Payload:**
-```json
-{
-  "title": "string",
-  "content": "string",
-  "meetingDate": "string",
-  "attendees": ["string"]
-}
-```
-
-#### PATCH `/meeting-notes/:id`
-- **Description:** Update meeting note
-
-#### DELETE `/meeting-notes/:id`
-- **Description:** Delete meeting note
-
-### 10. Comments (`/comments`)
+### 9. Comments (`/comments`)
 
 #### GET `/comments`
 - **Description:** Get comments for entity

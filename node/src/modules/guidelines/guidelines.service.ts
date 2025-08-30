@@ -78,7 +78,7 @@ export class GuidelinesService {
     // Add project count lookup
     pipeline.push({
       $lookup: {
-        from: 'projects',
+        from: 'solution_seo_projects',
         localField: '_id',
         foreignField: 'guideline',
         as: 'projects',

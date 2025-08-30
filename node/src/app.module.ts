@@ -19,7 +19,7 @@ import { ClaudeModule } from './modules/claude/claude.module';
 import { GeminiModule } from './modules/gemini/gemini.module';
 import { PromptTypesModule } from './modules/prompt-types/prompt-types.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
-
+import { GuardsModule } from './shared/guards/guards.module';
 
 import { EmailModule } from './shared/modules/email/email.module';
 
@@ -53,6 +53,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     ]),
     EventEmitterModule.forRoot(),
     EmailModule,
+    GuardsModule,
     ProjectsModule,
     ArticleModule,
     SystemPromptsModule,

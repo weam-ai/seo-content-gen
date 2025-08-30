@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Pagination } from '@/components/ui/simple-pagination';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import projectService, {
   GetProjectsParams,
 } from '@/lib/services/project.service.ts';
@@ -70,6 +70,7 @@ interface Project {
 
 export default function Projects() {
   // const { user } = useAuthStore(); // Removed for single-user application
+  const location = useLocation();
   const [projects, setProjects] = useState<Project[]>([]);
   // Removed agencies state for single-user application
   const [isLoading, setIsLoading] = useState(true);
@@ -90,13 +91,25 @@ export default function Projects() {
   });
 
   // Removed team member state for single-user application
-  const [selectedMembers] = useState<string[]>([]);
 
   const { toast } = useToast();
   const debouncedSearch = useDebounce(searchQuery, 500);
 
   // Single user application - no role restrictions
   // const isAgencyUser = false; // Removed unused variable
+
+  // Add window focus event listener to refresh data when user returns to the page
+  useEffect(() => {
+    const handleFocus = () => {
+      // Refresh projects when window gains focus (user returns to tab)
+      console.log('[DEBUG] Window focus detected, refreshing projects');
+      // Force a refresh by updating pagination
+      setPagination(prev => ({ ...prev })); // This will trigger the fetchProjects useEffect
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, []);
 
   // Save filters to localStorage whenever they change
   useEffect(() => {
@@ -172,10 +185,10 @@ export default function Projects() {
   }, [
     debouncedSearch,
     sortOrder,
-    selectedMembers,
     pagination.currentPage,
     itemsPerPage,
     toast,
+    location.pathname, // Add location dependency to refresh on navigation
   ]);
 
   // Replace handleDeleteProject to open dialog

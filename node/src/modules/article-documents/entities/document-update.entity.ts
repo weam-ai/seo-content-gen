@@ -4,7 +4,7 @@ import { BaseEntity } from '@shared/entities/basic.entity';
 
 export type DocChange = { added: number; removed: number; netChange: number };
 
-@Schema({ collection: 'document_updates' })
+@Schema({ collection: 'solution_seo_document_updates' })
 export class DocumentUpdates extends BaseEntity {
   @Prop({ type: Types.ObjectId, ref: 'Article', required: true })
   article: Types.ObjectId;

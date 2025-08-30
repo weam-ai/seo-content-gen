@@ -22,7 +22,8 @@ import { PromptTypesModule } from '../prompt-types/prompt-types.module';
 import { GeminiModule } from '../gemini/gemini.module';
 import { ClaudeModule } from '../claude/claude.module';
 import { OpenaiModule } from '../openai/openai.module';
-// Removed imports for deleted modules: User, AuthTokens, TimeTrackingModule, Thread, Comment
+import { User, UserSchema } from '../users/entities/user.entity';
+// Removed imports for deleted modules: AuthTokens, TimeTrackingModule, Thread, Comment
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { OpenaiModule } from '../openai/openai.module';
       { name: SiteAudit.name, schema: SiteAuditSchema },
       { name: DocumentUpdates.name, schema: DocumentUpdatesSchema },
       { name: PromptType.name, schema: PromptTypeSchema },
+      { name: User.name, schema: UserSchema },
     ]),
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'secretKey',

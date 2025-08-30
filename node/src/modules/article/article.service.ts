@@ -226,7 +226,7 @@ export class ArticleService {
       { $match: matchConditions },
       {
         $lookup: {
-          from: 'projects',
+          from: 'solution_seo_projects',
           localField: 'project',
           foreignField: '_id',
           as: 'project'

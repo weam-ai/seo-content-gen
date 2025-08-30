@@ -1,22 +1,18 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
-import { GeminiService } from './gemini.service';
-import { GeminiController } from './gemini.controller';
-import { User, UserSchema } from '../users/entities/user.entity';
+import { JwtAuthGuard } from './jwt-auth.guard';
+import { User, UserSchema } from '@modules/users/entities/user.entity';
 
 @Module({
   imports: [
-    ConfigModule,
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'secretKey',
       signOptions: { expiresIn: '24h' },
     }),
   ],
-  providers: [GeminiService],
-  controllers: [GeminiController],
-  exports: [GeminiService],
+  providers: [JwtAuthGuard],
+  exports: [JwtAuthGuard],
 })
-export class GeminiModule {}
+export class GuardsModule {}

@@ -110,8 +110,7 @@ export class User {
   @Prop({ type: Date })
   date_of_joining?: Date;
 
-  @Prop()
-  agency_profile_preferences?: string;
+
 
   @Prop()
   calendly_url?: string;
@@ -137,19 +136,9 @@ export class User {
 
 export const UserSchema = SchemaFactory.createForClass(User);
 
-// Add virtual field to transform _id to id for frontend compatibility
-UserSchema.virtual('id').get(function(this: any) {
-  return this._id ? this._id.toHexString() : undefined;
-});
-
-// Ensure virtual fields are serialized
+// Ensure proper JSON serialization without _id to id transformation
 UserSchema.set('toJSON', {
-  virtuals: true,
   transform: function(doc: any, ret: any) {
-    if (ret._id) {
-      ret.id = ret._id.toString();
-      delete ret._id;
-    }
     delete ret.__v;
     return ret;
   }

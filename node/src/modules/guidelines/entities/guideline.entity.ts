@@ -5,7 +5,7 @@ export type GuidelineDocument = Guideline & Document;
 
 @Schema({ 
   timestamps: true,
-  collection: 'guidelines'
+  collection: 'solution_seo_guidelines'
 })
 export class Guideline {
   @Prop({ type: String, required: true })
@@ -22,7 +22,7 @@ export const GuidelineSchema = SchemaFactory.createForClass(Guideline);
 
 // Ensure proper schema configuration
 GuidelineSchema.set('timestamps', true);
-GuidelineSchema.set('collection', 'guidelines');
+GuidelineSchema.set('collection', 'solution_seo_guidelines');
 
 // Create indexes for frequently queried fields
 GuidelineSchema.index({ name: 1 });
