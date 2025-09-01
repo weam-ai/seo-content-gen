@@ -1,7 +1,7 @@
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { DefaultUserMiddleware } from './shared/middleware/default-user.middleware';
+
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { mongooseConfig } from '@config/typeorm.config';
@@ -18,10 +18,10 @@ import { OpenaiModule } from './modules/openai/openai.module';
 import { ClaudeModule } from './modules/claude/claude.module';
 import { GeminiModule } from './modules/gemini/gemini.module';
 import { PromptTypesModule } from './modules/prompt-types/prompt-types.module';
-import { NotificationsModule } from './modules/notifications/notifications.module';
 import { GuardsModule } from './shared/guards/guards.module';
+import { WebhooksModule } from './modules/webhooks/webhooks.module';
 
-import { EmailModule } from './shared/modules/email/email.module';
+// Email and notification modules removed for single-user application
 
 import { ScheduleModule } from '@nestjs/schedule';
 
@@ -52,7 +52,6 @@ import { ScheduleModule } from '@nestjs/schedule';
       },
     ]),
     EventEmitterModule.forRoot(),
-    EmailModule,
     GuardsModule,
     ProjectsModule,
     ArticleModule,
@@ -64,7 +63,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     ClaudeModule,
     GeminiModule,
     PromptTypesModule,
-    NotificationsModule,
+    WebhooksModule,
 
     ScheduleModule.forRoot(),
   ],
@@ -73,9 +72,6 @@ import { ScheduleModule } from '@nestjs/schedule';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    // Temporarily disable default user middleware to debug callback error
-    // consumer
-    //   .apply(DefaultUserMiddleware)
-    //   .forRoutes('*'); // Apply to all routes
+    // No middleware configuration needed - using JWT guards
   }
 }

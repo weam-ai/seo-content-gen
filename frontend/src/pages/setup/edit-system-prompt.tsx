@@ -68,7 +68,7 @@ export default function EditSystemPromptPage() {
     }
     setLoading(true);
     try {
-      await systemPromptService.updateSystemPrompt(id!, { name: promptName, description: promptDescription });
+      await systemPromptService.updateSystemPrompt(id!, { name: promptName, description: promptDescription, type: promptType });
       toast({ title: 'Success', description: 'System prompt updated successfully.' });
       navigate('/setup/system-prompts');
     } catch (error: any) {
@@ -186,4 +186,4 @@ export default function EditSystemPromptPage() {
       <div className="pb-16"></div>
     </div>
   );
-} 
+}

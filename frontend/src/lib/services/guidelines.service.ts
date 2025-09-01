@@ -1,8 +1,7 @@
 import api from '../api';
 
 export interface Guideline {
-  id: string;
-  _id?: string;
+  _id: string;
   name: string;
   title?: string;
   description?: string;

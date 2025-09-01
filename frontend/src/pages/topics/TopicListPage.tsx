@@ -105,7 +105,7 @@ export default function Topics() {
   );
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [topicToDelete, setTopicToDelete] = useState<{
-    id: string;
+    _id: string;
     title: string;
   } | null>(null);
 
@@ -364,7 +364,7 @@ export default function Topics() {
   };
 
   const handleApprove = async (topicId: string) => {
-    const topic = topics.find((t) => t.id === topicId);
+    const topic = topics.find((t) => t._id === topicId);
     if (!topic) return;
     // Check if generated_outline exists and is not empty
     if (
@@ -380,7 +380,7 @@ export default function Topics() {
     setShowKeywordModal(true);
     setKeywordModalLoading(true);
     try {
-      const rec = await getRecommendedKeywords(topic.id);
+      const rec = await getRecommendedKeywords(topic._id);
       // Filter out already present secondary keywords
       setKeywordModalRecommended(
         rec.filter(
@@ -399,7 +399,7 @@ export default function Topics() {
       await updateArticle(topicId, { status: 'rejected' });
       setTopics(
         topics.map((topic) =>
-          topic.id === topicId
+          topic._id === topicId
             ? { ...topic, status: 'rejected' as const }
             : topic
         )
@@ -422,7 +422,7 @@ export default function Topics() {
       await updateArticle(topicId, { status: 'pending' });
       setTopics(
         topics.map((topic) =>
-          topic.id === topicId
+          topic._id === topicId
             ? { ...topic, status: 'pending approval' as any }
             : topic
         )
@@ -440,19 +440,19 @@ export default function Topics() {
     }
   };
 
-  const handleRegenerateTitle = (topicId: string) => {
-    const topic = topics.find((t) => t.id === topicId);
+  const handleRegenerateTitle = async (topicId: string) => {
+    const topic = topics.find((t) => t._id === topicId);
     if (!topic) return;
     setRegenerateTopicId(topicId);
     setRegenerateCurrentTitle(topic.title);
     setRegenerateTitleModalOpen(true);
   };
 
-  const handleDelete = (topicId: string) => {
-    const topic = topics.find((t) => t.id === topicId);
+  const handleDelete = async (topicId: string) => {
+    const topic = topics.find((t) => t._id === topicId);
     if (topic) {
       setTopicToDelete({
-        id: topicId,
+        _id: topicId,
         title: topic.title,
       });
       setDeleteConfirmOpen(true);
@@ -463,11 +463,11 @@ export default function Topics() {
     if (!topicToDelete) return;
 
     try {
-      const response = await api.delete(`/article/${topicToDelete.id}`);
+      const response = await api.delete(`/article/${topicToDelete._id}`);
 
       if (response.data.status) {
         // Remove the topic from the local state
-        setTopics(topics.filter((topic) => topic.id !== topicToDelete.id));
+        setTopics(topics.filter((topic) => topic._id !== topicToDelete._id));
         toast({
           title: 'Topic deleted',
           description: 'Topic has been deleted successfully.',
@@ -529,17 +529,17 @@ export default function Topics() {
         onApprove={async (updatedKeywords) => {
           if (!keywordModalTopic) return;
           try {
-            await updateArticle(keywordModalTopic.id, {
+            await updateArticle(keywordModalTopic._id, {
               secondary_keywords: updatedKeywords,
             });
             setTopics((prev) =>
               prev.map((t) =>
-                t.id === keywordModalTopic.id
+                t._id === keywordModalTopic._id
                   ? { ...t, secondaryKeywords: updatedKeywords }
                   : t
               )
             );
-            await updateArticle(keywordModalTopic.id, {
+            await updateArticle(keywordModalTopic._id, {
               status: 'not_started',
             });
             toast({
@@ -701,13 +701,13 @@ export default function Topics() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {filteredTopics.map((topic) => (
                     <Card
-                      key={topic.id}
+                      key={topic._id}
                       className="group hover:shadow-lg transition-all duration-200 hover:border-[hsl(var(--razor-primary))] hover:shadow-[hsl(var(--razor-primary))]/10"
                     >
                       <CardHeader className="pb-3">
                         <div className="flex items-start justify-between">
                           <div className="space-y-2 flex-1">
-                            <Link to={`/topics/${topic.id}`}>
+                            <Link to={`/topics/${topic._id}`}>
                               <h3 className="font-semibold text-lg hover:text-[hsl(var(--razor-primary))] transition-colors cursor-pointer">
                                 {topic.title}
                               </h3>
@@ -715,7 +715,7 @@ export default function Topics() {
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                               {topic.relatedProject ? (
                                 <Link
-                                  to={`/projects/${topic.relatedProject.id}`}
+                                  to={`/projects/${topic.relatedProject._id}`}
                                   className="flex items-center gap-1 group"
                                 >
                                   <ExternalLink className="h-3 w-3 group-hover:text-[hsl(var(--razor-primary))] transition-colors" />
@@ -740,25 +740,25 @@ export default function Topics() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem
-                                onClick={() => handleCopyLink(topic.id)}
+                                onClick={() => handleCopyLink(topic._id)}
                               >
                                 <Copy className="h-4 w-4 mr-2" />
                                 Copy Link
                               </DropdownMenuItem>
                               <DropdownMenuItem asChild>
-                                <Link to={`/topics/${topic.id}`}>
+                                <Link to={`/topics/${topic._id}`}>
                                   <Eye className="h-4 w-4 mr-2" />
                                   View
                                 </Link>
                               </DropdownMenuItem>
                               <DropdownMenuItem asChild>
-                                <Link to={`/topics/${topic.id}`}>
+                                <Link to={`/topics/${topic._id}`}>
                                   <Edit className="h-4 w-4 mr-2" />
                                   Edit
                                 </Link>
                               </DropdownMenuItem>
                               <DropdownMenuItem
-                                onClick={() => handleRegenerateTitle(topic.id)}
+                                onClick={() => handleRegenerateTitle(topic._id)}
                               >
                                 <RotateCw className="h-4 w-4 mr-2" />
                                 Regenerate Title
@@ -767,14 +767,14 @@ export default function Topics() {
                               {topic.status === 'pending approval' && (
                                 <>
                                   <DropdownMenuItem
-                                    onClick={() => handleApprove(topic.id)}
+                                    onClick={() => handleApprove(topic._id)}
                                     className="text-green-600"
                                   >
                                     <CheckCircle className="h-4 w-4 mr-2" />
                                     Mark as Approved
                                   </DropdownMenuItem>
                                   <DropdownMenuItem
-                                    onClick={() => handleReject(topic.id)}
+                                    onClick={() => handleReject(topic._id)}
                                     className="text-red-600"
                                   >
                                     <XCircle className="h-4 w-4 mr-2" />
@@ -787,7 +787,7 @@ export default function Topics() {
                                   'mark as rejected') && (
                                 <>
                                   <DropdownMenuItem
-                                    onClick={() => handleApprove(topic.id)}
+                                    onClick={() => handleApprove(topic._id)}
                                     className="text-green-600"
                                   >
                                     <CheckCircle className="h-4 w-4 mr-2" />
@@ -795,7 +795,7 @@ export default function Topics() {
                                   </DropdownMenuItem>
                                   <DropdownMenuItem
                                     onClick={() =>
-                                      handleSetPendingApproval(topic.id)
+                                      handleSetPendingApproval(topic._id)
                                     }
                                     className="text-yellow-600"
                                   >
@@ -805,7 +805,7 @@ export default function Topics() {
                                 </>
                               )}
                               <DropdownMenuItem
-                                onClick={() => handleDelete(topic.id)}
+                                onClick={() => handleDelete(topic._id)}
                                 className="text-destructive"
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />
@@ -887,7 +887,7 @@ export default function Topics() {
                 <div className="space-y-4">
                   {filteredTopics.map((topic) => (
                     <Card
-                      key={topic.id}
+                      key={topic._id}
                       className="group hover:shadow-lg transition-all duration-200 hover:border-[hsl(var(--razor-primary))] hover:shadow-[hsl(var(--razor-primary))]/10"
                     >
                       <CardContent className="p-6">
@@ -895,7 +895,7 @@ export default function Topics() {
                           <div className="space-y-3 flex-1">
                             <div className="flex items-start gap-4">
                               <div className="flex-1">
-                                <Link to={`/topics/${topic.id}`}>
+                                <Link to={`/topics/${topic._id}`}>
                                   <h3 className="font-semibold text-lg hover:text-[hsl(var(--razor-primary))] transition-colors cursor-pointer">
                                     {topic.title}
                                   </h3>
@@ -903,7 +903,7 @@ export default function Topics() {
                                 <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
                                   {topic.relatedProject ? (
                                     <Link
-                                      to={`/projects/${topic.relatedProject.id}`}
+                                      to={`/projects/${topic.relatedProject._id}`}
                                       className="flex items-center gap-1 group"
                                     >
                                       <ExternalLink className="h-3 w-3 group-hover:text-[hsl(var(--razor-primary))] transition-colors" />
@@ -993,25 +993,25 @@ export default function Topics() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem
-                                onClick={() => handleCopyLink(topic.id)}
+                                onClick={() => handleCopyLink(topic._id)}
                               >
                                 <Copy className="h-4 w-4 mr-2" />
                                 Copy Link
                               </DropdownMenuItem>
                               <DropdownMenuItem asChild>
-                                <Link to={`/topics/${topic.id}`}>
+                                <Link to={`/topics/${topic._id}`}>
                                   <Eye className="h-4 w-4 mr-2" />
                                   View
                                 </Link>
                               </DropdownMenuItem>
                               <DropdownMenuItem asChild>
-                                <Link to={`/topics/${topic.id}`}>
+                                <Link to={`/topics/${topic._id}`}>
                                   <Edit className="h-4 w-4 mr-2" />
                                   Edit
                                 </Link>
                               </DropdownMenuItem>
                               <DropdownMenuItem
-                                onClick={() => handleRegenerateTitle(topic.id)}
+                                onClick={() => handleRegenerateTitle(topic._id)}
                               >
                                 <RotateCw className="h-4 w-4 mr-2" />
                                 Regenerate Title
@@ -1020,14 +1020,14 @@ export default function Topics() {
                               {topic.status === 'pending approval' && (
                                 <>
                                   <DropdownMenuItem
-                                    onClick={() => handleApprove(topic.id)}
+                                    onClick={() => handleApprove(topic._id)}
                                     className="text-green-600"
                                   >
                                     <CheckCircle className="h-4 w-4 mr-2" />
                                     Mark as Approved
                                   </DropdownMenuItem>
                                   <DropdownMenuItem
-                                    onClick={() => handleReject(topic.id)}
+                                    onClick={() => handleReject(topic._id)}
                                     className="text-red-600"
                                   >
                                     <XCircle className="h-4 w-4 mr-2" />
@@ -1040,7 +1040,7 @@ export default function Topics() {
                                   'mark as rejected') && (
                                 <>
                                   <DropdownMenuItem
-                                    onClick={() => handleApprove(topic.id)}
+                                    onClick={() => handleApprove(topic._id)}
                                     className="text-green-600"
                                   >
                                     <CheckCircle className="h-4 w-4 mr-2" />
@@ -1048,7 +1048,7 @@ export default function Topics() {
                                   </DropdownMenuItem>
                                   <DropdownMenuItem
                                     onClick={() =>
-                                      handleSetPendingApproval(topic.id)
+                                      handleSetPendingApproval(topic._id)
                                     }
                                     className="text-yellow-600"
                                   >
@@ -1058,7 +1058,7 @@ export default function Topics() {
                                 </>
                               )}
                               <DropdownMenuItem
-                                onClick={() => handleDelete(topic.id)}
+                                onClick={() => handleDelete(topic._id)}
                                 className="text-destructive"
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />
@@ -1271,9 +1271,9 @@ export default function Topics() {
                                 </div>
                                 <div className="space-y-1">
                                   {dayTopics.slice(0, 2).map((topic) => (
-                                    <Tooltip key={topic.id}>
+                                    <Tooltip key={topic._id}>
                                       <TooltipTrigger asChild>
-                                        <Link to={`/topics/${topic.id}`}>
+                                        <Link to={`/topics/${topic._id}`}>
                                           <div
                                             className={`text-xs p-1 rounded truncate cursor-pointer hover:opacity-80 ${getStatusColorClass(
                                               topic._status || topic.status
@@ -1380,8 +1380,8 @@ export default function Topics() {
                                                 .slice(2)
                                                 .map((topic) => (
                                                   <Link
-                                                    key={topic.id}
-                                                    to={`/topics/${topic.id}`}
+                                                    key={topic._id}
+                                                    to={`/topics/${topic._id}`}
                                                     className={`block px-2 py-1 rounded text-xs truncate hover:opacity-80 transition-colors
                                                 ${getStatusColorClass(
                                                   topic._status || topic.status
@@ -1447,7 +1447,7 @@ export default function Topics() {
               await updateArticle(regenerateTopicId, { name: newTitle });
               setTopics((prev) =>
                 prev.map((t) =>
-                  t.id === regenerateTopicId ? { ...t, title: newTitle } : t
+                  t._id === regenerateTopicId ? { ...t, title: newTitle } : t
                 )
               );
               setRegenerateTitleModalOpen(false);

@@ -47,23 +47,23 @@ const saveProjectFiltersToStorage = (filters: any) => {
 };
 
 // Project interfaces
-interface AssignMember {
-  id: string;
-  name: string;
-  profile_image: string | null;
-  is_agency_owner: boolean;
-  agency_name: string | null;
+// Removed AssignMember interface for single-user application
+
+interface KeywordMetric {
+  keyword: string;
+  keyword_volume: number;
+  keyword_difficulty: 'HIGH' | 'MEDIUM' | 'LOW';
 }
 
 interface Project {
-  id: string;
+  _id: string;
   name: string;
   website_url: string;
   created_at: string;
   description: string;
-  keywords: string[] | null;
-  assign_member: AssignMember[];
-  agency_name: string | null;
+  keywords: KeywordMetric[] | null;
+  // Removed assign_member field for single-user application
+  // Removed agency_name field for single-user application
 }
 
 // Removed Agency interface for single-user application
@@ -202,14 +202,14 @@ export default function Projects() {
     if (!projectToDelete) return;
     setDeleteLoading(true);
     try {
-      await projectService.deleteProject(projectToDelete.id);
+      await projectService.deleteProject(projectToDelete._id);
       toast({
         title: 'Deleted',
         description: 'Project has been deleted successfully.',
         variant: 'default',
       });
       // Optionally, refetch projects or remove from state
-      setProjects((prev) => prev.filter((p) => p.id !== projectToDelete.id));
+      setProjects((prev) => prev.filter((p) => p._id !== projectToDelete._id));
     } catch {
       toast({
         title: 'Error',
@@ -354,7 +354,7 @@ export default function Projects() {
               >
                 {projects.map((project) => (
                   <ProjectCard
-                    key={project.id}
+                    key={project._id}
                     project={project}
                     onDelete={handleDeleteProject}
                   />

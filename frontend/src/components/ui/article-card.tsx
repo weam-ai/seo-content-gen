@@ -46,7 +46,7 @@ export function ArticleCard({ article, onDelete }: ArticleCardProps) {
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="space-y-1 flex-1">
-            <Link to={`/articles/${article.id}`}>
+            <Link to={`/articles/${article._id}`}>
               <h3 className="font-semibold text-lg hover:text-[hsl(var(--razor-primary))] transition-colors cursor-pointer">
                 {article.title}
               </h3>
@@ -63,10 +63,10 @@ export function ArticleCard({ article, onDelete }: ArticleCardProps) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => navigate(`/articles/${article.id}`)}>
+              <DropdownMenuItem onClick={() => navigate(`/articles/${article._id}`)}>
                 View Details
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate(`/articles/${article.id}/edit`)}>
+              <DropdownMenuItem onClick={() => navigate(`/articles/${article._id}/edit`)}>
                 Edit
               </DropdownMenuItem>
               {onDelete && (
@@ -99,9 +99,9 @@ export function ArticleCard({ article, onDelete }: ArticleCardProps) {
           <div className="flex items-center gap-2 text-sm">
             <FileText className="h-4 w-4 text-muted-foreground" />
             <span className="text-muted-foreground">Project:</span>
-            {article.relatedProject?.id ? (
+            {article.relatedProject?._id ? (
               <Link
-                to={`/projects/${article.relatedProject.id}`}
+                to={`/projects/${article.relatedProject._id}`}
                 className="text-[hsl(var(--razor-primary))] hover:underline truncate"
               >
                 {article.relatedProject.name}

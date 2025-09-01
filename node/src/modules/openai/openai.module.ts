@@ -8,7 +8,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { PythonService } from '@shared/services/python.service';
 import { ArticleModule } from '@modules/article/article.module';
 import { ArticleDocumentsModule } from '@modules/article-documents/article-documents.module';
-import { EmailModule } from '@shared/modules/email/email.module';
+// EmailModule import removed - email functionality not supported
 import { User, UserSchema } from '../users/entities/user.entity';
 
 @Module({
@@ -16,11 +16,11 @@ import { User, UserSchema } from '../users/entities/user.entity';
     ConfigModule.forRoot(),
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     JwtModule.register({
-      secret: process.env.JWT_SECRET || 'secretKey',
+      secret: process.env.JWT_SECRET || 'razorcopy',
       signOptions: { expiresIn: '24h' },
     }),
     HttpModule,
-    EmailModule,
+    // EmailModule, // Removed - email functionality not supported
     forwardRef(() => ArticleModule),
     forwardRef(() => ArticleDocumentsModule),
   ],

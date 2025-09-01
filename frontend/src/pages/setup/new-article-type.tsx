@@ -150,7 +150,7 @@ export default function NewArticleTypePage() {
                     >
                       <option value="" disabled>Select article prompt...</option>
                       {articlePrompts.map(p => (
-                        <option key={p.id} value={p.id}>{p.name}</option>
+                        <option key={p._id} value={p._id}>{p.name}</option>
                       ))}
                     </select>
                   </div>
@@ -170,7 +170,7 @@ export default function NewArticleTypePage() {
                     >
                       <option value="" disabled>Select outline prompt...</option>
                       {outlinePrompts.map(p => (
-                        <option key={p.id} value={p.id}>{p.name}</option>
+                        <option key={p._id} value={p._id}>{p.name}</option>
                       ))}
                     </select>
                   </div>
@@ -190,7 +190,7 @@ export default function NewArticleTypePage() {
                     >
                       <option value="" disabled>Select title prompt...</option>
                       {titlePrompts.map(p => (
-                        <option key={p.id} value={p.id}>{p.name}</option>
+                        <option key={p._id} value={p._id}>{p.name}</option>
                       ))}
                     </select>
                   </div>

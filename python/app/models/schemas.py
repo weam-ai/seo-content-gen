@@ -79,6 +79,7 @@ class ArticleRequest(BaseModel):
 
 class KeywordItem(BaseModel):
     keyword: str
+    promptTypeId: Optional[str] = None
 
 class TitlesRequest(BaseModel):
     ProjectId: str

@@ -78,7 +78,7 @@ export default function SystemPromptsPage() {
     setDeletingId(id);
     // Optimistically remove from UI
     const prev = prompts;
-    setPrompts(prompts.filter((g) => g.id !== id));
+    setPrompts(prompts.filter((g) => g._id !== id));
     try {
       await systemPromptService.deleteSystemPrompt(id);
       toast({ title: 'Deleted', description: 'System prompt deleted successfully.' });
@@ -129,8 +129,8 @@ export default function SystemPromptsPage() {
         'Name': g.name,
         'Type': g.type.replace(/_/g, ' '),
         'Default': g.is_default ? 'Yes' : 'No',
-        'Date Added': new Date(g.created_at).toLocaleDateString('en-GB'),
-        'Date Updated': new Date(g.updated_at).toLocaleDateString('en-GB'),
+        'Date Added': new Date(g.createdAt).toLocaleDateString('en-GB'),
+        'Date Updated': new Date(g.updatedAt).toLocaleDateString('en-GB'),
       }));
       setExportData(data);
       setTimeout(() => {
@@ -171,18 +171,18 @@ export default function SystemPromptsPage() {
     },
     {
       header: 'Date Added',
-      accessor: 'created_at',
+      accessor: 'createdAt',
       sortable: true,
       render: (row) => (
-        <span className="text-muted-foreground">{new Date(row.created_at).toLocaleDateString('en-GB')}</span>
+        <span className="text-muted-foreground">{new Date(row.createdAt).toLocaleDateString('en-GB')}</span>
       ),
     },
     {
       header: 'Date Updated',
-      accessor: 'updated_at',
+      accessor: 'updatedAt',
       sortable: true,
       render: (row) => (
-        <span className="text-muted-foreground">{new Date(row.updated_at).toLocaleDateString('en-GB')}</span>
+        <span className="text-muted-foreground">{new Date(row.updatedAt).toLocaleDateString('en-GB')}</span>
       ),
     },
     {
@@ -192,7 +192,7 @@ export default function SystemPromptsPage() {
         <div>
           {canUpdateSystemPrompts && (
             <Button variant="ghost" size="sm" asChild>
-              <Link to={`/setup/system-prompts/${row.id}/edit`}>
+              <Link to={`/setup/system-prompts/${row._id}/edit`}>
                 <Edit className="h-4 w-4" />
               </Link>
             </Button>
@@ -202,10 +202,10 @@ export default function SystemPromptsPage() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => handleDelete(row.id)}
-              disabled={deletingId === row.id}
+              onClick={() => handleDelete(row._id)}
+              disabled={deletingId === row._id}
             >
-              {deletingId === row.id ? (
+              {deletingId === row._id ? (
                 <span className="animate-spin"><Trash2 className="h-4 w-4 text-destructive" /></span>
               ) : (
                 <Trash2 className="h-4 w-4 text-destructive" />

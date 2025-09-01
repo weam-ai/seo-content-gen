@@ -15,7 +15,6 @@ import xml.etree.ElementTree as ET
 import brotli
 import gzip 
 import google.generativeai as genai
-from app.core.database import get_database
 from app.models.project_model import SystemPrompt
 from crawl4ai import AsyncWebCrawler, BrowserConfig, CrawlerRunConfig
 from typing import List
@@ -234,20 +233,22 @@ def generate_preview(title, keywords, target_audience, company_detail):
     return response.content
 
 async def generates_previews(title,keywords, target_audience, secondary_keywords, company_detail,article):
-    llm = ChatOpenAI(
-        model="gpt-4.1",
-        temperature=0.8,
-        api_key=OPENAI_API_KEY
-    )
+    try:
+        llm = ChatOpenAI(
+            model="gpt-4o-mini",  # Using a valid OpenAI model
+            temperature=0.8,
+            api_key=OPENAI_API_KEY
+        )
+        
+        # Use default prompt since article types are no longer supported
+        full_prompt = f"Generate an outline for an article with title: {title}, keywords: {keywords}, target audience: {target_audience}, secondary keywords: {secondary_keywords}, company details: {company_detail}"
 
-    database = get_database()
-    
-    # Use default prompt since article types are no longer supported
-    full_prompt = f"Generate an outline for an article with title: {title}, keywords: {keywords}, target audience: {target_audience}, secondary keywords: {secondary_keywords}, company details: {company_detail}"
-
-    messages = [("human", full_prompt)]
-    response = llm.invoke(messages)
-    return response.content
+        messages = [("human", full_prompt)]
+        response = llm.invoke(messages)
+        return response.content
+    except Exception as e:
+        logger.error(f"Error in generates_previews: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error generating preview: {str(e)}")
 
 async def extract_main_content(html_content: str) -> str:
     try:

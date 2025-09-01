@@ -8,8 +8,12 @@ import {
   Delete,
   Query,
   Res,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
-import { Response } from 'express';
+import { Request, Response } from 'express';
+import { JwtAuthGuard } from '@shared/guards/jwt-auth.guard';
+import { getUserId, toObjectId } from '@shared/types/populated-entities';
 import { ParseObjectIdPipe } from '@shared/pipes/parse-objectid.pipe';
 import { GuidelinesService } from './guidelines.service';
 import { CreateGuidelineDto } from './dto/create-guideline.dto';
@@ -24,12 +28,14 @@ import {
 import { instanceToPlain } from 'class-transformer';
 import { GUIDELINES_STRING } from '@shared/utils/string.utils';
 @Controller('guidelines')
+@UseGuards(JwtAuthGuard)
 export class GuidelinesController {
   constructor(private readonly guidelinesService: GuidelinesService) {}
 
   @Post()
   async create(
     @Body() createGuidelineDto: any,
+    @Req() req: Request,
     @Res() res: Response,
   ) {
     try {
@@ -38,6 +44,7 @@ export class GuidelinesController {
       
       const guideline = await this.guidelinesService.create(
         createGuidelineDto,
+        getUserId(req.user!),
       );
       
       console.log('Controller: Service returned:', guideline);
@@ -83,12 +90,13 @@ export class GuidelinesController {
   @Get()
   async findAll(
     @Query() query: ListGuidelineQueryPagination,
+    @Req() req: Request,
     @Res() res: Response,
   ) {
     const { guidelines, pagination } =
-      await this.guidelinesService.findAll(query);
+      await this.guidelinesService.findAll(query, getUserId(req.user!));
       
-    // Guidelines from service already have proper format with id field
+    // Guidelines from service now have _id field
     return successPaginationResponseWithData(
       pagination,
       res,
@@ -100,9 +108,10 @@ export class GuidelinesController {
   @Get('list')
   async listAllGuidelines(
     @Query() query: ListGuidelineDtoQuery,
+    @Req() req: Request,
     @Res() res: Response,
   ) {
-    const guidelines = await this.guidelinesService.findAllList(query);
+    const guidelines = await this.guidelinesService.findAllList(query, getUserId(req.user!));
     
     // Manually serialize to match original app format
     const serializedGuidelines = (guidelines as any[]).map(guideline => ({
@@ -123,23 +132,16 @@ export class GuidelinesController {
   @Get(':id')
   async findOne(
     @Param('id', ParseObjectIdPipe) id: string,
+    @Req() req: Request,
     @Res() res: Response,
   ) {
-    const guideline = await this.guidelinesService.findOne(id);
+    const guideline = await this.guidelinesService.findOne(id, getUserId(req.user!));
     
-    // Manually serialize to match original app format
-    const serializedGuideline = {
-      id: (guideline as any)._id.toString(),
-      name: guideline.name,
-      description: guideline.description,
-      created_at: (guideline as any).created_at,
-      updated_at: (guideline as any).updated_at
-    };
-    
+    // Return guideline with _id field intact
     return successResponseWithData(
       res,
       GUIDELINES_STRING.SUCCESS.GUIDELINE_FETCHED,
-      serializedGuideline,
+      guideline,
     );
   }
 
@@ -147,35 +149,30 @@ export class GuidelinesController {
   async update(
     @Param('id', ParseObjectIdPipe) id: string,
     @Body() updateGuidelineDto: UpdateGuidelineDto,
+    @Req() req: Request,
     @Res() res: Response,
   ) {
     const guideline = await this.guidelinesService.update(
       id,
       updateGuidelineDto,
+      getUserId(req.user!),
     );
     
-    // Manually serialize to match original app format
-    const serializedGuideline = {
-      id: (guideline as any)._id.toString(),
-      name: guideline.name,
-      description: guideline.description,
-      created_at: (guideline as any).created_at,
-      updated_at: (guideline as any).updated_at
-    };
-    
+    // Return guideline with _id field intact
     return successResponseWithData(
       res,
       GUIDELINES_STRING.SUCCESS.GUIDELINES_UPDATED,
-      serializedGuideline,
+      guideline,
     );
   }
 
   @Delete(':id')
   async remove(
     @Param('id', ParseObjectIdPipe) id: string,
+    @Req() req: Request,
     @Res() res: Response,
   ) {
-    await this.guidelinesService.remove(id);
+    await this.guidelinesService.remove(id, getUserId(req.user!));
     return successResponse(res, GUIDELINES_STRING.SUCCESS.GUIDELINES_DELETED);
   }
 }

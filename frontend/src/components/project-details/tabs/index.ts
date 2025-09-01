@@ -1,4 +1,4 @@
-export * from './ComingSoonTab';
+// export * from './ComingSoonTab'; // Removed - no longer showing coming soon features
 export * from './ProjectKeywordsTab';
 export * from './ProjectOverviewTab';
 export * from './ProjectSitemapTab';

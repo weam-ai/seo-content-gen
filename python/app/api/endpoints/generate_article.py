@@ -2,7 +2,6 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Optional, List
 from app.models.schemas import ArticleRequest
-from app.core.database import get_database
 from bson import ObjectId
 import logging
 import os
@@ -12,6 +11,8 @@ import google.generativeai as genai
 import anthropic
 import re
 import asyncio
+import aiohttp
+import json
 
 load_dotenv()
 
@@ -21,6 +22,8 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 CLAUDE_API_KEY = os.getenv("CLAUDE_API_KEY")
 CUSTOM_GOOGLE_SEARCH = os.getenv("CUSTOM_GOOGLE_SEARCH")
 CX_ID = os.getenv("CX_ID")
+BASE_URL = os.getenv("BASE_URL", "http://localhost:9001")
+WEBHOOK_AUTH_TOKEN = os.getenv("WEBHOOK_AUTH_TOKEN")
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +33,44 @@ genai.configure(api_key=GEMINI_API_KEY) if GEMINI_API_KEY else None
 claude_client = anthropic.Anthropic(api_key=CLAUDE_API_KEY) if CLAUDE_API_KEY else None
 
 router = APIRouter()
+
+async def call_webhook(article_id: str, request_id: str, model: str, content: str, avg_word_count: float):
+    """Call the Node.js webhook to notify about article generation completion"""
+    try:
+        webhook_url = f"{BASE_URL}/webhooks/{article_id}/content"
+        
+        payload = {
+            "requestId": request_id,
+            "model": model,
+            "content": content,
+            "avg_word_count": avg_word_count
+        }
+        
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {WEBHOOK_AUTH_TOKEN}"
+        }
+        
+        # Create SSL context that doesn't verify certificates (for development)
+        import ssl
+        ssl_context = ssl.create_default_context()
+        ssl_context.check_hostname = False
+        ssl_context.verify_mode = ssl.CERT_NONE
+        
+        connector = aiohttp.TCPConnector(ssl=ssl_context)
+        async with aiohttp.ClientSession(connector=connector) as session:
+            async with session.post(webhook_url, json=payload, headers=headers) as response:
+                if response.status == 202:  # Accepted
+                    logger.info(f"Webhook called successfully for article {article_id}")
+                    return True
+                else:
+                    error_text = await response.text()
+                    logger.error(f"Webhook call failed: {response.status} - {error_text}")
+                    return False
+                    
+    except Exception as e:
+        logger.error(f"Error calling webhook for article {article_id}: {e}")
+        return False
 
 @router.get("/test")
 async def test_endpoint():
@@ -208,43 +249,48 @@ Please write a well-structured, informative article that incorporates the keywor
         # Generate content based on model - only one model at a time
         summaries = {}
         word_counts = []
+        generated_content = ""
         
         # Default to OpenAI if no model specified
         model_to_use = request_data.model if request_data.model and request_data.model.strip() else "open_ai"
         
         if model_to_use == "open_ai":
-            content = get_openai_summary(prompt, reference_links)
-            summaries["open_ai"] = content
-            word_counts.append(len(content.split()))
+            generated_content = get_openai_summary(prompt, reference_links)
+            summaries["open_ai"] = generated_content
+            word_counts.append(len(generated_content.split()))
         elif model_to_use == "gemini":
-            content = get_gemini_summary(prompt, reference_links)
-            summaries["gemini"] = content
-            word_counts.append(len(content.split()))
+            generated_content = get_gemini_summary(prompt, reference_links)
+            summaries["gemini"] = generated_content
+            word_counts.append(len(generated_content.split()))
         elif model_to_use == "claude":
-            content = get_claude_summary(prompt, reference_links)
-            summaries["claude"] = content
-            word_counts.append(len(content.split()))
+            generated_content = get_claude_summary(prompt, reference_links)
+            summaries["claude"] = generated_content
+            word_counts.append(len(generated_content.split()))
         else:
             # Fallback to OpenAI for unknown models
-            content = get_openai_summary(prompt, reference_links)
-            summaries["open_ai"] = content
-            word_counts.append(len(content.split()))
+            generated_content = get_openai_summary(prompt, reference_links)
+            summaries["open_ai"] = generated_content
+            word_counts.append(len(generated_content.split()))
         
         # Calculate average word count
         calculated_avg_word_count = sum(word_counts) / len(word_counts) if word_counts else 0
         
-        # Mock webhook responses for testing
-        webhook_responses = {}
-        for model_name, summary in summaries.items():
-            word_count = len(summary.split())
-            # Mock successful webhook response
-            webhook_responses[model_name] = 200
-            logger.info(f"Mock webhook sent for {model_name} with {word_count} words")
+        # Call webhook to notify Node.js backend
+        webhook_success = await call_webhook(
+            article_id=request_data.articleId,
+            request_id=request_data.requestId,
+            model=model_to_use,
+            content=generated_content,
+            avg_word_count=calculated_avg_word_count
+        )
+        
+        if not webhook_success:
+            logger.warning(f"Webhook call failed for article {request_data.articleId}, but content was generated")
         
         return {
             "message": "Article generation completed",
-            "webhook_responses": webhook_responses,
-            "avg_word_count": calculated_avg_word_count
+            "avg_word_count": calculated_avg_word_count,
+            "webhook_called": webhook_success
         }
         
     except Exception as e:

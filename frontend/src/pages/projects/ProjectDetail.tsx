@@ -19,7 +19,7 @@ import ProjectOverviewTab from '@/components/project-details/tabs/ProjectOvervie
 import ProjectKeywordsTab from '@/components/project-details/tabs/ProjectKeywordsTab';
 // import ProjectTeamTab from '@/components/project-details/tabs/ProjectTeamTab'; // Removed for single-user app
 import ProjectContentTab from '@/components/project-details/tabs/ProjectContentTab';
-import ComingSoonTab from '@/components/project-details/tabs/ComingSoonTab';
+// ComingSoonTab removed - no longer showing coming soon features
 import ProjectSitemapTab from '@/components/project-details/tabs/ProjectSitemapTab';
 import ProjectAuditReport from '@/components/project-details/tabs/ProjectAuditReport';
 
@@ -185,7 +185,7 @@ export default function ProjectDetails() {
             </div>
             {/* Project Header */}
             <div className="mb-8">
-              <ProjectHeader project={project} projectId={project.id} />
+              <ProjectHeader project={project} projectId={project._id} />
 
               {/* Quick Stats Cards */}
               <ProjectQuickStats project={project} />
@@ -201,23 +201,19 @@ export default function ProjectDetails() {
               <ProjectKeywordsTab project={project} />
             )}
 
-            {/* {activeTab === 'team' && <ProjectTeamTab projectId={project.id} />} */} {/* Removed for single-user app */}
+            {/* {activeTab === 'team' && <ProjectTeamTab projectId={project._id} />} */} {/* Removed for single-user app */}
 
             {activeTab === 'content' && <ProjectContentTab project={project} />}
 
-            {/* Other tabs with coming soon states */}
-            {(activeTab === 'audit' ||
-              activeTab === 'sitemap') && (
-              <ComingSoonTab activeTab={activeTab} />
-            )}
+            {/* Coming soon tabs removed for single-user application */}
 
             {activeTab === 'audit' && (
-              <ProjectAuditReport projectId={project.id} />
+              <ProjectAuditReport projectId={project._id} />
             )}
 
             {activeTab === 'sitemap' && project && (
               <ProjectSitemapTab
-                projectId={project.id}
+                projectId={project._id}
                 projectName={project.name}
               />
             )}

@@ -611,7 +611,7 @@ export default function EditProject() {
                                   </div>
                                   <Badge variant="outline" className="text-xs">
                                     {promptTypes.find(
-                                      (pt) => pt.id === keyword.promptTypeId
+                                      (pt) => pt._id === keyword.promptTypeId
                                     )?.name || 'Unknown Type'}
                                   </Badge>
                                 </div>
@@ -652,8 +652,8 @@ export default function EditProject() {
                             <SelectContent>
                               {guidelines.map((guideline) => (
                                 <SelectItem
-                                  key={guideline.id}
-                                  value={guideline.id}
+                                  key={guideline._id}
+                                  value={guideline._id}
                                 >
                                   {guideline.name}
                                 </SelectItem>

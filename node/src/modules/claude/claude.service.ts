@@ -50,13 +50,7 @@ export class ClaudeService {
     }
   }
 
-  async articleAudit(content: string): Promise<string> {
-    const prompt = `Please audit the following article content for quality, accuracy, and readability. Provide detailed feedback and suggestions for improvement:
 
-${content}`;
-
-    return this.generateContent(prompt);
-  }
 
   async regenerateArticlePortion(data: {
     article: string;

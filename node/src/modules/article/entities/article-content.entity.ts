@@ -4,11 +4,21 @@ import { BaseEntity } from '@shared/entities/basic.entity';
 import { ArticleFrom } from '@shared/types/articles.t';
 import { Exclude } from 'class-transformer';
 
-@Schema({ collection: 'solution_seo_articles_content' })
+@Schema({ 
+  collection: 'solution_seo_articles_content',
+  timestamps: {
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+    currentTime: () => new Date()
+  }
+})
 export class ArticleContent extends BaseEntity {
   @Exclude()
   // Virtual reference - articles will be populated via virtual
   articles?: Types.ObjectId[];
+
+  @Prop({ type: Types.ObjectId, ref: 'User', required: false })
+  user?: Types.ObjectId;
 
   @Prop({ type: String })
   open_ai_content: string | null;

@@ -28,6 +28,7 @@ import { ArticleDocumentQualityCheckDto } from './dto/article-document-quality-c
 import { JwtAuthGuard } from '@shared/guards/jwt-auth.guard';
 
 @Controller('article-documents')
+@UseGuards(JwtAuthGuard)
 export class ArticleDocumentsController {
   constructor(
     private readonly articleDocumentService: ArticleDocumentsService,
@@ -71,7 +72,6 @@ export class ArticleDocumentsController {
   }
 
   @Post('/:articleId/update')
-  @UseGuards(JwtAuthGuard)
   async documentUpdates(
     @Param('articleId', ParseObjectIdPipe) articleId: string,
     @Body() body: ArticleDocumentUpdateContent,
@@ -90,7 +90,6 @@ export class ArticleDocumentsController {
   }
 
   @Post('/:articleId/versions/:version/restore')
-  @UseGuards(JwtAuthGuard)
   async restoreToVersion(
     @Param('articleId', ParseObjectIdPipe) articleId: string,
     @Param('version', ParseIntPipe) version: number,

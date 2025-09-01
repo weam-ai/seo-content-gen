@@ -291,12 +291,12 @@ export const BlockNoteEditor = forwardRef<any, BlockNoteEditorProps>(
           profile_image: '',
         };
       return {
-        id: user.id,
+        id: user._id,
         color: getRandomColor(),
-        firstname: user.firstname || 'User',
-        lastname: user.lastname || '',
-        username: `${user.firstname} ${user.lastname}`.trim(),
-        profile_image: user.profile_image || '',
+        firstname: 'User',
+        lastname: '',
+        username: user.email || 'User',
+        profile_image: '',
       };
     }, [user]);
 

@@ -40,16 +40,7 @@ export class GeminiController {
   //   );
   // }
 
-  @Post('/audit-article')
-  async auditArticle(@Body() body: { content: string }, @Res() res: Response) {
-    const result = await this.geminiService.articleAudit(body.content);
 
-    return successResponseWithData(
-      res,
-      OPENAI_STRING.SUCCESS.CHAT_RESPONSE,
-      result,
-    );
-  }
 
   @Post('/generate-content')
   async generateContent(@Body() body: { prompt: string; options?: any }, @Res() res: Response) {

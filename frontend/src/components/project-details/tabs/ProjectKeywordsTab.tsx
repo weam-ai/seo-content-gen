@@ -114,9 +114,9 @@ export default function ProjectKeywordsTab({
   // Restore fetching hooks
   useEffect(() => {
     async function fetchProjectKeywords() {
-      if (project?.id) {
+      if (project?._id) {
         try {
-          const response = await ProjectService.getProjectKeywords(project.id);
+          const response = await ProjectService.getProjectKeywords(project._id);
           if (response.status && response.data) {
             const apiTargetedKeywords: DisplayKeyword[] = response.data.map(
               (k: Keyword) => ({
@@ -144,7 +144,7 @@ export default function ProjectKeywordsTab({
       }
     }
     fetchProjectKeywords();
-  }, [project?.id]);
+  }, [project?._id]);
 
   useEffect(() => {
     const fetchPromptTypes = async () => {
@@ -175,11 +175,11 @@ export default function ProjectKeywordsTab({
 
   useEffect(() => {
     const fetchRecommendations = async () => {
-      if (project?.id && project?.keywords) {
+      if (project?._id && project?.keywords) {
         setIsLoading(true);
         try {
           const response = await ProjectService.fetchKeywordRecommendation(
-            project.id
+            project._id
           );
 
           if (response.status && response.data) {
@@ -321,7 +321,7 @@ export default function ProjectKeywordsTab({
   // Update moveKeywordToTargeted to use CsvKeywordTypeModal
   const moveKeywordToTargeted = (keyword: DisplayKeyword) => {
     setCsvKeywords([keyword.keyword]);
-    setCsvKeywordTypes({ [keyword.keyword]: promptTypes[0]?.id || '' });
+    setCsvKeywordTypes({ [keyword.keyword]: promptTypes[0]?._id || '' });
     setCsvModalOpen(true);
   };
 
@@ -333,7 +333,7 @@ export default function ProjectKeywordsTab({
       const keys = keywordsToMove.map((k) => k.keyword);
       setCsvKeywords(keys);
       setCsvKeywordTypes(
-        Object.fromEntries(keys.map((k) => [k, promptTypes[0]?.id || '']))
+        Object.fromEntries(keys.map((k) => [k, promptTypes[0]?._id || '']))
       );
       setCsvModalOpen(true);
     }
@@ -399,7 +399,7 @@ export default function ProjectKeywordsTab({
         setRowLoadingId(null);
         return;
       }
-      if (!project?.id) {
+      if (!project?._id) {
         setRowLoadingId(null);
         return;
       }
@@ -412,7 +412,7 @@ export default function ProjectKeywordsTab({
             { keyword: keyword.keyword, promptTypeId: keyword.articleType },
           ];
           response = await ProjectService.addProjectKeywords(
-            project.id,
+            project._id,
             payload
           );
           responseData = response.data;
@@ -437,7 +437,7 @@ export default function ProjectKeywordsTab({
           });
 
           // Refresh targeted keywords from backend
-          const refreshed = await ProjectService.getProjectKeywords(project.id);
+          const refreshed = await ProjectService.getProjectKeywords(project._id);
           if (refreshed.status && refreshed.data) {
             const apiTargetedKeywords: DisplayKeyword[] = refreshed.data.map(
               (k: Keyword) => ({
@@ -473,7 +473,7 @@ export default function ProjectKeywordsTab({
         setRowLoadingId(null);
       }
     },
-    [targetedKeywords, editingKeywords, project?.id]
+    [targetedKeywords, editingKeywords, project?._id]
   );
 
   const cancelEdit = useCallback((id: string) => {
@@ -659,7 +659,7 @@ export default function ProjectKeywordsTab({
                       setCsvKeywords(keywords);
                       setCsvKeywordTypes(
                         Object.fromEntries(
-                          keywords.map((k) => [k, promptTypes[0]?.id || ''])
+                          keywords.map((k) => [k, promptTypes[0]?._id || ''])
                         )
                       );
                       setCsvModalOpen(true);
@@ -866,7 +866,7 @@ export default function ProjectKeywordsTab({
                             </SelectTrigger>
                             <SelectContent>
                               {promptTypes.map((type) => (
-                                <SelectItem key={type.id} value={type.id}>
+                                <SelectItem key={type._id} value={type._id}>
                                   {type.name}
                                 </SelectItem>
                               ))}
@@ -1234,14 +1234,14 @@ export default function ProjectKeywordsTab({
             return;
           }
 
-          if (!project?.id) {
+          if (!project?._id) {
             setCsvError('Project not found.');
             return;
           }
           setArticleTypeModalLoading(true);
           try {
             const response = await ProjectService.addProjectKeywords(
-              project.id,
+              project._id,
               newPairs
             );
             if (response.status) {

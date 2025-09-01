@@ -11,8 +11,8 @@ async function bootstrap() {
 
   app.use(helmet());
   app.enableCors();
-  // Temporarily disable global exception filter to debug callback error
-  // app.useGlobalFilters(new AllExceptionsFilter());
+  // Enable global exception filter to debug article creation error
+  app.useGlobalFilters(new AllExceptionsFilter());
   // Temporarily disable global validation pipe to debug callback error
   // app.useGlobalPipes(
   //   new ValidationPipe({

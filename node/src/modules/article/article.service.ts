@@ -10,13 +10,11 @@ import { Model, Types } from 'mongoose';
 import { Article } from './entities/article.entity';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
-// TODO: Re-implement when User entity is available
-// import { User } from '@modules/users/entities/user.entity';
+
 
 // Minimal User interface for type safety
 interface User {
   _id?: string;
-  id?: string;
   name?: string;
   email?: string;
 }
@@ -35,7 +33,7 @@ import { PythonService } from '@shared/services/python.service';
 import {
   ARTICLES_STRING,
   COMMON_ERROR_STRING,
-  EMAIL_STRING,
+  // EMAIL_STRING, // Removed - email functionality not supported
 } from '@shared/utils/string.utils';
 import { ArticleContent } from './entities/article-content.entity';
 import {
@@ -43,7 +41,7 @@ import {
   SelectArticleContent,
 } from './dto/article-content.dto';
 // Roles functionality removed
-import { EmailService } from '@/shared/modules/email/email.service';
+// Email service removed for single-user application
 import { ArticleDocumentsService } from '../article-documents/article-documents.service';
 import { PromptType } from '../prompt-types/entities/prompt-type.entity';
 // Removed ArticleBulkAssignDto import - functionality no longer supported
@@ -52,9 +50,7 @@ import { marked } from 'marked';
 import { logger } from '@/shared/utils/logger.utils';
 import { formatedTitles } from '@/shared/utils/article.util';
 import { markdownToBlocks } from '@/shared/utils/blocknote.util';
-// TODO: Re-implement when comment entities are available
-// import { Thread } from '../comments/entities/threads.entity';
-// import { Comment } from '../comments/entities/comment.entity';
+
 import { RecommendedKeyword } from '../projects/entities/recommended-keyword.entity';
 
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -82,10 +78,7 @@ export class ArticleService {
     private readonly articleContentModel: Model<ArticleContent>,
     @InjectModel(PromptType.name)
     private readonly promptTypeModel: Model<PromptType>,
-    // @InjectModel(Thread.name)
-    // private readonly threadModel: Model<Thread>,
-    // @InjectModel(Comment.name)
-    // private readonly commentModel: Model<Comment>,
+
     @InjectModel(DocumentUpdates.name)
     private readonly documentUpdatesModel: Model<DocumentUpdates>,
     // private readonly dataForSeoService: DataForSeoService, // Temporarily disabled
@@ -101,31 +94,27 @@ export class ArticleService {
     // private readonly timeTrackingService: TimeTrackingService,
   ) {}
 
-  async create(createArticleDto: CreateArticleDto, loggedInUserId: string) {
+  async create(createArticleDto: CreateArticleDto) {
     try {
-      console.log('Step 1: Starting article creation');
-      
-      const project = await this.projectModel.findById(createArticleDto.project_id);
-      console.log('Step 2: Project found:', !!project);
+      const project = await this.projectModel.findOne({
+        _id: createArticleDto.project_id
+      });
 
       if (!project) {
         throw new BadRequestException(
           `Project with ID ${createArticleDto.project_id} does not exist`,
         );
       }
-
-      console.log('Step 3: Creating article object');
-      const article = new this.articleModel({
+      
+      const articleData = {
         ...createArticleDto,
         project: toObjectId(createArticleDto.project_id),
-        user: toObjectId(loggedInUserId),
         status: ArticleStatus.NOT_STARTED,
         approved_at: new Date(),
-      });
-
-      console.log('Step 4: Saving article');
+      };
+      
+      const article = new this.articleModel(articleData);
       const newArticle = await article.save();
-      console.log('Step 5: Article saved successfully');
 
       return newArticle;
     } catch (error) {
@@ -134,7 +123,7 @@ export class ArticleService {
     }
   }
 
-  async findAll(query?: Partial<ListArticleDtoQuery>, user?: User) {
+  async findAll(query?: Partial<ListArticleDtoQuery>) {
     const {
       page: pageParam = 1,
       limit: limitParam = 10,
@@ -158,13 +147,17 @@ export class ArticleService {
       name: { $ne: null }
     };
 
+    // Articles are now project-dependent only, no user filtering needed
+
+    // Build search conditions separately
+    const searchConditions: any[] = [];
     if (search) {
-      matchConditions.$or = [
+      searchConditions.push(
         { name: { $regex: search, $options: 'i' } },
         { keywords: { $regex: search, $options: 'i' } },
         { secondary_keywords: { $elemMatch: { $regex: search, $options: 'i' } } },
         { keyword_difficulty: { $regex: search, $options: 'i' } }
-      ];
+      );
     }
 
     if (status) {
@@ -179,19 +172,15 @@ export class ArticleService {
       matchConditions.project = { $in: projectIdsArray.map(id => toObjectId(id)) };
     }
 
-    // Date filtering
+    // Build date conditions separately
+    const dateConditions: any[] = [];
     if (query?.start_date && query?.end_date) {
-      matchConditions.$or = [
-        ...(matchConditions.$or || []),
+      dateConditions.push(
         {
-          $and: [
-            { start_date: { $gte: new Date(query.start_date), $lte: new Date(query.end_date) } },
-          ]
+          start_date: { $gte: new Date(query.start_date), $lte: new Date(query.end_date) }
         },
         {
-          $and: [
-            { end_date: { $gte: new Date(query.start_date), $lte: new Date(query.end_date) } },
-          ]
+          end_date: { $gte: new Date(query.start_date), $lte: new Date(query.end_date) }
         },
         {
           $and: [
@@ -204,7 +193,7 @@ export class ArticleService {
             }
           ]
         }
-      ];
+      );
     } else {
       if (query?.start_date) {
         matchConditions.start_date = new Date(query.start_date);
@@ -212,6 +201,19 @@ export class ArticleService {
       if (query?.end_date) {
         matchConditions.end_date = new Date(query.end_date);
       }
+    }
+
+    // Combine all OR conditions properly
+    const orConditions: any[] = [];
+    if (searchConditions.length > 0) {
+      orConditions.push(...searchConditions);
+    }
+    if (dateConditions.length > 0) {
+      orConditions.push(...dateConditions);
+    }
+    
+    if (orConditions.length > 0) {
+      matchConditions.$or = orConditions;
     }
 
     // Agency search functionality removed - no longer supported
@@ -263,6 +265,34 @@ export class ArticleService {
         }
       },
       // Prompt type unwind removed
+      // Add projection to ensure all necessary fields are included
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          keywords: 1,
+          keyword_volume: 1,
+          keyword_difficulty: 1,
+          status: 1,
+          start_date: 1,
+          end_date: 1,
+          secondary_keywords: 1,
+          generated_outline: 1,
+          meta_title: 1,
+          meta_description: 1,
+          settings: 1,
+          project: 1,
+          user: 1,
+          article_content: 1,
+          priority: 1,
+          approved_at: 1,
+          created_at: 1,
+          updated_at: 1,
+          published_url: 1,
+          is_content_generated: 1,
+          is_outline_generated: 1
+        }
+      }
     ];
 
     if (sort) {
@@ -303,11 +333,8 @@ export class ArticleService {
 
     // Apply pagination only if limit is not -1
     if (shouldApplyPagination) {
-      console.log('Applying pagination - page:', page, 'limit:', limit);
       pipeline.push({ $skip: (page - 1) * limit });
       pipeline.push({ $limit: limit });
-    } else {
-      console.log('Skipping pagination - limit is 0 or -1');
     }
 
     const articles = await this.articleModel.aggregate(pipeline);
@@ -319,32 +346,16 @@ export class ArticleService {
       total_pages: totalPages,
     };
 
-    // Transform ObjectIds to strings for proper serialization
+    // Return articles with _id fields intact
     const articlesWithPrompts = articles.map((article) => {
       const transformedArticle = {
         ...article,
-        id: article._id?.toString(), // Transform _id to id for frontend compatibility
-        project: {
-          ...article.project,
-          id: article.project?._id?.toString(),
-        },
-        user: article.user ? {
-          ...article.user,
-          id: article.user._id?.toString(),
-        } : null,
+        project: article.project || null,
+        user: article.user || null,
         article_content: article.article_content?.toString(),
         // Removed assign_member field - functionality no longer supported
         // Prompt types are no longer supported
       };
-      
-      // Remove _id field to avoid confusion
-      delete transformedArticle._id;
-      if (transformedArticle.project) {
-        delete transformedArticle.project._id;
-      }
-      if (transformedArticle.user) {
-        delete transformedArticle.user._id;
-      }
       
       return transformedArticle as any;
     });
@@ -356,8 +367,11 @@ export class ArticleService {
   }
 
   async findOne(id: string) {
+    const query: any = { _id: toObjectId(id) };
+    // Articles are now project-dependent only, no user filtering needed
+
     const article = await this.articleModel
-      .findById(toObjectId(id))
+      .findOne(query)
       .select('name keywords keyword_volume keyword_difficulty status start_date end_date created_at updated_at secondary_keywords generated_outline meta_title meta_description settings project user')
       .populate({
         path: 'project',
@@ -372,36 +386,17 @@ export class ArticleService {
       throw new NotFoundException(`Article with ID ${id} not found`);
     }
 
-    // Transform _id to id for frontend compatibility
-    const transformedArticle = {
+    // Return article with _id fields intact
+    return {
       ...article,
-      id: article._id?.toString(),
-      project: article.project ? {
-        ...article.project,
-        id: (article.project as any)._id?.toString(),
-      } : null,
-      user: article.user ? {
-        ...article.user,
-        id: (article.user as any)._id?.toString(),
-      } : null,
+      project: article.project || null,
+      user: article.user || null,
     };
-
-    // Remove _id fields to avoid confusion
-    delete (transformedArticle as any)._id;
-    if (transformedArticle.project) {
-      delete (transformedArticle.project as any)._id;
-    }
-    if (transformedArticle.user) {
-      delete (transformedArticle.user as any)._id;
-    }
-
-    return transformedArticle;
   }
 
   async update(
     id: string,
     updateArticleDto: UpdateArticleDto,
-    currentUser?: User,
   ) {
     const article = await this.articleModel.findById(toObjectId(id))
       // Removed assigned_members and assign_followers population - functionality no longer supported
@@ -452,14 +447,11 @@ export class ArticleService {
     }
 
     await this.articleModel.updateOne(
-      { _id: toObjectId((article._id as any).toString()) },
+      { _id: toObjectId(article._id) },
       { $set: payload }
     );
 
-    // Update timer activity if user is currently tracking time on this article
-    if (currentUser) {
-      // await this.timeTrackingService.updateTimerActivity(getUserId(currentUser as any), id);
-    }
+    // Timer activity tracking removed for single-user application
 
     // Get the updated article with all relations
     const updatedArticle = await this.findOne(id);
@@ -468,53 +460,19 @@ export class ArticleService {
     const wasTopicBefore = this.isTopicStatus(originalStatus);
     const isTopicNow = this.isTopicStatus(updatedArticle.status);
 
-    // Get the user who made the update
-    // const user =
-    //   currentUser ||
-    //   (await this.userModel.findById(toObjectId(article.user?._id)).lean());
-    const user = currentUser || null; // Temporary: user model removed
+    // User tracking removed for single-user application
+    const user = null; // Single-user mode: no user tracking needed
 
     if (user) {
       if (wasTopicBefore && !isTopicNow) {
-        this.eventEmitter.emit(
-          iEventType.TOPIC_UPDATED,
-          user,
-          updatedArticle,
-          updatedArticle.project,
-        );
-        this.eventEmitter.emit(
-          iEventType.ARTICLE_CREATED,
-          user,
-          updatedArticle,
-          updatedArticle.project,
-        );
+        // Event emitters removed for single-user application
+        // Event emitters removed for single-user application
       } else if (!wasTopicBefore && isTopicNow) {
-        this.eventEmitter.emit(
-          iEventType.ARTICLE_UPDATED,
-          user,
-          updatedArticle,
-          updatedArticle.project,
-        );
-        this.eventEmitter.emit(
-          iEventType.TOPIC_CREATED,
-          user,
-          updatedArticle,
-          updatedArticle.project,
-        );
+        // Event emitters removed for single-user application
       } else if (wasTopicBefore && isTopicNow) {
-        this.eventEmitter.emit(
-          iEventType.TOPIC_UPDATED,
-          user,
-          updatedArticle,
-          updatedArticle.project,
-        );
+        // Event emitters removed for single-user application
       } else {
-        this.eventEmitter.emit(
-          iEventType.ARTICLE_UPDATED,
-          user,
-          updatedArticle,
-          updatedArticle.project,
-        );
+        // Event emitters removed for single-user application
       }
     }
 
@@ -529,40 +487,14 @@ export class ArticleService {
       }
     }
 
-    // Send status update email if status has changed
-    if (
-      updateArticleDto.status &&
-      originalStatus !== updateArticleDto.status &&
-      currentUser
-    ) {
-      // Send email to each member about the status update
-      void this.sendArticleStatusUpdateMail(
-        article,
-        originalStatus,
-        updateArticleDto.status,
-        currentUser,
-      );
-    }
+    // Email functionality removed for single-user application
 
-    // Send title update email if title has changed
-    if (
-      updateArticleDto.name &&
-      originalTitle !== updateArticleDto.name &&
-      currentUser
-    ) {
-      // Send email to each member about the title update
-      void this.sendArticleTitleUpdateMail(
-        updatedArticle as any,
-        originalTitle,
-        updateArticleDto.name,
-        currentUser,
-      );
-    }
+    // Email functionality removed for single-user application
 
     return updateArticleDto as any;
   }
 
-  async remove(id: string, currentUser: User) {
+  async remove(id: string) {
     // First, fetch the article with all related data before deletion
     const article = await this.articleModel.findById(toObjectId(id))
       // Removed assigned_members and assign_followers population - functionality no longer supported
@@ -576,10 +508,8 @@ export class ArticleService {
 
     const isTopicStatus = this.isTopicStatus(article.status);
 
-    // Use the currentUser if provided, otherwise fall back to the article's user
-    // const user =
-    //   currentUser || (await this.userModel.findById(toObjectId(getUserId(article.user as any))).exec());
-    const user = currentUser || null; // Temporary: user model removed
+    // User tracking removed for single-user application
+    const user = null; // Single-user mode: no user tracking needed
 
     // Emit the appropriate event
     this.eventEmitter.emit(
@@ -594,11 +524,7 @@ export class ArticleService {
     // Member and follower notification functionality removed - no longer supported
     // const allUsersToNotify = new Set<string>();
 
-    // Add creator if not the deleter
-    const creatorId = getUserId(article.user as any);
-    if (creatorId && creatorId !== getUserId(currentUser as any)) {
-      allUsersToNotify.add(creatorId);
-    }
+    // User notification functionality removed for single-user application
 
     // Delete the article
     await this.articleModel.deleteOne({ _id: toObjectId(id) });
@@ -613,16 +539,7 @@ export class ArticleService {
 
       // Send email notifications
       for (const user of usersToNotify) {
-        // void this.emailService.sendMailWithTemplate(
-        //   user.email || '',
-        //   'article-deleted.email.ejs',
-        //   EMAIL_STRING.SUBJECT.ARTICLE_DELETED,
-        //   {
-        //     user: user,
-        //     article: article,
-        //     deletedBy: currentUser,
-        //   },
-        // ); // Disabled
+        // Email notification removed - not supported in single-user application
 
         // Notification functionality removed
         // Emit notification event for notification list entry
@@ -667,21 +584,16 @@ export class ArticleService {
 
   async getTaskStatusCounts(
     taskType?: string | null,
-    user?: User,
   ): Promise<any> {
     const matchConditions: any = {
       deleted_at: null,
-      name: { $ne: null },
     };
 
     if (taskType) {
       matchConditions.task_type = taskType;
     }
 
-    // Role-based access control removed - filter by assigned members for all users
-    if (user) {
-      // Removed assigned_members filtering - functionality no longer supported
-    }
+    // Role-based access control removed for single-user application
 
     const pipeline = [
       { $match: matchConditions },
@@ -709,17 +621,15 @@ export class ArticleService {
     project: Project,
     keywords: TargetedKeyword[],
     secondary_keywords?: string[],
-    user?: User,
     skipTitleGeneration: boolean = false,
+    authToken?: string,
   ) {
     //create article at top most priority
     const articles = await Promise.all(
       keywords.map(async (keyword) => {
         const articleData = {
           keywords: keyword.keyword,
-          project: toObjectId(((project as any)._id).toString()),
-          // Removed assigned_members field - functionality no longer supported
-          user: toObjectId(getUserId(user as any) || getUserId((project.user as any))),
+          project: toObjectId((project as any)._id),
           secondary_keywords: secondary_keywords ?? [],
         };
         return await this.articleModel.create(articleData);
@@ -730,7 +640,7 @@ export class ArticleService {
     try {
       await Promise.all(
         articles.map((article) =>
-          this.updateArticleKeywordsMetrics((article._id as any).toString()),
+          this.updateArticleKeywordsMetrics(article._id.toString()),
         ),
       );
     } catch {
@@ -743,10 +653,23 @@ export class ArticleService {
     //fetch and save titles for keywords in background
     if (!skipTitleGeneration) {
       try {
+        // Get a default prompt type from the database for keywords without promptTypeId
+        const defaultPromptType = await this.promptTypeModel.findOne({}).exec();
+        
+        if (!defaultPromptType) {
+          throw new NotFoundException('No prompt types found. Please create a prompt type first.');
+        }
+
+        // Ensure all keywords have a valid promptTypeId
+        const keywordsWithPromptType = keywords.map(keyword => ({
+          keyword: keyword.keyword,
+          promptTypeId: keyword.promptTypeId || defaultPromptType._id.toString()
+        }));
+
         const generateTitles = await this.pythonService.generateTitles({
-          ProjectId: (project as any).id,
-          Keywords: keywords,
-        });
+          ProjectId: (project as any)._id.toString(),
+          Keywords: keywordsWithPromptType,
+        }, authToken);
 
         if (!generateTitles) {
           throw new InternalServerErrorException(
@@ -781,19 +704,20 @@ export class ArticleService {
           'Error generating titles: [' +
             keywords.map((k) => k.keyword).join(', ') +
             '] for project: ' +
-            ((project as any)._id).toString() +
+            (project as any)._id.toString() +
             ', error: ' +
             error?.message,
         );
       }
     }
 
-    return this.getProjectKeywords(((project as any)._id).toString());
+    return this.getProjectKeywords((project as any)._id.toString());
   }
 
   async generateTitlesForProject(
     projectId: string,
     keywords: TargetedKeyword[],
+    authToken?: string,
   ) {
     // Find articles that don't have titles yet for this project
     const articlesWithoutTitles = await this.articleModel
@@ -823,7 +747,7 @@ export class ArticleService {
       const generateTitles = await this.pythonService.generateTitles({
         ProjectId: projectId,
         Keywords: requestKeywords,
-      });
+      }, authToken);
 
       if (!generateTitles) {
         throw new InternalServerErrorException(
@@ -838,7 +762,7 @@ export class ArticleService {
           if (formattedTitles[i]) {
             article.name = formattedTitles[i];
             return this.articleModel.updateOne(
-              { _id: toObjectId((article._id as any).toString()) },
+              { _id: toObjectId(article._id) },
               { $set: { name: formattedTitles[i] } },
             );
           }
@@ -895,11 +819,11 @@ export class ArticleService {
           article_id: '$_id',
           is_title_generated: { $ne: ['$name', null] },
           title: '$name',
-          created_at: '$created_at'
+
         }
       },
       {
-        $sort: { created_at: -1 }
+        $sort: { createdAt: -1 }
       }
     ]);
 
@@ -924,7 +848,7 @@ export class ArticleService {
     // For now, using a workaround with direct model access
     const RecommendedKeywordModel = this.projectModel.db.model('RecommendedKeyword');
     const recommendedKeywordResponse = await RecommendedKeywordModel.findOne({
-      project: toObjectId((article.project as any)._id.toString()),
+      project: toObjectId((article.project as any)._id),
     });
 
     const recommendedKeyword = recommendedKeywordResponse?.keywords.find(
@@ -972,12 +896,13 @@ export class ArticleService {
   async requestPythonAIContentGenerate(
     articleId: string,
     body: GenerateArticlePayloadRequest,
+    authToken?: string,
   ) {
     try {
       await this.pythonService.generateArticle({
         articleId,
         ...body,
-      });
+      }, authToken);
       // Python service processes asynchronously and sends results via webhook
       // No need to check result as it's a fire-and-forget operation
     } catch (error) {
@@ -1030,7 +955,7 @@ export class ArticleService {
       }
 
       await this.articleContentModel.updateOne(
-        { _id: toObjectId(article.article_content._id.toString()) },
+        { _id: toObjectId(article.article_content._id) },
         { $set: updatePayload },
       );
     }
@@ -1123,7 +1048,6 @@ export class ArticleService {
   async chooseAIArticleContent(
     id: string,
     data: SelectArticleContent,
-    user: User,
   ) {
     const article = await this.articleModel.findById(id)
       .populate([
@@ -1159,26 +1083,7 @@ export class ArticleService {
     //   user,
     // ); // Disabled
 
-    //delete all comments and threads
-    {
-      // const threadsResult = await this.threadModel.find({ 
-      //   documentId: toObjectId((article._id as any)) 
-      // }).lean();
-      const threadsResult: any[] = []; // Temporary: thread model removed
-      
-      // await this.threadModel.updateMany(
-      //   { documentId: toObjectId((article._id as any)) },
-      //   { $set: { deletedAt: new Date() } },
-      // );
 
-      if (threadsResult.length) {
-        const threadIds = threadsResult.map((thread) => thread._id);
-        // await this.commentModel.updateMany(
-        //   { thread: { $in: threadIds } },
-        //   { $set: { deletedAt: new Date() } },
-        // );
-      }
-    }
 
     await this.articleContentModel.updateOne(
       { _id: toObjectId((article.article_content as any)._id) },
@@ -1186,96 +1091,11 @@ export class ArticleService {
     );
   }
 
-  // Removed sendTopicAssignMail method - assignment functionality no longer needed
+  // Email and notification methods removed for single-user application
 
-  private async sendArticleStatusUpdateMail(
-    article: Article,
-    oldStatus: ArticleStatus,
-    newStatus: ArticleStatus,
-    currentUser: User,
-  ) {
-    // Removed assigned_members functionality - no longer supported
-    const recipientIds: string[] = [];
+  // Email and notification methods removed for single-user application
 
-    if (recipientIds.length === 0) {
-      return; // No recipients to notify
-    }
-
-    // Fetch recipient users
-    // const recipients = await this.userModel.find({
-    //   _id: { $in: recipientIds.map(id => toObjectId(id.toString())) },
-    // });
-    const recipients: User[] = []; // Temporary: user model removed
-
-    recipients.map((member) => {
-      // Send email to each recipient
-      // void this.emailService.sendMailWithTemplate(
-      //   member.email || '',
-      //   'article-status-update.email.ejs',
-      //   EMAIL_STRING.SUBJECT.ARTICLE_STATUS_UPDATE,
-      //   {
-      //     user: member,
-      //     article: article,
-      //     oldStatus: oldStatus.replace('_', ' '),
-      //     newStatus: newStatus.replace('_', ' '),
-      //     updatedBy: currentUser,
-      //   },
-      // ); // Disabled
-
-      // Notification functionality removed
-      // if (
-      //   newStatus &&
-      //   [ArticleStatus.NOT_STARTED, ArticleStatus.REJECTED].includes(newStatus)
-      // ) {
-      //   // Send notification for status change
-      // }
-
-      // if (newStatus === ArticleStatus.PUBLISHED) {
-      //   // Send notification for published status
-      // }
-    });
-  }
-
-  private async sendArticleTitleUpdateMail(
-    article: Article,
-    oldTitle: string,
-    newTitle: string,
-    currentUser: User,
-  ) {
-    // Removed assigned_members functionality - no longer supported
-    const recipientIds: string[] = [];
-
-    if (recipientIds.length === 0) {
-      return; // No recipients to notify
-    }
-
-    // Fetch recipient users
-    // const recipients = await this.userModel.find({
-    //   _id: { $in: recipientIds.map(id => toObjectId(id.toString())) },
-    // });
-    const recipients: User[] = []; // Temporary: user model removed
-
-    recipients.map((member) => {
-      // Send email to each recipient
-      // void this.emailService.sendMailWithTemplate(
-      //   member.email || '',
-      //   'article-title-update.email.ejs',
-      //   EMAIL_STRING.SUBJECT.ARTICLE_TITLE_UPDATE,
-      //   {
-      //     user: member,
-      //     article: article,
-      //     oldTitle: oldTitle,
-      //     newTitle: newTitle,
-      //     updatedBy: currentUser,
-      //   },
-      // ); // Disabled
-
-      // Notification functionality removed
-      // Emit notification event for title change
-    });
-  }
-
-  async getAndGenerateArticleOutline(articleId: string, refresh?: boolean) {
+  async getAndGenerateArticleOutline(articleId: string, refresh?: boolean, authToken?: string) {
     const article = await this.articleModel.findById(toObjectId(articleId)).exec();
     if (!article) {
       throw new NotFoundException(ARTICLES_STRING.ERRORS.ARTICLE_NOT_FOUND);
@@ -1286,8 +1106,8 @@ export class ArticleService {
     }
 
     const result = await this.pythonService.generateOutline({
-      articleId: (article._id as any).toString(),
-    });
+      articleId: article._id.toString(),
+    }, authToken);
 
     if (!result) {
       throw new InternalServerErrorException(
@@ -1296,13 +1116,13 @@ export class ArticleService {
     }
 
     await this.articleModel.updateOne(
-      { _id: toObjectId((article._id as any).toString()) },
+      { _id: toObjectId(article._id) },
       { $set: { generated_outline: result, is_outline_generated: true } },
     );
     return result;
   }
 
-  async regenerateTitle(articleId: string, is_save?: boolean) {
+  async regenerateTitle(articleId: string, is_save?: boolean, authToken?: string) {
     const article = await this.articleModel.findById(toObjectId(articleId))
       .populate('project')
       .exec();
@@ -1311,18 +1131,19 @@ export class ArticleService {
       throw new NotFoundException(ARTICLES_STRING.ERRORS.ARTICLE_NOT_FOUND);
     }
 
-    // Get a default prompt type from the database
+    // Get a default prompt type from the database for single-user mode
     const defaultPromptType = await this.promptTypeModel.findOne({}).exec();
+    
     if (!defaultPromptType) {
-      throw new NotFoundException('No prompt types found. Please seed the database.');
+      throw new NotFoundException('No prompt types found. Please create a prompt type first.');
     }
 
     const topics = await this.pythonService.generateTitles({
-      ProjectId: (article.project as any)._id.toString(),
-      Keywords: [
-        { promptTypeId: defaultPromptType._id.toString(), keyword: article.keywords },
-      ],
-    });
+        ProjectId: (article.project as any)._id.toString(),
+        Keywords: [
+          { promptTypeId: defaultPromptType._id.toString(), keyword: article.keywords },
+        ],
+      }, authToken);
 
     if (!topics || !topics.length) {
       throw new InternalServerErrorException(
@@ -1415,8 +1236,8 @@ export class ArticleService {
     throw new InternalServerErrorException('Gemini topic generation not yet implemented');
   }
 
-  checkExistinProjectTitles(projectId: string, title: string) {
-    return this.pythonService.checkExistingProjectTitle(projectId, title);
+  checkExistinProjectTitles(projectId: string, title: string, authToken?: string) {
+    return this.pythonService.checkExistingProjectTitle(projectId, title, authToken);
   }
 
   // Removed articleBulkAssign method - functionality no longer supported
@@ -1447,25 +1268,12 @@ export class ArticleService {
 
   // Removed articleAuditReport method - audit functionality no longer supported for single-user application
 
-  private checkUserArticleAccess(article: Article, currentUser: User): boolean {
-    // Check if user is the owner of the article
-    if (article.user && String(article.user.id) === String(currentUser.id)) {
-      return true;
-    }
-
-    // Removed assigned_members and assign_followers functionality - no longer supported
-    // Access control now only checks if user is the owner
-
-    // If none of the above conditions are met, user doesn't have access
-    return false;
-  }
+  // User access checking removed for single-user application
 
   async implementArticleWithGemini(
     articleId: string,
     auditReport: string,
     editorContent: string,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _user: User,
   ): Promise<string> {
     const article = await this.articleModel.findById(toObjectId(articleId))
       .populate('article_content')
@@ -1520,7 +1328,7 @@ export class ArticleService {
     // Fetch recommended keywords for the project
     const RecommendedKeywordModel = this.projectModel.db.model('RecommendedKeyword');
     const recommended = await RecommendedKeywordModel.findOne({
-      project: toObjectId((article.project as any)._id.toString()),
+      project: toObjectId((article.project as any)._id),
     }).exec();
     if (!recommended || !recommended.keywords) return [];
 

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Request, Depends, Query, Body
+from fastapi import FastAPI, HTTPException, Request, Query, Body, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from app.models.schemas import (
     RequestData,
@@ -77,7 +77,6 @@ import anthropic
 from urllib.parse import urlparse
 from app.seo_audit.router import seo_audit_router
 from app.api.endpoints.generate_article import router as generate_article_router
-from app.core.database import get_database
 
 
 logging.basicConfig(level=logging.INFO)
@@ -202,7 +201,7 @@ def get_target_audience(request_data: CompanyDetails):
 
 @app.post("/generate-outline")
 async def generates_contents(
-    request_data: outline, article_id=None
+    request_data: outline
 ):
     try:
         logger.info(
@@ -228,15 +227,15 @@ async def generates_contents(
                 status_code=400, detail="Invalid ObjectId format for articleId"
             )
 
-        # Fetch the target article
+        # Fetch the target article (no user filtering needed)
         database = get_database()
         logger.info(f"Searching for article with ObjectId: {article_object_id}")
-        article_doc = await database.articles.find_one({"_id": article_object_id})
+        article_doc = await database.solution_seo_articles.find_one({"_id": article_object_id})
         
         if not article_doc:
             logger.warning(f"Article not found for articleId: {request_data.articleId}")
             # Let's also try to see what articles exist
-            all_articles = await database.articles.find({}).limit(5).to_list(length=5)
+            all_articles = await database.solution_seo_articles.find({}).limit(5).to_list(length=5)
             logger.info(f"Available articles: {[str(a.get('_id')) for a in all_articles]}")
             raise HTTPException(status_code=404, detail="Article not found")
         
@@ -254,7 +253,7 @@ async def generates_contents(
 
         try:
             project_object_id = ObjectId(project_id) if isinstance(project_id, str) else project_id
-            project_doc = await database.projects.find_one({"_id": project_object_id})
+            project_doc = await database.solution_seo_projects.find_one({"_id": project_object_id})
         except Exception as e:
             logger.warning(f"Invalid ObjectId format for projectId: {project_id}, error: {e}")
             project_doc = None
@@ -298,6 +297,9 @@ async def generates_contents(
 
         return generated_content_preview
 
+    except HTTPException:
+        # Re-raise HTTPExceptions (like 404, 400) without modification
+        raise
     except Exception as e:
         logger.exception(
             f"Unhandled error in /generate-outline for articleId: {request_data.articleId}"
@@ -438,8 +440,8 @@ async def get_all_titles(request: TitlesRequest):
         # Get MongoDB database
         database = get_database()
         
-        # Fetch project details
-        project = await database.projects.find_one({"_id": project_object_id})
+        # Fetch project details (no user filtering needed)
+        project = await database.solution_seo_projects.find_one({"_id": project_object_id})
 
         if not project:
             logger.error(f"Project not found for ID: {request.ProjectId}")
@@ -461,15 +463,16 @@ async def get_all_titles(request: TitlesRequest):
                     f"Failed to decode detailedsitemap JSON: {e} - Raw Data: {project['detailedsitemap']}"
                 )
 
-        # Fetch articles associated with the project
-        articles_cursor = database.articles.find({"projectId": str(project_object_id)})
+        # Fetch articles associated with the project (no user filtering needed)
+        articles_cursor = database.solution_seo_articles.find({"project": project_object_id})
 
         articles = await articles_cursor.to_list(length=None)
 
         if not articles:
             logger.warning(f"No articles found for project ID: {request.ProjectId}")
 
-        # Extract keywords from request
+        # Extract keywords and promptTypeIds from request
+        keywords_with_prompts = [(item.keyword, item.promptTypeId) for item in request.Keywords]
         keywords = [item.keyword for item in request.Keywords]
         logger.info(f"Extracted {len(keywords)} keywords from request: {keywords}")
         final_titles = []
@@ -516,7 +519,7 @@ async def get_all_titles(request: TitlesRequest):
             )
             return prompt
 
-        # Create keyword-prompt pairs with default system prompt for title generation
+        # Create keyword-prompt pairs by fetching system prompts from database
         default_system_prompt = """You are an expert SEO content strategist. Generate compelling, SEO-optimized blog titles for the keyword '{keywords}' that would appeal to {project_target_audience}.
 
 Project Details:
@@ -536,10 +539,56 @@ Generate 5-10 unique, engaging blog titles that:
 
 Format: Return only the titles, one per line, without numbering."""
         
-        keyword_prompt_pairs = [
-            {"keyword": keyword, "prompt_description": default_system_prompt}
-            for keyword in keywords
-        ]
+        keyword_prompt_pairs = []
+        
+        # Fetch system prompts for each keyword based on promptTypeId
+        for keyword, prompt_type_id in keywords_with_prompts:
+            system_prompt_description = default_system_prompt
+            
+            if prompt_type_id:
+                try:
+                    # Convert promptTypeId to ObjectId if it's a string
+
+                    if isinstance(prompt_type_id, str) and prompt_type_id:
+                        try:
+                            prompt_object_id = ObjectId(prompt_type_id)
+                        except Exception as e:
+
+                            continue # Skip to next keyword if ObjectId is invalid
+                    else:
+
+                        continue # Skip to next keyword if promptTypeId is invalid
+                    
+
+                    
+                    # Fetch system prompt from database (no user filtering needed for single-user mode)
+                    system_prompt = await database.solution_seo_prompt_types.find_one({"_id": prompt_object_id})
+                    
+
+                    if system_prompt and system_prompt.get("titlePrompt"):
+                        title_prompt_id = system_prompt["titlePrompt"]
+                        # Fetch the actual title prompt document
+                        title_prompt_doc = await database.solution_seo_system_prompts.find_one({"_id": title_prompt_id})
+
+
+                        if title_prompt_doc and title_prompt_doc.get("description"):
+                            system_prompt_description = title_prompt_doc["description"]
+
+                        else:
+                            pass
+
+                    else:
+                        pass
+
+                        
+                except Exception as e:
+                    logger.error(f"Error fetching system prompt for promptTypeId {prompt_type_id}: {e}")
+                    # Continue with default prompt
+            
+            keyword_prompt_pairs.append({
+                "keyword": keyword,
+                "prompt_description": system_prompt_description
+            })
 
         # Loop through keyword-prompt pairs and generate SEO titles
         for pair in keyword_prompt_pairs:
@@ -557,12 +606,20 @@ Format: Return only the titles, one per line, without numbering."""
             try:
                 response = requests.post(
                     "https://api.openai.com/v1/chat/completions",
-                    json={"model": "gpt-4.1", "messages": messages, "temperature": 0.8},
+                    json={"model": "gpt-4o-mini", "messages": messages, "temperature": 0.8},
                     headers={
                         "Authorization": f"Bearer {OPENAI_API_KEY}",
                         "Content-Type": "application/json",
                     },
                 )
+                
+                # Check if the response was successful
+                if response.status_code != 200:
+                    logger.error(f"OpenAI API error: {response.status_code} - {response.text}")
+                    raise HTTPException(
+                        status_code=500,
+                        detail=f"OpenAI API error: {response.status_code}",
+                    )
 
                 response_data = response.json()
                 generated_titles = (
@@ -598,47 +655,48 @@ Format: Return only the titles, one per line, without numbering."""
 
                             try:
                                 unique_response = requests.post(
-                                    "https://api.openai.com/v1/chat/completions",
-                                    json={
-                                        "model": "gpt-4.1",
-                                        "messages": [
-                                            {
-                                                "role": "user",
-                                                "content": unique_title_prompt,
-                                            }
-                                        ],
-                                        "temperature": 0.8,
-                                    },
-                                    headers={
-                                        "Authorization": f"Bearer {OPENAI_API_KEY}",
-                                        "Content-Type": "application/json",
-                                    },
-                                )
-
-                                unique_data = unique_response.json()
-                                new_title = (
-                                    unique_data.get("choices", [{}])[0]
-                                    .get("message", {})
-                                    .get("content", "")
-                                    .strip()
-                                )
-                                # matched_titles.append({"original": gen_title, "unique": new_title})
+                                "https://api.openai.com/v1/chat/completions",
+                                json={
+                                    "model": "gpt-4o-mini",
+                                    "messages": [
+                                        {
+                                            "role": "user",
+                                            "content": unique_title_prompt,
+                                        }
+                                    ],
+                                    "temperature": 0.8,
+                                },
+                                headers={
+                                    "Authorization": f"Bearer {OPENAI_API_KEY}",
+                                    "Content-Type": "application/json",
+                                },
+                            )
+                                
+                                if unique_response.status_code == 200:
+                                    unique_data = unique_response.json()
+                                    new_title = (
+                                        unique_data.get("choices", [{}])[0]
+                                        .get("message", {})
+                                        .get("content", "")
+                                        .strip()
+                                    )
+                                    matched_titles.append(new_title)
+                                else:
+                                    logger.error(f"Failed to generate unique title: {unique_response.status_code}")
 
                             except requests.exceptions.RequestException as e:
                                 logger.error(f"Error generating unique title: {e}")
 
-                # Add unique titles or cleaned titles to final list
+                # Add the best available title to final list
                 if matched_titles:
+                    # Use the unique title generated to replace similar ones
                     final_titles.append(matched_titles[0])
                 elif cleaned_titles:
+                    # Use the first cleaned title if no similarity issues
                     final_titles.append(cleaned_titles[0])
                 else:
-                    final_titles.append("No title generated")
-                # final_titles.append({
-                #     "keyword": keyword,
-                #     "titles": final_title
-                # })
-                # final_titles.append(final_title)
+                    # Fallback if no titles were generated
+                    final_titles.append(f"SEO Title for {keyword}")
 
             except requests.exceptions.RequestException as e:
                 logger.error(f"OpenAI API request error: {e}")
@@ -649,6 +707,9 @@ Format: Return only the titles, one per line, without numbering."""
 
         return final_titles
 
+    except HTTPException:
+        # Re-raise HTTPExceptions (like 404, 400) without modification
+        raise
     except Exception as e:
         logger.error(f"Unexpected error: {e}")
         raise HTTPException(status_code=500, detail="An unexpected error occurred.")
@@ -674,9 +735,9 @@ async def check_title(request: FindTitle):
     else:
         project_object_id = projectId
 
-    exists = await database.articles.find_one({
+    exists = await database.solution_seo_articles.find_one({
         "name": title_to_check,
-        "projectId": str(project_object_id)
+        "project": project_object_id
     })
 
     if exists:
@@ -957,7 +1018,7 @@ async def get_all_projects(request: ArticleRequest):
             )
 
         # Fetch article data from MongoDB
-        article = await database.articles.find_one({"_id": article_object_id})
+        article = await database.solution_seo_articles.find_one({"_id": article_object_id})
 
         if not article:
             logger.error(f"Article not found for ID: {request.articleId}")
@@ -973,7 +1034,7 @@ async def get_all_projects(request: ArticleRequest):
         if article.get("project"):
             try:
                 project_object_id = ObjectId(str(article["project"]))
-                project = await database.projects.find_one({"_id": project_object_id})
+                project = await database.solution_seo_projects.find_one({"_id": project_object_id})
             except Exception:
                 logger.error(f"Invalid ObjectId format for project: {article['project']}")
 
@@ -981,7 +1042,7 @@ async def get_all_projects(request: ArticleRequest):
         if project and project.get("guideline_id"):
             try:
                 guideline_object_id = ObjectId(str(project["guideline_id"]))
-                guideline = await database.guidelines.find_one({"_id": guideline_object_id})
+                guideline = await database.solution_seo_guidelines.find_one({"_id": guideline_object_id})
             except Exception:
                 logger.error(
                     f"Invalid ObjectId format for guideline_id: {project['guideline_id']}"

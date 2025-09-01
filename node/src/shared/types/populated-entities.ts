@@ -5,9 +5,7 @@ import { Project } from '@modules/projects/entities/projects.entity';
 // Local User type definition (original entity was deleted)
 export interface User {
   _id?: Types.ObjectId;
-  id?: string;
-  name?: string;
-  email?: string;
+  email: string;
 }
 
 // Simplified User interface for single-user application
@@ -41,4 +39,9 @@ export function toObjectId(id: UserIdType): Types.ObjectId {
 // Helper function to get user ID as string
 export function getUserId(user: User | PopulatedUser): string {
   return user._id?.toString() || '';
+}
+
+// Helper function to convert _id to string for API responses
+export function getIdAsString(doc: { _id?: Types.ObjectId }): string {
+  return doc._id?.toString() || '';
 }

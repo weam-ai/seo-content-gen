@@ -55,7 +55,7 @@ function App() {
 
   return (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-        <Router>
+        <Router basename={import.meta.env.VITE_USE_NGINX_BASE === 'true' ? '/seo' : '/'}>
           <div
             className="min-h-screen"
             style={{

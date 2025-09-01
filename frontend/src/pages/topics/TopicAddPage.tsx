@@ -18,7 +18,7 @@ import { Plus, X, Target, Building, ArrowLeft } from 'lucide-react';
 import { PageHeader } from '@/components/ui/page-header';
 import { Formik, Form, FieldArray } from 'formik';
 import * as Yup from 'yup';
-import projectService from '@/lib/services/project.service';
+import projectService, { KeywordMetric } from '@/lib/services/project.service';
 import {
   addKeywordsToProject,
   RecommendedKeywordData,
@@ -30,9 +30,9 @@ import FetchingRecommendedKeyword from '@/components/article/FetchingRecommedKey
 import { usePasteHandler } from '@/utils/pasteParser';
 
 interface Project {
-  id: string;
+  _id: string;
   name: string;
-  keywords: string[];
+  keywords: KeywordMetric[];
 }
 
 const validationSchema = Yup.object({
@@ -253,7 +253,7 @@ export default function TopicAddPage() {
                         <SelectContent className="max-h-[300px]">
                           <ScrollArea className="h-full">
                             {projects.map((project) => (
-                              <SelectItem key={project.id} value={project.id}>
+                              <SelectItem key={project._id} value={project._id}>
                                 {project.name}
                               </SelectItem>
                             ))}
@@ -313,7 +313,7 @@ export default function TopicAddPage() {
                         <SelectContent className="max-h-[300px]">
                           <ScrollArea className="h-full">
                             {articleTypes.map((type) => (
-                              <SelectItem key={type.id} value={type.id}>
+                              <SelectItem key={type._id} value={type._id}>
                                 {type.name}
                               </SelectItem>
                             ))}

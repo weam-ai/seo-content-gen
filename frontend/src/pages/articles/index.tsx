@@ -545,7 +545,7 @@ export default function Articles() {
 
   // Handle status change
   const handleStatusChange = async (articleId: string, newStatus: string, currentStatus: string) => {
-    const article = articles.find(a => a.id === articleId);
+    const article = articles.find(a => a._id === articleId);
     if (!article) return;
 
     // Show confirmation dialog if changing to pending approval in regular article interface
@@ -576,7 +576,7 @@ export default function Articles() {
     }
     // If outline exists, show modal to optionally add secondary keyword
     setCurrentApprovalArticle(article);
-    await fetchRecommendedKeywords(article.id);
+    await fetchRecommendedKeywords(article._id);
     setShowAddKeywordModal(true);
   };
 
@@ -585,11 +585,11 @@ export default function Articles() {
     if (!currentApprovalArticle) return;
     setOutlineLoading(true);
     try {
-      const outlineText = await generateOutline(currentApprovalArticle.id);
+      const outlineText = await generateOutline(currentApprovalArticle._id);
       // Update the article in local state
       setArticles(prevArticles =>
         prevArticles.map(article =>
-          article.id === currentApprovalArticle.id
+          article._id === currentApprovalArticle._id
             ? { ...article, generated_outline: outlineText }
             : article
         )
@@ -601,7 +601,7 @@ export default function Articles() {
       });
       setShowOutlineDialog(false);
       // Show secondary keyword modal after outline generation
-      await fetchRecommendedKeywords(currentApprovalArticle.id);
+      await fetchRecommendedKeywords(currentApprovalArticle._id);
       setShowAddKeywordModal(true);
     } catch {
       toast({
@@ -619,7 +619,7 @@ export default function Articles() {
     setRecommendedLoading(true);
     try {
       const data = await getRecommendedKeywords(articleId);
-      const article = articles.find(a => a.id === articleId);
+      const article = articles.find(a => a._id === articleId);
       setRecommendedKeywords(
         data.filter(
           (k: any) => !(article?.secondaryKeywords || []).includes(k.keyword)
@@ -651,7 +651,7 @@ export default function Articles() {
       // Update the article in the local state
       setArticles(prevArticles =>
         prevArticles.map(article =>
-          article.id === articleId
+          article._id === articleId
             ? { ...article, status: newStatus as ArticleStatus }
             : article
         )
@@ -682,12 +682,12 @@ export default function Articles() {
 
     try {
       // Update the article title
-      await updateArticle(regenerateTitleArticle.id, { name: newTitle });
+      await updateArticle(regenerateTitleArticle._id, { name: newTitle });
 
       // Update local state
       setArticles(prevArticles =>
         prevArticles.map(article =>
-          article.id === regenerateTitleArticle.id
+          article._id === regenerateTitleArticle._id
             ? { ...article, title: newTitle }
             : article
         )
@@ -704,7 +704,7 @@ export default function Articles() {
       });
 
       // Redirect to article detail page with auto-regenerate outline parameter
-      navigate(`/articles/${regenerateTitleArticle.id}?autoRegenerateOutline=true`);
+      navigate(`/articles/${regenerateTitleArticle._id}?autoRegenerateOutline=true`);
     } catch (err: any) {
       toast({
         title: 'Error',
@@ -800,20 +800,20 @@ export default function Articles() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {articles.map((article) => (
                     <Card
-                      key={article.id}
+                      key={article._id}
                       className="group hover:shadow-lg transition-all duration-200 hover:border-[hsl(var(--razor-primary))] hover:shadow-[hsl(var(--razor-primary))]/10"
                     >
                       <CardHeader className="pb-3">
                         <div className="flex items-start justify-between">
                           <div className="space-y-2 flex-1">
-                            <Link to={`/articles/${article.id}`}>
+                            <Link to={`/articles/${article._id}`}>
                               <h3 className="font-semibold text-lg hover:text-[hsl(var(--razor-primary))] transition-colors cursor-pointer">
                                 {article.title}
                               </h3>
                             </Link>
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                               {article.relatedProject ? (
-                                <Link to={`/projects/${article.relatedProject.id}`} className="flex items-center gap-1 group">
+                                <Link to={`/projects/${article.relatedProject._id}`} className="flex items-center gap-1 group">
                                   <ExternalLink className="h-3 w-3 group-hover:text-[hsl(var(--razor-primary))] transition-colors" />
                                   <span className="truncate group-hover:text-[hsl(var(--razor-primary))] transition-colors">{article.relatedProject.name}</span>
                                 </Link>
@@ -834,19 +834,19 @@ export default function Articles() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem
-                                onClick={() => handleCopyLink(article.id)}
+                                onClick={() => handleCopyLink(article._id)}
                               >
                                 <Copy className="h-4 w-4 mr-2" />
                                 Copy Link
                               </DropdownMenuItem>
                               <DropdownMenuItem asChild>
-                                <Link to={`/articles/${article.id}`}>
+                                <Link to={`/articles/${article._id}`}>
                                   <Eye className="h-4 w-4 mr-2" />
                                   View
                                 </Link>
                               </DropdownMenuItem>
                               <DropdownMenuItem asChild>
-                                <Link to={`/articles/${article.id}`}>
+                                <Link to={`/articles/${article._id}`}>
                                   <Edit className="h-4 w-4 mr-2" />
                                   Edit
                                 </Link>
@@ -869,7 +869,7 @@ export default function Articles() {
                                   {getStatusOptions(article).map((option) => (
                                     <DropdownMenuItem
                                       key={option.value}
-                                      onClick={() => handleStatusChange(article.id, option.value, article.status)}
+                                      onClick={() => handleStatusChange(article._id, option.value, article.status)}
                                       disabled={article.status === option.value}
                                     >
                                       {option.label}
@@ -938,7 +938,7 @@ export default function Articles() {
                 <div className="space-y-4">
                   {articles.map((article) => (
                     <Card
-                      key={article.id}
+                      key={article._id}
                       className="group hover:shadow-lg transition-all duration-200 hover:border-[hsl(var(--razor-primary))] hover:shadow-[hsl(var(--razor-primary))]/10"
                     >
                       <CardContent className="p-6">
@@ -946,14 +946,14 @@ export default function Articles() {
                           <div className="space-y-3 flex-1">
                             <div className="flex items-start gap-4">
                               <div className="flex-1">
-                                <Link to={`/articles/${article.id}`}>
+                                <Link to={`/articles/${article._id}`}>
                                   <h3 className="font-semibold text-lg hover:text-[hsl(var(--razor-primary))] transition-colors cursor-pointer">
                                     {article.title}
                                   </h3>
                                 </Link>
                                 <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
                                   {article.relatedProject ? (
-                                    <Link to={`/projects/${article.relatedProject.id}`} className="flex items-center gap-1 group">
+                                    <Link to={`/projects/${article.relatedProject._id}`} className="flex items-center gap-1 group">
                                       <ExternalLink className="h-3 w-3 group-hover:text-[hsl(var(--razor-primary))] transition-colors" />
                                       <span className="truncate group-hover:text-[hsl(var(--razor-primary))] transition-colors">{article.relatedProject.name}</span>
                                     </Link>
@@ -1020,19 +1020,19 @@ export default function Articles() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem
-                                onClick={() => handleCopyLink(article.id)}
+                                onClick={() => handleCopyLink(article._id)}
                               >
                                 <Copy className="h-4 w-4 mr-2" />
                                 Copy Link
                               </DropdownMenuItem>
                               <DropdownMenuItem asChild>
-                                <Link to={`/articles/${article.id}`}>
+                                <Link to={`/articles/${article._id}`}>
                                   <Eye className="h-4 w-4 mr-2" />
                                   View
                                 </Link>
                               </DropdownMenuItem>
                               <DropdownMenuItem asChild>
-                                <Link to={`/articles/${article.id}`}>
+                                <Link to={`/articles/${article._id}`}>
                                   <Edit className="h-4 w-4 mr-2" />
                                   Edit
                                 </Link>
@@ -1055,7 +1055,7 @@ export default function Articles() {
                                   {getStatusOptions(article).map((option) => (
                                     <DropdownMenuItem
                                       key={option.value}
-                                      onClick={() => handleStatusChange(article.id, option.value, article.status)}
+                                      onClick={() => handleStatusChange(article._id, option.value, article.status)}
                                       disabled={article.status === option.value}
                                     >
                                       {option.label}
@@ -1262,9 +1262,9 @@ export default function Articles() {
                               </div>
                               <div className="space-y-1">
                                 {dayArticles.slice(0, 2).map((article) => (
-                                  <Tooltip key={article.id}>
+                                  <Tooltip key={article._id}>
                                     <TooltipTrigger asChild>
-                                      <Link to={`/articles/${article.id}`}>
+                                      <Link to={`/articles/${article._id}`}>
                                         <div
                                           className={`text-xs p-1 rounded truncate cursor-pointer hover:opacity-80 ${statusColors[article._status as ArticleStatus] || statusColors['not started']}`}
                                         >
@@ -1347,8 +1347,8 @@ export default function Articles() {
                                           <div className="flex flex-col gap-1">
                                             {dayArticles.slice(2).map((article) => (
                                               <Link
-                                                key={article.id}
-                                                to={`/articles/${article.id}`}
+                                                key={article._id}
+                                                to={`/articles/${article._id}`}
                                                 className={`block px-2 py-1 rounded text-xs truncate hover:opacity-80 transition-colors ${statusColors[article._status as ArticleStatus] || statusColors['not started']}`
                                                 }
                                               >
@@ -1448,13 +1448,13 @@ export default function Articles() {
             primaryKeyword={currentApprovalArticle.keyword}
             onApprove={async (updatedKeywords) => {
               try {
-                await updateArticle(currentApprovalArticle.id, {
+                await updateArticle(currentApprovalArticle._id, {
                   secondary_keywords: updatedKeywords,
                 });
                 // Update local state
                 setArticles(prevArticles =>
                   prevArticles.map(article =>
-                    article.id === currentApprovalArticle.id
+                    article._id === currentApprovalArticle._id
                       ? { ...article, secondaryKeywords: updatedKeywords, status: 'not_started' as ArticleStatus }
                       : article
                   )
@@ -1479,7 +1479,7 @@ export default function Articles() {
           <RegenerateTitleModal
             open={showRegenerateTitleModal}
             onOpenChange={setShowRegenerateTitleModal}
-            topicId={regenerateTitleArticle.id}
+            topicId={regenerateTitleArticle._id}
             currentTitle={regenerateTitleArticle.title}
             onSaveAndGenerateOutline={handleRegenerateTitleSaveAndRedirect}
           />

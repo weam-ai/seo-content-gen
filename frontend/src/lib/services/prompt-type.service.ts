@@ -1,22 +1,22 @@
 import api from '@/lib/api';
 
 export interface PromptType {
-  id: string;
+  _id: string;
   name: string;
   titlePrompt: {
-    id: string;
+    _id: string;
     name: string;
   };
   outlinePrompt: {
-    id: string;
+    _id: string;
     name: string;
   };
   articlePrompt: {
-    id: string;
+    _id: string;
     name: string;
   };
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface PaginationMeta {

@@ -18,16 +18,15 @@ import {
 // Local User type definition for compatibility
 interface User {
   _id?: any;
-  id?: string;
   name?: string;
   email?: string;
 }
 import { ListProjectDtoQuery } from './dto/list-project.dto';
-import { EMAIL_STRING, PROJECTS_STRING } from '@shared/utils/string.utils';
+import { PROJECTS_STRING } from '@shared/utils/string.utils';
 import { DataForSeoService } from '@shared/services/dataforseo.service';
 import { RecommendedKeyword } from './entities/recommended-keyword.entity';
 import { PythonService } from '@shared/services/python.service';
-import { EmailService } from '@/shared/modules/email/email.service';
+// EmailService import removed - email functionality not supported
 import { logger } from '@shared/utils/logger.utils';
 import { Article } from '../article/entities/article.entity';
 import { ArticleService } from '../article/article.service';
@@ -36,6 +35,7 @@ import { KeywordMetric } from '@shared/types/dataForSeo.t';
 import { TargetedKeyword } from '@/shared/types/articles.t';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { iEventType } from '@shared/types/events.t';
+import { toObjectId } from '@shared/types/populated-entities';
 // NotificationType import removed
 import { marked } from 'marked';
 import { SeoAuditService } from '@shared/services/seo-audit.service';
@@ -59,7 +59,7 @@ export class ProjectsService {
     private readonly dataForSeoService: DataForSeoService,
     private readonly seoAuditService: SeoAuditService,
     private readonly pythonService: PythonService,
-    private readonly mailService: EmailService,
+    // private readonly mailService: EmailService, // Removed - email functionality not supported
     private readonly eventEmitter: EventEmitter2,
   ) { }
 
@@ -70,8 +70,8 @@ export class ProjectsService {
     // Removed member assignment logic
     const projectData = {
       ...createProjectDto,
-      user: user?._id,
-      guideline: createProjectDto.guideline_id,
+      user: user?._id ? toObjectId(user._id) : undefined,
+      guideline: createProjectDto.guideline_id ? new Types.ObjectId(createProjectDto.guideline_id) : undefined,
       targeted_keywords: createProjectDto.targeted_keywords
         ? createProjectDto.targeted_keywords.map(
           (e: TargetedKeyword) => e.keyword,
@@ -97,7 +97,6 @@ export class ProjectsService {
         project,
         createProjectDto.targeted_keywords,
         [],
-        user,
         true, // skipTitleGeneration = true, titles will be generated after sitemap
       );
     }
@@ -145,7 +144,10 @@ export class ProjectsService {
     const matchStage: any = {};
 
     // Single-user application: only show projects for current user
-    matchStage.user = new Types.ObjectId(user._id || user.id);
+    matchStage.user = toObjectId(user._id);
+    
+    // Filter out deleted projects
+    matchStage.deleted_at = null;
 
     // Search filtering
     if (search) {
@@ -216,10 +218,10 @@ export class ProjectsService {
       pipeline.push({ $limit: limit });
     }
 
-    // Add final projection to convert ObjectIds to strings and map _id to id
+    // Add final projection to keep _id field
     pipeline.push({
       $project: {
-        id: { $toString: '$_id' },
+        _id: 1,
         name: 1,
         description: 1,
         website_url: 1,
@@ -247,8 +249,11 @@ export class ProjectsService {
   async findOne(id: string, user?: User): Promise<ProjectDocument> {
     const pipeline: any[] = [];
 
-    // Match the specific project - removed user filtering for single-user application
-    const matchStage: any = { _id: new Types.ObjectId(id) };
+    // Match the specific project with user filtering for data isolation
+    const matchStage: any = { _id: toObjectId(id) };
+    if (user && user._id) {
+      matchStage.user = toObjectId(user._id);
+    }
     pipeline.push({ $match: matchStage });
 
     // Lookup project creator
@@ -349,10 +354,10 @@ export class ProjectsService {
       }
     });
 
-    // Map _id to id and include all necessary fields
+    // Include all necessary fields with _id intact
     pipeline.push({
       $project: {
-        id: { $toString: '$_id' },
+        _id: 1,
         name: 1,
         description: 1,
         website_url: 1,
@@ -437,7 +442,6 @@ export class ProjectsService {
             newUniqueKeywords.includes(keyword),
           ) as unknown as TargetedKeyword[],
           [],
-          user,
         );
     }
 
@@ -495,7 +499,6 @@ export class ProjectsService {
       project,
       keywords,
       secondary_keywords,
-      user,
     );
   }
 
@@ -536,7 +539,7 @@ export class ProjectsService {
    * @param keywords
    * @returns
    */
-  async fetchKeywordRecommendation(projectId: string) {
+  async fetchKeywordRecommendation(projectId: string, user: User) {
     const project = await this.findOne(projectId);
 
     if (!project) {
@@ -596,6 +599,7 @@ export class ProjectsService {
     } else {
       await this.recommendedKeywordModel.create({
         project: project._id,
+        user: user._id,
         keywords: keywordRecommendation,
       });
     }
@@ -740,8 +744,9 @@ export class ProjectsService {
 
   // Removed sendAssignMailAndNotification method
 
-  async generateBusinessSummary(website_url: string) {
-    const result = await this.pythonService.companyBusinessSummary(website_url);
+  async generateBusinessSummary(website_url: string, authToken?: string) {
+    console.log('hi')
+    const result = await this.pythonService.companyBusinessSummary(website_url, authToken);
 
     if (!result.company_details) {
       throw new InternalServerErrorException(
@@ -752,7 +757,7 @@ export class ProjectsService {
     return result;
   }
 
-  async requestSiteAudit(projectId: string) {
+  async requestSiteAudit(projectId: string, user: User) {
     const project = await this.findOne(projectId);
     if (!project) {
       throw new NotFoundException(PROJECTS_STRING.ERROR.PROJECT_NOT_FOUND);
@@ -779,6 +784,7 @@ export class ProjectsService {
     // Create new audit record
     const siteAudit = await this.siteAuditModel.create({
       project: project._id,
+      user: user._id,
       url: project.website_url,
       status: SiteAuditStatus.PENDING,
       current_step: 'Initiating audit...',
@@ -893,7 +899,7 @@ export class ProjectsService {
 
     const siteAudit = await this.siteAuditModel.findOne({
       project: project._id,
-    }).sort({ created_at: -1 });
+    }).sort({ createdAt: -1 });
 
     if (!siteAudit) {
       throw new NotFoundException('No site audit found for this project');

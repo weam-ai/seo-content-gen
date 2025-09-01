@@ -13,23 +13,23 @@ import { format } from 'date-fns';
 import * as marked from 'marked';
 import DomPurify from 'dompurify';
 
-interface AssignMember {
-  id: string;
-  name: string;
-  profile_image: string | null;
-  is_agency_owner: boolean;
-  agency_name: string | null;
+// Removed AssignMember interface for single-user application
+
+interface KeywordMetric {
+  keyword: string;
+  keyword_volume: number;
+  keyword_difficulty: 'HIGH' | 'MEDIUM' | 'LOW';
 }
 
 interface Project {
-  id: string;
+  _id: string;
   name: string;
   website_url: string;
   created_at: string;
   description: string;
-  keywords: string[] | null;
-  assign_member: AssignMember[];
-  agency_name: string | null;
+  keywords: KeywordMetric[] | null;
+  // Removed assign_member field for single-user application
+  // Removed agency_name field for single-user application
 }
 
 interface ProjectCardProps {
@@ -52,7 +52,7 @@ export function ProjectCard({ project, onDelete }: ProjectCardProps) {
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="space-y-1 flex-1">
-            <Link to={`/projects/${project.id}`}>
+            <Link to={`/projects/${project._id}`}>
               <h3 className="font-semibold text-lg hover:text-[hsl(var(--razor-primary))] transition-colors cursor-pointer">
                 {project.name}
               </h3>
@@ -82,7 +82,7 @@ export function ProjectCard({ project, onDelete }: ProjectCardProps) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem
-                onClick={() => navigate(`/projects/${project.id}/edit`)}
+                onClick={() => navigate(`/projects/${project._id}/edit`)}
               >
                 Edit Project
               </DropdownMenuItem>
@@ -102,13 +102,11 @@ export function ProjectCard({ project, onDelete }: ProjectCardProps) {
             <Badge className={statusColors[projectStatus]} variant="outline">
               {projectStatus.charAt(0).toUpperCase() + projectStatus.slice(1)}
             </Badge>
-            {project.agency_name && (
-              <Badge variant="secondary">{project.agency_name}</Badge>
-            )}
+            {/* Removed agency badge for single-user application */}
           </div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Calendar className="h-4 w-4" />
-            {format(new Date(project.created_at), 'MMM dd, yyyy')}
+            {project.created_at && !isNaN(new Date(project.created_at).getTime()) ? format(new Date(project.created_at), 'MMM dd, yyyy') : 'No date'}
           </div>
         </div>
 
@@ -131,9 +129,9 @@ export function ProjectCard({ project, onDelete }: ProjectCardProps) {
 
         {project.keywords && project.keywords.length > 0 && (
           <div className="flex flex-wrap gap-1">
-            {project.keywords.slice(0, 3).map((keyword) => (
-              <Badge key={keyword} variant="secondary" className="text-xs">
-                {keyword}
+            {project.keywords.slice(0, 3).map((keywordObj, index) => (
+              <Badge key={keywordObj.keyword || index} variant="secondary" className="text-xs">
+                {keywordObj.keyword}
               </Badge>
             ))}
             {project.keywords.length > 3 && (

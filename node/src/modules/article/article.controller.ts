@@ -48,55 +48,56 @@ export class ArticleController {
   constructor(private readonly articleService: ArticleService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard)
   async create(
-    @Req() req: Request & { user: any },
+    @Req() req: Request,
     @Body() createArticleDto: CreateArticleDto,
     @Res() res: Response,
   ) {
-    const loggedInUserId = req.user?.id;
-    const article = await this.articleService.create(
-      createArticleDto,
-      loggedInUserId,
-    );
+    try {
+      const article = await this.articleService.create(
+        createArticleDto,
+      );
 
-    // Convert Mongoose document to plain object manually
-    const plainArticle = {
-      _id: article._id?.toString() || article._id,
-      name: article.name,
-      project: article.project,
-      user: article.user,
-      keywords: article.keywords,
-      keyword_volume: article.keyword_volume,
-      keyword_difficulty: article.keyword_difficulty,
-      secondary_keywords: article.secondary_keywords,
-      generated_outline: article.generated_outline,
-      start_date: article.start_date,
-      end_date: article.end_date,
-      status: article.status,
-      approved_at: article.approved_at,
-      settings: article.settings,
-      published_url: article.published_url,
-      is_content_generated: article.is_content_generated,
-      is_outline_generated: article.is_outline_generated,
-      priority: article.priority,
-      audit_report: article.audit_report,
-      audit_report_generated_at: article.audit_report_generated_at,
-      meta_title: article.meta_title,
-      meta_description: article.meta_description,
-      created_at: article.created_at,
-      updated_at: article.updated_at
-    };
+      // Return article with _id field intact
+      const plainArticle = {
+        _id: article._id,
+        name: article.name,
+        project: article.project,
+        user: article.user,
+        keywords: article.keywords,
+        keyword_volume: article.keyword_volume,
+        keyword_difficulty: article.keyword_difficulty,
+        secondary_keywords: article.secondary_keywords,
+        generated_outline: article.generated_outline,
+        start_date: article.start_date,
+        end_date: article.end_date,
+        status: article.status,
+        approved_at: article.approved_at,
+        settings: article.settings,
+        published_url: article.published_url,
+        is_content_generated: article.is_content_generated,
+        is_outline_generated: article.is_outline_generated,
+        priority: article.priority,
+        audit_report: article.audit_report,
+        audit_report_generated_at: article.audit_report_generated_at,
+        meta_title: article.meta_title,
+        meta_description: article.meta_description,
+        created_at: (article as any).createdAt,
+        updated_at: (article as any).updatedAt
+      };
 
-    return successResponseWithData(
-      res,
-      ARTICLES_STRING.SUCCESS.TOPIC_ADDED,
-      plainArticle,
-    );
+      return successResponseWithData(
+        res,
+        ARTICLES_STRING.SUCCESS.TOPIC_ADDED,
+        plainArticle,
+      );
+    } catch (error) {
+      console.error('Controller: Error creating article:', error);
+      throw error;
+    }
   }
 
   @Get()
-  @UseGuards(JwtAuthGuard)
   async findAll(
     @Req() req: Request,
     @Res() res: Response,
@@ -130,7 +131,6 @@ export class ArticleController {
 
     const { articles, pagination } = await this.articleService.findAll(
       query,
-      req.user as any,
     );
 
     // Articles already have proper id transformation from service
@@ -155,7 +155,6 @@ export class ArticleController {
   }
 
   @Get('/status-view')
-  @UseGuards(JwtAuthGuard)
   async getArticlesStatusView(
     @Req() req: Request,
     @Res() res: Response,
@@ -205,7 +204,6 @@ export class ArticleController {
       statuses.map((status) =>
         this.articleService.findAll(
           { ...query, status: status.value },
-          req.user as any,
         ),
       ),
     );
@@ -221,7 +219,6 @@ export class ArticleController {
   }
 
   @Get('/task-status-count')
-  @UseGuards(JwtAuthGuard)
   async getTaskStatusCount(
     @Res() res: Response,
     @Req() req: Request,
@@ -230,7 +227,6 @@ export class ArticleController {
     const parsedTaskType = taskType && taskType !== '0' ? taskType : null;
     const taskCounts = await this.articleService.getTaskStatusCounts(
       parsedTaskType,
-      req.user as any,
     );
 
     return successResponseWithData(
@@ -274,21 +270,15 @@ export class ArticleController {
   }
 
   @Get(':id')
-  async findOne(@Param('id', ParseObjectIdPipe) id: string, @Res() res: Response) {
+  async findOne(
+    @Param('id', ParseObjectIdPipe) id: string,
+    @Res() res: Response
+  ) {
     const article = await this.articleService.findOne(id);
     
-    // Convert ObjectIds to strings for proper serialization
+    // Return article with _id fields intact
     const serializedArticle = {
-      ...article,
-      _id: article._id?.toString() || article._id,
-      project: article.project ? {
-        ...article.project,
-        _id: article.project._id?.toString() || article.project._id
-      } : null,
-      user: article.user ? {
-        ...article.user,
-        _id: article.user._id?.toString() || article.user._id
-      } : null
+      ...article
     };
     
     return successResponseWithData(
@@ -299,9 +289,7 @@ export class ArticleController {
   }
 
   @Patch(':id')
-  @UseGuards(JwtAuthGuard)
   async update(
-    @Req() req: Request,
     @Param('id', ParseObjectIdPipe) id: string,
     @Body() updateArticleDto: UpdateArticleDto,
     @Res() res: Response,
@@ -309,7 +297,6 @@ export class ArticleController {
     const updatedArticle = await this.articleService.update(
       id,
       updateArticleDto,
-      req.user as any,
     );
     return successResponseWithData(
       res,
@@ -319,13 +306,11 @@ export class ArticleController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
   async remove(
     @Param('id', ParseObjectIdPipe) id: string,
-    @Req() req: Request & { user: any },
     @Res() res: Response,
   ) {
-    await this.articleService.remove(id, req.user);
+    await this.articleService.remove(id);
     return successResponse(res, ARTICLES_STRING.SUCCESS.ARTICLE_DELETED);
   }
 
@@ -346,9 +331,11 @@ export class ArticleController {
   async RequestGenerateAIContent(
     @Param('articleId', ParseObjectIdPipe) articleId: string,
     @Body() body: GenerateArticlePayloadRequest,
+    @Req() req: Request,
     @Res() res: Response,
   ) {
-    await this.articleService.requestPythonAIContentGenerate(articleId, body);
+    const authToken = req.headers.authorization;
+    await this.articleService.requestPythonAIContentGenerate(articleId, body, authToken);
     return acceptedResponse(res, ARTICLES_STRING.SUCCESS.ARTICLE_AI_REQUESTED);
   }
 
@@ -360,7 +347,6 @@ export class ArticleController {
    * @returns
    */
   @Post(':articleId/select-ai-content')
-  @UseGuards(JwtAuthGuard)
   async ChooseAiArticleContent(
     @Param('articleId', ParseObjectIdPipe) articleId: string,
     @Body() data: SelectArticleContent,
@@ -370,7 +356,6 @@ export class ArticleController {
     await this.articleService.chooseAIArticleContent(
       articleId,
       data,
-      req.user! as any,
     );
     return successResponse(
       res,
@@ -402,11 +387,14 @@ export class ArticleController {
   async articleOutline(
     @Param('articleId', ParseObjectIdPipe) articleId: string,
     @Query('refresh', new ParseBoolPipe({ optional: true })) refresh: boolean,
+    @Req() req: Request,
     @Res() res: Response,
   ) {
+    const authToken = req.headers.authorization;
     const outline = await this.articleService.getAndGenerateArticleOutline(
       articleId,
       refresh,
+      authToken,
     );
     return successResponseWithData(
       res,
@@ -425,9 +413,11 @@ export class ArticleController {
   async generateTitles(
     @Param('articleId', ParseObjectIdPipe) articleId: string,
     @Query('is_save', new ParseBoolPipe({ optional: true })) is_save: boolean,
+    @Req() req: Request,
     @Res() res: Response,
   ) {
-    const topic = await this.articleService.regenerateTitle(articleId, is_save);
+    const authToken = req.headers.authorization;
+    const topic = await this.articleService.regenerateTitle(articleId, is_save, authToken);
     return successResponseWithData(
       res,
       ARTICLES_STRING.SUCCESS.TOPIC_GENERATED,
@@ -443,7 +433,6 @@ export class ArticleController {
    * @returns
    */
   @Post(':articleId/topics')
-  @UseGuards(JwtAuthGuard)
   async generateTopicsWithAI(
     @Param('articleId', ParseObjectIdPipe) articleId: string,
     @Body() body: GenerateArticlePayloadRequest,
@@ -468,11 +457,14 @@ export class ArticleController {
     @Param('projectId', ParseObjectIdPipe) projectId: string,
     @Body('title', new ValidationPipe({ transform: true, whitelist: true }))
     title: string,
+    @Req() req: Request,
     @Res() res: Response,
   ) {
+    const authToken = req.headers.authorization;
     const existingTopic = await this.articleService.checkExistinProjectTitles(
       projectId,
       title,
+      authToken,
     );
     return successResponseWithData(
       res,
@@ -497,18 +489,16 @@ export class ArticleController {
   // Removed audit report endpoint - functionality no longer supported for single-user application
 
   @Post(':articleId/implement')
-  @UseGuards(JwtAuthGuard)
   async implementArticle(
     @Param('articleId', ParseObjectIdPipe) articleId: string,
     @Body() body: ImplementArticleRequestDto,
-    @Req() req: Request & { user: any },
+    @Req() req: Request,
     @Res() res: Response,
   ) {
     const generated = await this.articleService.implementArticleWithGemini(
       articleId,
       body.auditReport,
       body.editorContent,
-      req.user,
     );
     return successResponseWithData(
       res,

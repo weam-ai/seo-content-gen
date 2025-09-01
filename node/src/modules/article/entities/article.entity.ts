@@ -8,7 +8,14 @@ import {
 } from '@shared/types/articles.t';
 import { Exclude } from 'class-transformer';
 
-@Schema({ collection: 'solution_seo_articles' })
+@Schema({ 
+  collection: 'solution_seo_articles',
+  timestamps: {
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+    currentTime: () => new Date()
+  }
+})
 export class Article extends BaseEntity {
   @Prop({ maxlength: 191 })
   name?: string;
@@ -19,8 +26,8 @@ export class Article extends BaseEntity {
   @Prop({ type: Types.ObjectId, ref: 'Project', required: true })
   project: Types.ObjectId;
 
-  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
-  user: Types.ObjectId;
+  @Prop({ type: Types.ObjectId, ref: 'User', required: false })
+  user?: Types.ObjectId;
 
   @Prop({ type: String })
   keywords: string;
@@ -40,11 +47,11 @@ export class Article extends BaseEntity {
   @Prop({ type: Boolean, default: false })
   is_outline_generated: boolean | null;
 
-  @Prop({ type: Date, default: Date.now })
-  start_date: Date | null;
+  @Prop({ type: Date })
+  start_date: Date;
 
-  @Prop({ type: Date, default: null })
-  end_date: Date | null;
+  @Prop({ type: Date })
+  end_date: Date;
 
   @Prop({ type: [String], default: [] })
   secondary_keywords: string[];

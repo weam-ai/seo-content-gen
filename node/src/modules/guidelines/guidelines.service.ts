@@ -14,6 +14,7 @@ import {
   ListGuidelineQueryPagination,
 } from './dto/list-guideline.dto';
 import { Pagination } from '@shared/types/response.t';
+import { toObjectId } from '@shared/types/populated-entities';
 
 @Injectable()
 export class GuidelinesService {
@@ -22,22 +23,33 @@ export class GuidelinesService {
     private readonly guidelineModel: Model<GuidelineDocument>,
   ) {}
 
-  async create(createGuidelineDto: any): Promise<any> {
+  async create(createGuidelineDto: any, userId: string): Promise<any> {
     try {
       console.log('Service: Starting create method');
       console.log('Service: DTO received:', createGuidelineDto);
       
-      // Return a mock response to test if the issue is with Mongoose
-      const mockGuideline = {
-        _id: '507f1f77bcf86cd799439011',
+      // Check if guideline with same name already exists for this user
+      const existingGuideline = await this.guidelineModel.findOne({
+        name: createGuidelineDto.name,
+        user: toObjectId(userId),
+        deleted_at: null
+      });
+      
+      if (existingGuideline) {
+        throw new ConflictException(GUIDELINES_STRING.ERROR.GUIDELINES_ALREADY_EXISTS);
+      }
+      
+      // Create new guideline
+      const newGuideline = new this.guidelineModel({
         name: createGuidelineDto.name,
         description: createGuidelineDto.description,
-        created_at: new Date(),
-        updated_at: new Date()
-      };
+        user: toObjectId(userId)
+      });
       
-      console.log('Service: Returning mock guideline:', mockGuideline);
-      return mockGuideline;
+      const savedGuideline = await newGuideline.save();
+      console.log('Service: Guideline saved to database:', savedGuideline);
+      
+      return savedGuideline;
     } catch (error) {
       console.error('Guidelines create error:', error);
       throw error;
@@ -46,11 +58,12 @@ export class GuidelinesService {
 
   async findAll(
     query: ListGuidelineQueryPagination,
+    userId: string,
   ): Promise<{ guidelines: Guideline[]; pagination: Pagination }> {
     const {
       page = 1,
       limit = 10,
-      sort = 'created_at',
+      sort = 'createdAt',
       search,
     } = query;
 
@@ -66,7 +79,7 @@ export class GuidelinesService {
     const pipeline: any[] = [];
 
     // Match stage for filtering
-    const matchStage: any = { deleted_at: null };
+    const matchStage: any = { deleted_at: null, user: toObjectId(userId) };
     if (search) {
       matchStage.$or = [
         { name: { $regex: search, $options: 'i' } },
@@ -99,7 +112,7 @@ export class GuidelinesService {
     } else if (sortField === 'project_count') {
       sortStage.project_count = sortDirection === 'asc' ? 1 : -1;
     } else {
-      sortStage.created_at = sortDirection === 'asc' ? 1 : -1;
+      sortStage.createdAt = sortDirection === 'asc' ? 1 : -1;
     }
     pipeline.push({ $sort: sortStage });
 
@@ -117,12 +130,12 @@ export class GuidelinesService {
     // Final projection
     pipeline.push({
       $project: {
-        id: { $toString: '$_id' },
+        _id: 1,
         name: 1,
         description: 1,
         project_count: 1,
-        created_at: 1,
-        updated_at: 1,
+        created_at: '$createdAt',
+        updated_at: '$updatedAt',
       },
     });
 
@@ -138,9 +151,9 @@ export class GuidelinesService {
     return { guidelines, pagination };
   }
 
-  async findAllList(query: ListGuidelineDtoQuery): Promise<Guideline[]> {
+  async findAllList(query: ListGuidelineDtoQuery, userId: string): Promise<Guideline[]> {
     const { search } = query;
-    const matchStage: any = { deleted_at: null };
+    const matchStage: any = { deleted_at: null, user: toObjectId(userId) };
     
     if (search) {
       matchStage.$or = [
@@ -151,16 +164,20 @@ export class GuidelinesService {
 
     return this.guidelineModel
       .find(matchStage)
-      .select('_id name description created_at updated_at')
-      .sort({ created_at: -1 })
+      .select('_id name description createdAt updatedAt')
+      .sort({ createdAt: -1 })
       .exec();
   }
 
-  async findOne(id: string): Promise<Guideline> {
-    const guideline = await this.guidelineModel.findOne({
+  async findOne(id: string, user?: any): Promise<Guideline> {
+    const query: any = {
       _id: id,
       deleted_at: null,
-    });
+    };
+    if (user && user._id) {
+      query.user = user._id;
+    }
+    const guideline = await this.guidelineModel.findOne(query);
     if (!guideline) {
       throw new NotFoundException(GUIDELINES_STRING.ERROR.GUIDELINES_NOT_FOUND);
     }
@@ -170,12 +187,14 @@ export class GuidelinesService {
   async update(
     id: string,
     updateGuidelineDto: UpdateGuidelineDto,
+    userId: string,
   ): Promise<Guideline> {
-    // Check if guideline already exists with same name
+    // Check if guideline already exists with same name for this user
     if (updateGuidelineDto.name) {
       const isExists = await this.guidelineModel.findOne({
         name: updateGuidelineDto.name,
         _id: { $ne: id },
+        user: toObjectId(userId),
         deleted_at: null,
       });
       if (isExists) {
@@ -185,9 +204,9 @@ export class GuidelinesService {
       }
     }
 
-    const guideline = await this.findOne(id);
-    const updatedGuideline = await this.guidelineModel.findByIdAndUpdate(
-      id,
+    const guideline = await this.findOne(id, { _id: userId });
+    const updatedGuideline = await this.guidelineModel.findOneAndUpdate(
+      { _id: id, user: toObjectId(userId), deleted_at: null },
       updateGuidelineDto,
       { new: true },
     );
@@ -199,10 +218,11 @@ export class GuidelinesService {
     return updatedGuideline;
   }
 
-  async remove(id: string): Promise<void> {
-    const guideline = await this.findOne(id);
-    await this.guidelineModel.findByIdAndUpdate(id, {
-      deleted_at: new Date(),
-    });
+  async remove(id: string, userId: string): Promise<void> {
+    const guideline = await this.findOne(id, { _id: userId });
+    await this.guidelineModel.findOneAndUpdate(
+      { _id: id, user: toObjectId(userId), deleted_at: null },
+      { deleted_at: new Date() },
+    );
   }
 }

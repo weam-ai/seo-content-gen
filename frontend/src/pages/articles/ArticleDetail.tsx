@@ -274,7 +274,7 @@ export default function ArticleDetails() {
             (data.articleType?.toLowerCase().trim() || '')
         );
 
-        setArticleType(match ? match.id : articleTypeOptions[0]?.id || '');
+        setArticleType(match ? match._id : articleTypeOptions[0]?._id || '');
       } catch (err: any) {
         setError(err.message || 'Failed to fetch article details');
         toast({
@@ -308,10 +308,10 @@ export default function ArticleDetails() {
   // Fetch recommended keywords for the article (for topic-style interface)
   useEffect(() => {
     async function fetchRecommended() {
-      if (!article?.id || !isTopicStyleInterface()) return;
+      if (!article?._id || !isTopicStyleInterface()) return;
       setRecommendedLoading(true);
       try {
-        const data = await getRecommendedKeywords(article.id);
+        const data = await getRecommendedKeywords(article._id);
         setRecommendedKeywords(
           data.filter(
             (k: any) => !(article.secondaryKeywords || []).includes(k.keyword)
@@ -340,10 +340,10 @@ export default function ArticleDetails() {
   ];
 
   const fetchAIContent = useCallback(async () => {
-    if (!article?.id) return;
+    if (!article?._id) return;
 
     try {
-      const content = await getArticleAIContent(article.id);
+      const content = await getArticleAIContent(article._id);
       setAIContent(content);
     } catch (error: any) {
       console.error('Error fetching AI content:', error); // Debug log
@@ -353,16 +353,16 @@ export default function ArticleDetails() {
         variant: 'destructive',
       });
     }
-  }, [article?.id]);
+  }, [article?._id]);
 
   const fetchEditorContent = useCallback(async () => {
-    if (!article?.id) return;
+    if (!article?._id) return;
 
     setEditorContentLoading(true);
     setEditorContentError(null);
 
     try {
-      const content = await getArticleEditorContent(article.id);
+      const content = await getArticleEditorContent(article._id);
       setEditorContent(content);
     } catch (error: any) {
       console.error('Error fetching editor content:', error);
@@ -375,33 +375,33 @@ export default function ArticleDetails() {
     } finally {
       setEditorContentLoading(false);
     }
-  }, [article?.id]);
+  }, [article?._id]);
 
   useEffect(() => {
-    if (article?.id) {
+    if (article?._id) {
       fetchAIContent();
       fetchEditorContent();
     }
-  }, [article?.id, fetchAIContent, fetchEditorContent]);
+  }, [article?._id, fetchAIContent, fetchEditorContent]);
 
   // Add effect to fetch editor content after /collab/token is called when switching to Editor tab
   useEffect(() => {
-    if (activeTab === 'editor' && article?.id) {
+    if (activeTab === 'editor' && article?._id) {
       // Assume /collab/token is called by the EditorProvider or elsewhere
       // Immediately fetch the latest editor content
       fetchEditorContent();
     }
-    // Only run when activeTab or article.id changes
+    // Only run when activeTab or article._id changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, article?.id]);
+  }, [activeTab, article?._id]);
 
   // --- SSE integration ---
   aiProviders.forEach((provider) => {
     const requestId = sseRequestIds[provider.id];
     useSSE(requestId || '', async (content) => {
-      if (article?.id) {
+      if (article?._id) {
         try {
-          const updated = await getArticleAIContent(article.id);
+          const updated = await getArticleAIContent(article._id);
           setAIContent(updated);
           toast({
             title: 'AI content ready!',
@@ -429,7 +429,7 @@ export default function ArticleDetails() {
       (_: string, i: number) => i !== idx
     );
     try {
-      await updateArticle(article.id, { secondary_keywords: updatedKeywords });
+      await updateArticle(article._id, { secondary_keywords: updatedKeywords });
       setArticle((prev: any) =>
         prev ? { ...prev, secondaryKeywords: updatedKeywords } : prev
       );
@@ -464,7 +464,7 @@ export default function ArticleDetails() {
       newSecondaryKeyword.trim(),
     ];
     try {
-      await updateArticle(article.id, { secondary_keywords: updatedKeywords });
+      await updateArticle(article._id, { secondary_keywords: updatedKeywords });
       setArticle((prev: any) =>
         prev ? { ...prev, secondaryKeywords: updatedKeywords } : prev
       );
@@ -497,7 +497,7 @@ export default function ArticleDetails() {
     setAddingKeyword(true);
     const updatedKeywords = [...(article.secondaryKeywords || []), ...keywords];
     try {
-      await updateArticle(article.id, { secondary_keywords: updatedKeywords });
+      await updateArticle(article._id, { secondary_keywords: updatedKeywords });
       setArticle((prev: any) =>
         prev ? { ...prev, secondaryKeywords: updatedKeywords } : prev
       );
@@ -566,7 +566,7 @@ export default function ArticleDetails() {
       else if (value === 'pending') backendStatus = 'pending';
       else if (value === 'rejected') backendStatus = 'rejected';
       else if (value === 'not_started') backendStatus = 'not_started';
-      await updateArticle(article.id, { status: backendStatus });
+      await updateArticle(article._id, { status: backendStatus });
       setArticle((prev: any) => (prev ? { ...prev, status: value } : prev));
       toast({
         title: 'Status updated',
@@ -613,9 +613,9 @@ export default function ArticleDetails() {
 
     setArticleTypeLoading(true);
     try {
-      const selectedType = articleTypeOptions.find((type) => type.id === value);
-      const promptTypeId = selectedType ? selectedType.id : value;
-      await updateArticle(article.id, { prompt_type: promptTypeId });
+      const selectedType = articleTypeOptions.find((type) => type._id === value);
+        const promptTypeId = selectedType ? selectedType._id : value;
+      await updateArticle(article._id, { prompt_type: promptTypeId });
       setArticleType(value);
       setArticle((prev: any) =>
         prev ? { ...prev, articleType: selectedType?.name || value } : prev
@@ -638,14 +638,14 @@ export default function ArticleDetails() {
   const handleRegenerateAIContent = async (
     providerId: 'open_ai' | 'gemini' | 'claude'
   ) => {
-    if (!article?.id) return;
+    if (!article?._id) return;
     setRegeneratingProviders((prev) => ({ ...prev, [providerId]: true }));
     setGeneratingProviders((prev) => ({ ...prev, [providerId]: true }));
     try {
       const requestId = Math.random().toString(36).substring(2, 18);
       setSseRequestIds((prev) => ({ ...prev, [providerId]: requestId }));
       const res = await generateArticleAIContent(
-        article.id,
+        article._id,
         providerId,
         requestId
       );
@@ -687,7 +687,7 @@ export default function ArticleDetails() {
     setOutlineLoading(true);
     setOutlineError(null);
     try {
-      const newOutline = await generateOutline(article.id);
+      const newOutline = await generateOutline(article._id);
       setOutline(newOutline);
       setArticle((prev: any) =>
         prev ? { ...prev, generated_outline: newOutline } : prev
@@ -731,7 +731,7 @@ export default function ArticleDetails() {
     setOutlineLoading(true);
     setOutlineError(null);
     try {
-      await updateArticle(article.id, { generated_outline: outline });
+      await updateArticle(article._id, { generated_outline: outline });
       setArticle((prev: any) =>
         prev ? { ...prev, generated_outline: outline } : prev
       );
@@ -781,7 +781,7 @@ export default function ArticleDetails() {
 
   const handleSaveTitle = async () => {
     try {
-      await updateArticle(article!.id, { name: title });
+      await updateArticle(article!._id, { name: title });
       setArticle((prev: any) => (prev ? { ...prev, title } : prev));
       setIsEditingTitle(false);
       toast({
@@ -801,7 +801,7 @@ export default function ArticleDetails() {
     if (!article) return;
     setAuthorBioSaving(true);
     try {
-      await updateArticle(article.id, { author_bio: authorBio });
+      await updateArticle(article._id, { author_bio: authorBio });
       setArticle((prev: any) =>
         prev ? { ...prev, authorBio: authorBio } : prev
       );
@@ -835,7 +835,7 @@ export default function ArticleDetails() {
     if (!article) return;
     setLoading(true);
     try {
-      await updateArticle(article.id, { status: 'not_started' });
+      await updateArticle(article._id, { status: 'not_started' });
       // Update local state - use 'not_started' to match the backend value and UI expectations
       setArticle((prev: any) =>
         prev ? { ...prev, status: 'not_started' } : prev
@@ -877,7 +877,7 @@ export default function ArticleDetails() {
     if (!article) return;
     setProceedingProvider(apiProvider);
     try {
-      const res = await selectArticleAIContent(article.id, apiProvider);
+      const res = await selectArticleAIContent(article._id, apiProvider);
       if (res.status) {
         setAIContent((prev) =>
           prev
@@ -1101,7 +1101,7 @@ export default function ArticleDetails() {
             <div className="lg:col-span-1 space-y-6">
               <TaskSidebar
                 projectName={{
-                  id: article.relatedProject.id,
+                  id: article.relatedProject._id,
                   name: article.relatedProject.name,
                 }}
                 businessDetails={{
@@ -1130,7 +1130,7 @@ export default function ArticleDetails() {
                 onStatusChange={handleStatusChange}
                 articleType={articleType}
                 articleTypeOptions={articleTypeOptions.map((type) => ({
-                  id: type.id,
+                  _id: type._id,
                   name: type.name.trim(),
                 }))}
                 onArticleTypeChange={handleArticleTypeChange}
@@ -1325,7 +1325,7 @@ export default function ArticleDetails() {
                             </>
                           )}
                           {isApproved && (
-                            <Link to={`/articles/${article.id}`}>
+                            <Link to={`/articles/${article._id}`}>
                               <Button
                                 size="sm"
                                 className="text-blue-600 bg-white border border-blue-600 hover:bg-blue-50 "
@@ -1484,18 +1484,18 @@ export default function ArticleDetails() {
             setRegenerateTitleModalOpen(open);
             if (!open) setPendingArticleType(null);
           }}
-          topicId={article.id}
+          topicId={article._id}
           currentTitle={title}
           onSaveAndGenerateOutline={async (newTitle: string) => {
             const typeToUse = pendingArticleType || articleType;
             try {
-              await updateArticle(article.id, {
+              await updateArticle(article._id, {
                 prompt_type: typeToUse,
                 name: newTitle,
               });
               setArticleType(typeToUse);
               const selectedType = articleTypeOptions.find(
-                (type) => type.id === typeToUse
+                (type) => type._id === typeToUse
               );
               setArticle((prev: any) =>
                 prev
@@ -1545,7 +1545,7 @@ export default function ArticleDetails() {
           primaryKeyword={article.keyword}
           onApprove={async (updatedKeywords) => {
             try {
-              await updateArticle(article.id, {
+              await updateArticle(article._id, {
                 secondary_keywords: updatedKeywords,
               });
               setArticle((prev: any) =>
@@ -1583,9 +1583,9 @@ export default function ArticleDetails() {
           {/* Sidebar - Task Information */}
           <div className="lg:col-span-1 space-y-6">
             <TaskSidebar
-              topicId={article.id}
+              topicId={article._id}
               projectName={{
-                id: article.relatedProject.id,
+                id: article.relatedProject._id,
                 name: article.relatedProject.name,
               }}
               businessDetails={{
@@ -1621,7 +1621,7 @@ export default function ArticleDetails() {
               onStatusChange={handleStatusChange}
               articleType={articleType}
               articleTypeOptions={articleTypeOptions.map((type) => ({
-                id: type.id,
+                _id: type._id,
                 name: type.name,
               }))}
               onArticleTypeChange={handleArticleTypeChange}
@@ -2193,7 +2193,7 @@ export default function ArticleDetails() {
                           enabled.
                         </p>
                         <div className="flex justify-center">
-                          <Link to={`/article-editor/${article.id}`}>
+                          <Link to={`/article-editor/${article._id}`}>
                             <Button variant="outline" size="sm">
                               <Edit className="h-4 w-4 mr-2" />
                               Open Expanded View
@@ -2218,7 +2218,7 @@ export default function ArticleDetails() {
                             </button>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Link to={`/article-editor/${article.id}`}>
+                            <Link to={`/article-editor/${article._id}`}>
                               <Button variant="outline" size="sm">
                                 <Edit className="h-4 w-4 mr-2" />
                                 Open Expanded View
@@ -2250,7 +2250,7 @@ export default function ArticleDetails() {
                             <div className="bg-white border rounded-lg overflow-hidden shadow-sm">
                               <EditorProvider
                                 ref={editorRef}
-                                docId={article?.id || ''}
+                                docId={article?._id || ''}
                                 initialContent={(() => {
                                   const buffer = new Uint8Array(
                                     editorContent.snapshot_data.data
@@ -2424,7 +2424,7 @@ export default function ArticleDetails() {
         {/* Version History Modal */}
         {showVersionHistory && (
           <ArticleVersionHistory
-            articleId={article.id}
+            articleId={article._id}
             open={showVersionHistory}
             onOpenChange={setShowVersionHistory}
             onFinish={() => {
@@ -2436,7 +2436,7 @@ export default function ArticleDetails() {
         {/* Publish Modal */}
         {showPublishModal && (
           <ArticlePublishModel
-            articleId={article.id}
+            articleId={article._id}
             onOpenChange={setShowPublishModal}
             open={showPublishModal}
             onFinish={(publishUrl: string) => {
@@ -2506,7 +2506,7 @@ export default function ArticleDetails() {
                   if (!article || !pendingStatusValue) return;
                   setLoading(true);
                   try {
-                    await updateArticle(article.id, { status: 'pending' });
+                    await updateArticle(article._id, { status: 'pending' });
                     setArticle((prev: any) =>
                       prev ? { ...prev, status: pendingStatusValue } : prev
                     );

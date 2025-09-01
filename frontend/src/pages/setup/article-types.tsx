@@ -72,7 +72,7 @@ export default function ArticleTypesPage() {
     setDeletingId(id);
     // Optimistically remove from UI
     const prev = articleTypes;
-    setArticleTypes(articleTypes.filter((g) => g.id !== id));
+    setArticleTypes(articleTypes.filter((g) => g._id !== id));
     try {
       await promptTypeService.deletePromptType(id);
       toast({ title: 'Deleted', description: 'Article type deleted successfully.' });
@@ -118,7 +118,7 @@ export default function ArticleTypesPage() {
         'Title Prompt': g.titlePrompt?.name || 'N/A',
         'Outline Prompt': g.outlinePrompt?.name || 'N/A',
         'Article Prompt': g.articlePrompt?.name || 'N/A',
-        'Created Date': new Date(g.created_at).toLocaleDateString('en-GB'),
+        'Created Date': new Date(g.createdAt).toLocaleDateString('en-GB'),
       }));
       setExportData(data);
       setTimeout(() => {
@@ -168,10 +168,10 @@ export default function ArticleTypesPage() {
     },
     {
       header: 'Created Date',
-      accessor: 'created_at',
+      accessor: 'createdAt',
       sortable: true,
       render: (row) => (
-        <span className="text-sm text-muted-foreground">{new Date(row.created_at).toLocaleDateString('en-GB')}</span>
+        <span className="text-sm text-muted-foreground">{new Date(row.createdAt).toLocaleDateString('en-GB')}</span>
       ),
     },
     {
@@ -181,7 +181,7 @@ export default function ArticleTypesPage() {
         <div>
           {canUpdateSystemPrompts && (
             <Button variant="ghost" size="sm" asChild>
-              <Link to={`/setup/article-types/${row.id}/edit`}>
+              <Link to={`/setup/article-types/${row._id}/edit`}>
                 <Edit className="h-4 w-4" />
               </Link>
             </Button>
@@ -191,10 +191,10 @@ export default function ArticleTypesPage() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => handleDelete(row.id)}
-              disabled={deletingId === row.id}
+              onClick={() => handleDelete(row._id)}
+              disabled={deletingId === row._id}
             >
-              {deletingId === row.id ? (
+              {deletingId === row._id ? (
                 <span className="animate-spin"><Trash2 className="h-4 w-4 text-red-600" /></span>
               ) : (
                 <Trash2 className="h-4 w-4 text-red-600" />

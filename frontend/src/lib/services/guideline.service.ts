@@ -1,7 +1,7 @@
 import api from '@/lib/api';
 
 export interface Guideline {
-  id: string;
+  _id: string;
   name: string;
   description: string;
   project_count: number;

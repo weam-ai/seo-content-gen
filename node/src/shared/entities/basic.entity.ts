@@ -1,16 +1,21 @@
 import { Prop, Schema } from '@nestjs/mongoose';
 import { Exclude } from 'class-transformer';
 
-@Schema({ timestamps: true })
+@Schema({ 
+  timestamps: {
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+    currentTime: () => new Date()
+  }
+})
 export class BaseEntity {
-  @Prop({ type: Date, default: Date.now })
+  @Exclude()
+  @Prop({ type: Date, default: null })
+  deleted_at?: Date;
+
+  @Prop({ type: Date })
   created_at: Date;
 
-  @Exclude()
-  @Prop({ type: Date, default: Date.now })
+  @Prop({ type: Date })
   updated_at: Date;
-
-  @Exclude()
-  @Prop({ type: Date, default: Date.now })
-  deleted_at?: Date;
 }

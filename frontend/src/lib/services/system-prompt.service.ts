@@ -1,13 +1,13 @@
 import api from '@/lib/api';
 
 export interface SystemPrompt {
-  id: string;
+  _id: string;
   name: string;
   description: string;
   type: string;
   is_default: boolean;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface PaginationMeta {
@@ -73,7 +73,7 @@ class SystemPromptService {
   /**
    * Create a new system prompt
    */
-  async createSystemPrompt(payload: { name: string; description: string }): Promise<any> {
+  async createSystemPrompt(payload: { name: string; description: string; type: string }): Promise<any> {
     try {
       const response = await api.post('/system-prompts', payload);
       return response.data;
@@ -85,7 +85,7 @@ class SystemPromptService {
   /**
    * Update an existing system prompt
    */
-  async updateSystemPrompt(id: string, payload: { name?: string; description?: string }): Promise<any> {
+  async updateSystemPrompt(id: string, payload: { name?: string; description?: string; type?: string }): Promise<any> {
     try {
       const response = await api.patch(`/system-prompts/${id}`, payload);
       return response.data;
@@ -133,4 +133,4 @@ class SystemPromptService {
   }
 }
 
-export default new SystemPromptService(); 
+export default new SystemPromptService();

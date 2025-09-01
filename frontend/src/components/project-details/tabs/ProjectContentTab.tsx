@@ -100,7 +100,7 @@ export default function ProjectContentTab({ project }: ProjectContentTabProps) {
           sort: 'created_at:desc',
           limit: itemsPerPage,
           page: currentPage,
-          search_by_project: project.id,
+          search_by_project: project._id,
           ...(statusFilter !== 'all' && {
             search_by_status: statusFilter,
           }),
@@ -127,7 +127,7 @@ export default function ProjectContentTab({ project }: ProjectContentTabProps) {
 
     fetchContent();
   }, [
-    project.id,
+    project._id,
     currentPage,
     itemsPerPage,
     statusFilter,
@@ -186,7 +186,7 @@ export default function ProjectContentTab({ project }: ProjectContentTabProps) {
 
             {/* Action Buttons */}
             <div className="flex gap-2">
-              <Link to={`/articles/new?project=${project.id}`}>
+              <Link to={`/articles/new?project=${project._id}`}>
                 <Button className="bg-[hsl(var(--razor-primary))] text-white hover:opacity-90">
                   <Plus className="h-4 w-4 mr-2" />
                   New Article
@@ -228,7 +228,7 @@ export default function ProjectContentTab({ project }: ProjectContentTabProps) {
                   ? 'Try adjusting your search or filters.'
                   : 'Create your first article to get started.'}
               </p>
-              <Link to={`/articles/new?project=${project.id}`}>
+              <Link to={`/articles/new?project=${project._id}`}>
                 <Button>
                   <Plus className="h-4 w-4 mr-2" />
                   Create Article
@@ -239,7 +239,7 @@ export default function ProjectContentTab({ project }: ProjectContentTabProps) {
             <div className="divide-y divide-border">
               {paginatedData.map((item) => (
                 <div
-                  key={item.id}
+                  key={item._id}
                   className="p-6 hover:bg-muted/30 transition-colors"
                 >
                   <ArticleItem article={item as Article} />
@@ -315,7 +315,7 @@ function ArticleItem({ article }: { article: Article }) {
         </div>
       </div>
       <div className="flex items-center gap-2 ml-4">
-        <Link to={`/articles/${article.id}`}>
+        <Link to={`/articles/${article._id}`}>
           <Button variant="outline" size="sm">
             <Eye className="h-4 w-4 mr-2" />
             View

@@ -225,20 +225,7 @@ export const ARTICLES_STRING = {
   },
 };
 
-export const EMAIL_STRING = {
-  SUBJECT: {
-    TWO_FA_CODE: 'Two Factor Authentication',
-    NEW_COMMENT_NOTIFICATION: 'New comment on your article',
-    ARTICLE_STATUS_UPDATE: 'Article status has been updated',
-    ARTICLE_TITLE_UPDATE: 'Article title has been updated',
-    ARTICLE_DELETED: 'Article has been deleted',
-    PROJECT_DELETED: 'Project has been deleted',
-    WEEKLY_REPORT_EMAIL: 'Razorcopy: Weekly Report',
-  },
-  SUCCESS: {
-    EMAIL_SENT: 'Email sent successfully',
-  },
-};
+// EMAIL_STRING removed - email functionality not supported in single-user application
 
 export const GOOGLE_DOC_SERVICE_STRING = {
   ERRORS: {

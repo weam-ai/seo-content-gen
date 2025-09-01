@@ -422,7 +422,7 @@ export const TimeSection: React.FC = () => {
                 const canEdit =
                   entry.type === 'manual' && entry.status !== 'running';
                 const canDelete =
-                  currentUser?.id === entry.user_id &&
+                  currentUser?._id === entry.user_id &&
                   entry.status !== 'running';
                 const hasActions = canEdit || canDelete;
 

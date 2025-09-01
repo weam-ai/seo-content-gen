@@ -17,8 +17,6 @@ export const ROLES_TYPES = {
 
 // Simple user type for single-user application
 export type User = {
-  id: string;
+  _id: string;
   email: string;
-  name?: string;
-  role: UserRole;
 };

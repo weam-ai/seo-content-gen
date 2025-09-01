@@ -32,7 +32,7 @@ import { toast } from '@/hooks/use-toast';
 import React from 'react';
 
 interface Project {
-  id: string;
+  _id: string;
   name: string;
 }
 // Member and Agency interfaces removed for single-user application
@@ -182,13 +182,13 @@ export const FilterUtilityBar: React.FC<TopicToolbarProps> = ({
                 title={
                   projectFilter === 'all'
                     ? 'All Projects'
-                    : projects.find((p) => p.id === projectFilter)?.name ||
+                    : projects.find((p) => p._id === projectFilter)?.name ||
                     'All Projects'
                 }
               >
                 {projectFilter === 'all'
                   ? 'All Projects'
-                  : projects.find((p) => p.id === projectFilter)?.name ||
+                  : projects.find((p) => p._id === projectFilter)?.name ||
                   'All Projects'}
               </span>
               <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
@@ -226,8 +226,8 @@ export const FilterUtilityBar: React.FC<TopicToolbarProps> = ({
                 ) : (
                   projects.map((project) => (
                     <CommandItem
-                      key={project.id}
-                      value={`${project.id}|||${project.name.toLowerCase()}`}
+                      key={project._id}
+                      value={`${project._id}|||${project.name.toLowerCase()}`}
                       onSelect={(v) => {
                         const id = v.split('|||')[0];
                         setProjectFilter(id);
@@ -240,7 +240,7 @@ export const FilterUtilityBar: React.FC<TopicToolbarProps> = ({
                     >
                       <Check
                         className={
-                          projectFilter === project.id
+                          projectFilter === project._id
                             ? 'mr-2 h-4 w-4 opacity-100'
                             : 'mr-2 h-4 w-4 opacity-0'
                         }

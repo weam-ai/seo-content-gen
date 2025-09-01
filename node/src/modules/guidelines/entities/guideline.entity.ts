@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
 export type GuidelineDocument = Guideline & Document;
 
@@ -10,6 +10,9 @@ export type GuidelineDocument = Guideline & Document;
 export class Guideline {
   @Prop({ type: String, required: true })
   name: string;
+
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+  user: Types.ObjectId;
 
   @Prop({ type: String, required: true })
   description: string;
@@ -26,4 +29,4 @@ GuidelineSchema.set('collection', 'solution_seo_guidelines');
 
 // Create indexes for frequently queried fields
 GuidelineSchema.index({ name: 1 });
-GuidelineSchema.index({ created_at: -1 });
+GuidelineSchema.index({ createdAt: -1 });

@@ -4,14 +4,16 @@ import { JwtModule } from '@nestjs/jwt';
 import { GuidelinesService } from './guidelines.service';
 import { GuidelinesController } from './guidelines.controller';
 import { Guideline, GuidelineSchema } from './entities/guideline.entity';
+import { User, UserSchema } from '../users/entities/user.entity';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Guideline.name, schema: GuidelineSchema },
+      { name: User.name, schema: UserSchema },
     ]),
     JwtModule.register({
-      secret: process.env.JWT_SECRET || 'secretKey',
+      secret: process.env.JWT_SECRET || 'razorcopy',
       signOptions: { expiresIn: '24h' },
     }),
   ],

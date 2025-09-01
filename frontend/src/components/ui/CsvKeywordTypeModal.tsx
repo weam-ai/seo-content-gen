@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/select';
 
 interface PromptType {
-  id: string;
+  _id: string;
   name: string;
 }
 
@@ -83,7 +83,7 @@ const CsvKeywordTypeModal: React.FC<CsvKeywordTypeModalProps> = ({
               </SelectTrigger>
               <SelectContent>
                 {promptTypes.map((type) => (
-                  <SelectItem key={type.id} value={type.id}>
+                  <SelectItem key={type._id} value={type._id}>
                     {type.name}
                   </SelectItem>
                 ))}
@@ -107,7 +107,7 @@ const CsvKeywordTypeModal: React.FC<CsvKeywordTypeModalProps> = ({
                 </SelectTrigger>
                 <SelectContent>
                   {promptTypes.map((type) => (
-                    <SelectItem key={type.id} value={type.id}>
+                    <SelectItem key={type._id} value={type._id}>
                       {type.name}
                     </SelectItem>
                   ))}

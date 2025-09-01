@@ -119,7 +119,7 @@
   - `search_by_status`: string
   - `search_by_project`: string
   - `staffid`: string
-  - `assigned_to_me`: boolean
+  // assigned_to_me field removed for single-user application
 
 #### POST `/article`
 - **Description:** Create new article
@@ -129,8 +129,8 @@
   "title": "string",
   "content": "string",
   "projectId": "string",
-  "status": "string",
-  "assignedTo": "string"
+  "status": "string"
+  // assignedTo field removed for single-user application
 }
 ```
 
@@ -267,32 +267,7 @@
 #### GET `/time-tracking/stats`
 - **Description:** Get time tracking statistics
 
-### 9. Comments (`/comments`)
-
-#### GET `/comments`
-- **Description:** Get comments for entity
-- **Query Parameters:**
-  - `entityId`: string
-  - `entityType`: string
-
-#### POST `/comments`
-- **Description:** Create comment
-- **Payload:**
-```json
-{
-  "content": "string",
-  "entityId": "string",
-  "entityType": "string"
-}
-```
-
-#### PATCH `/comments/:id`
-- **Description:** Update comment
-
-#### DELETE `/comments/:id`
-- **Description:** Delete comment
-
-### 12. Gemini AI (`/gemini`)
+### 9. Gemini AI (`/gemini`)
 
 #### POST `/gemini/audit-article`
 - **Description:** Audit article using Gemini AI

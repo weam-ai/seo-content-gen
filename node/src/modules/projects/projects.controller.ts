@@ -47,6 +47,7 @@ import { GenerateBusinessSummaryRequest } from './dto/business-summary.dto';
 import { JwtAuthGuard } from '@shared/guards/jwt-auth.guard';
 
 @Controller('projects')
+@UseGuards(JwtAuthGuard)
 export class ProjectsController {
   constructor(
     private readonly projectsService: ProjectsService,
@@ -54,7 +55,6 @@ export class ProjectsController {
   ) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard)
   async create(
     @Body() createProjectDto: CreateProjectDto,
     @Res() res: Response,
@@ -72,7 +72,6 @@ export class ProjectsController {
   }
 
   @Get()
-  @UseGuards(JwtAuthGuard)
   async findAll(
     @Query() query: ListProjectDtoQuery,
     @Req() req: Request,
@@ -100,7 +99,6 @@ export class ProjectsController {
   }
 
   @Get(':id')
-  @UseGuards(JwtAuthGuard)
   async findOne(
     @Param('id', ParseObjectIdPipe) id: string,
     @Req() req: Request,
@@ -115,7 +113,6 @@ export class ProjectsController {
   }
 
   @Patch(':id')
-  @UseGuards(JwtAuthGuard)
   async update(
     @Param('id', ParseObjectIdPipe) id: string,
     @Body() UpdateProjectDto: Partial<UpdateProjectDto>,
@@ -135,7 +132,6 @@ export class ProjectsController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
   async remove(
     @Param('id', ParseObjectIdPipe) id: string,
     @Req() req: Request,
@@ -161,7 +157,6 @@ export class ProjectsController {
   }
 
   @Post('/:projectId/add-keywords')
-  @UseGuards(JwtAuthGuard)
   async addProjectKeywords(
     @Req() req: Request,
     @Param('projectId', ParseObjectIdPipe) projectId: string,
@@ -213,10 +208,12 @@ export class ProjectsController {
   @Get(':projectId/fetch-keyword-recommendation')
   async fetchKeywordRecommendation(
     @Param('projectId', ParseObjectIdPipe) projectId: string,
+    @Req() req: Request,
     @Res() res: Response,
   ) {
+    const user = req.user as User;
     const keywordRecommendation =
-      await this.projectsService.fetchKeywordRecommendation(projectId);
+      await this.projectsService.fetchKeywordRecommendation(projectId, user);
     return successResponseWithData(
       res,
       PROJECTS_STRING.SUCCESS.KEYWORD_RECOMMENDATION_FETCHED,
@@ -252,10 +249,13 @@ export class ProjectsController {
   @Post('/business-summary')
   async businessSummary(
     @Body() generateBusinessSummary: GenerateBusinessSummaryRequest,
+    @Req() req: Request,
     @Res() res: Response,
   ) {
+    const authToken = req.headers.authorization;
     const business_summary = await this.projectsService.generateBusinessSummary(
       generateBusinessSummary.website_url,
+      authToken,
     );
     return successResponseWithData(
       res,
@@ -267,9 +267,11 @@ export class ProjectsController {
   @Post(':projectId/site-audit')
   async requestSiteAudit(
     @Param('projectId', ParseObjectIdPipe) projectId: string,
+    @Req() req: Request,
     @Res() res: Response,
   ) {
-    await this.projectsService.requestSiteAudit(projectId);
+    const user = req.user as User;
+    await this.projectsService.requestSiteAudit(projectId, user);
     return successResponse(res, 'SEO audit started');
   }
 

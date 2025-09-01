@@ -6,7 +6,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { Article, ArticleSchema } from './entities/article.entity';
 import { Project, ProjectSchema } from '../projects/entities/projects.entity';
 import { User, UserSchema } from '../users/entities/user.entity';
-import { EmailModule } from '@/shared/modules/email/email.module';
+// EmailModule import removed - email functionality not supported
 import { DataForSeoService, DataForSeoProvider } from '@shared/services/dataforseo.service';
 import { HttpModule } from '@nestjs/axios';
 import { OpenaiModule } from '../openai/openai.module';
@@ -17,8 +17,7 @@ import { PromptTypesModule } from '../prompt-types/prompt-types.module';
 import { GeminiModule } from '../gemini/gemini.module';
 import { ClaudeModule } from '../claude/claude.module';
 // import { TimeTrackingModule } from '../time-tracking/time-tracking.module';
-// import { Thread, ThreadSchema } from '../comments/entities/threads.entity';
-// import { Comment, CommentSchema } from '../comments/entities/comment.entity';
+
 import { DocumentUpdates, DocumentUpdatesSchema } from '../article-documents/entities/document-update.entity';
 import { PromptType, PromptTypeSchema } from '../prompt-types/entities/prompt-type.entity';
 // import { AuthTokens, AuthTokensSchema } from '../auth/entities/auth-tokens.entity';
@@ -32,12 +31,12 @@ import { PromptType, PromptTypeSchema } from '../prompt-types/entities/prompt-ty
       { name: Project.name, schema: ProjectSchema },
       { name: PromptType.name, schema: PromptTypeSchema },
       // { name: Thread.name, schema: ThreadSchema },
-      // { name: Comment.name, schema: CommentSchema },
+  
       { name: DocumentUpdates.name, schema: DocumentUpdatesSchema },
       // { name: AuthTokens.name, schema: AuthTokensSchema },
     ]),
     JwtModule.register({
-      secret: process.env.JWT_SECRET || 'secretKey',
+      secret: process.env.JWT_SECRET || 'razorcopy',
       signOptions: { expiresIn: '24h' },
     }),
     HttpModule,
@@ -46,7 +45,7 @@ import { PromptType, PromptTypeSchema } from '../prompt-types/entities/prompt-ty
     forwardRef(() => ClaudeModule),
     ArticleDocumentsModule,
     PromptTypesModule,
-    EmailModule,
+    // EmailModule, // Removed - email functionality not supported
     // TimeTrackingModule,
   ],
   controllers: [ArticleController],

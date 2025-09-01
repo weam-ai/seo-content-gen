@@ -21,82 +21,40 @@ export class JwtAuthGuard implements CanActivate {
     const authHeader = request.headers['authorization'];
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      // For single-user mode, get the actual user from database
-       const user = await this.userModel.findOne().exec();
-       if (user) {
-         request.user = {
-           _id: (user._id as any).toString(),
-           name: user.email.split('@')[0],
-           email: user.email,
-           firstname: user.email.split('@')[0],
-           lastname: 'User'
-         };
-       }
-      return true;
+      throw new UnauthorizedException('Authorization token is required');
     }
 
     try {
       const token = authHeader.substring(7); // Remove 'Bearer ' prefix
       
-      // For static token in development, get actual user from database
-      if (token === 'static-jwt-token-for-local-testing') {
-        const user = await this.userModel.findOne().exec();
-         if (user) {
-           request.user = {
-             _id: (user._id as any).toString(),
-             name: user.email.split('@')[0],
-             email: user.email,
-             firstname: user.email.split('@')[0],
-             lastname: 'User'
-           };
-         }
-        return true;
-      }
-      
-      // For production JWT tokens, verify and extract user info
+      // Verify JWT token and extract user info
       const payload = this.jwtService.verify(token);
       
-      // Extract user information from JWT payload or get from database
-      let userId = payload.sub || payload.userId;
-      if (userId) {
-        const user = await this.userModel.findById(userId).exec();
-         if (user) {
-           request.user = {
-             _id: (user._id as any).toString(),
-             name: user.email.split('@')[0],
-             email: user.email,
-             firstname: user.email.split('@')[0],
-             lastname: 'User'
-           };
-         }
-      } else {
-        // Fallback to first user in database
-         const user = await this.userModel.findOne().exec();
-         if (user) {
-           request.user = {
-           _id: (user._id as any).toString(),
-           name: user.email.split('@')[0],
-           email: user.email,
-           firstname: user.email.split('@')[0],
-           lastname: 'User'
-         };
-         }
+      // Extract user information from JWT payload
+      const userId = payload.sub || payload.userId;
+      if (!userId) {
+        throw new UnauthorizedException('Invalid token: user ID not found');
       }
+
+      const user = await this.userModel.findById(userId).exec();
+      if (!user) {
+        throw new UnauthorizedException('User not found');
+      }
+
+      request.user = {
+        _id: user._id,
+        name: user.email.split('@')[0],
+        email: user.email,
+        firstname: user.email.split('@')[0],
+        lastname: 'User'
+      };
       
       return true;
     } catch (error) {
-      // If JWT verification fails, fall back to actual user from database
-       const user = await this.userModel.findOne().exec();
-       if (user) {
-         request.user = {
-           _id: (user._id as any).toString(),
-           name: user.email.split('@')[0],
-           email: user.email,
-           firstname: user.email.split('@')[0],
-           lastname: 'User'
-         };
-       }
-      return true;
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+      throw new UnauthorizedException('Invalid or expired token');
     }
   }
 }

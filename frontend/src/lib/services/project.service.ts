@@ -1,22 +1,22 @@
 import api from '@/lib/api';
 
-interface AssignMember {
-  id: string;
-  name: string;
-  profile_image: string | null;
-  is_agency_owner: boolean;
-  agency_name: string | null;
+// Removed AssignMember interface for single-user application
+
+export interface KeywordMetric {
+  keyword: string;
+  keyword_volume: number;
+  keyword_difficulty: 'HIGH' | 'MEDIUM' | 'LOW';
 }
 
 export interface Project {
-  id: string;
+  _id: string;
   name: string;
   website_url: string;
   created_at: string;
   description: string;
-  keywords: string[];
-  assign_member: AssignMember[];
-  agency_name: string | null;
+  keywords: KeywordMetric[];
+  // Removed assign_member field for single-user application
+  // Removed agency_name field for single-user application
 }
 
 interface Pagination {
@@ -44,15 +44,7 @@ export interface Keyword {
 
 // Role interface removed for single-user application
 
-export interface AssignedToMember {
-  id: string;
-  email: string;
-  firstname: string;
-  lastname: string;
-  profile_image: string | null;
-  // role property removed for single-user application
-  agency_name: string | null;
-}
+// AssignedToMember interface removed for single-user application
 
 export interface ProjectDetail
   extends Omit<Project, 'keywords' | 'assign_member'> {
@@ -66,7 +58,7 @@ export interface ProjectDetail
   sitemapdata: string;
   detailedsitemap: string;
   keywords: Keyword[];
-  assign_to: AssignedToMember[];
+  // assign_to field removed for single-user application
   guideline: any;
   guideline_description: string;
   progress: number;

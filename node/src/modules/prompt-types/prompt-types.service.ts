@@ -15,6 +15,7 @@ import {
   ListPromptTypeQueryPagination,
 } from './dto/list-prompt-types.dto';
 import { Pagination } from '@/shared/types/response.t';
+import { toObjectId } from '@/shared/types/populated-entities';
 
 @Injectable()
 export class PromptTypesService {
@@ -24,7 +25,7 @@ export class PromptTypesService {
     private readonly systemPrompService: SystemPromptsService,
   ) {}
 
-  async create(createPromptTypeDto: CreatePromptTypeDto) {
+  async create(createPromptTypeDto: CreatePromptTypeDto, userId: string) {
     //verify topic title prompt type already exists
     const topic_prompt = await this.systemPrompService.verifySystemPromptType(
       createPromptTypeDto.titlePrompt,
@@ -43,9 +44,10 @@ export class PromptTypesService {
       SYSTEM_PROMPT_TYPES.ARTICLE,
     );
 
-    //check if prompt type already exists
+    //check if prompt type already exists for this user
     const isExistPromptType = await this.promptTypeModel.findOne({
       name: createPromptTypeDto.name,
+      user: toObjectId(userId),
     });
     if (isExistPromptType)
       throw new ConflictException(
@@ -57,6 +59,7 @@ export class PromptTypesService {
       titlePrompt: topic_prompt._id,
       outlinePrompt: outline_prompt._id,
       articlePrompt: article_prompt._id,
+      user: toObjectId(userId),
     });
     return promptType.save();
   }
@@ -64,18 +67,20 @@ export class PromptTypesService {
   // Function overloads to match with the expected return type
   async findAll(
     query: ListPromptTypeQueryPagination,
+    userId: string,
   ): Promise<{ promptTypes: PromptType[]; pagination: Pagination }>;
-  async findAll(query: ListPromptTypeQuery): Promise<PromptType[]>;
+  async findAll(query: ListPromptTypeQuery, userId: string): Promise<PromptType[]>;
 
   async findAll(
     query: ListPromptTypeQueryPagination | ListPromptTypeQuery,
+    userId: string,
   ): Promise<
     { promptTypes: PromptType[]; pagination: Pagination } | PromptType[]
   > {
     const { search } = query;
     
-    // Build query
-    const mongoQuery: any = {};
+    // Build query with user filter
+    const mongoQuery: any = { user: toObjectId(userId) };
     if (search) {
       mongoQuery.name = { $regex: search, $options: 'i' };
     }
@@ -149,9 +154,13 @@ export class PromptTypesService {
     };
   }
 
-  async findOne(id: string) {
+  async findOne(id: string, user?: any) {
+    const query: any = { _id: id };
+    if (user && user._id) {
+      query.user = user._id;
+    }
     const prompt = await this.promptTypeModel
-      .findById(id)
+      .findOne(query)
       .populate('titlePrompt', 'id name')
       .populate('outlinePrompt', 'id name')
       .populate('articlePrompt', 'id name')
@@ -165,8 +174,8 @@ export class PromptTypesService {
     return prompt;
   }
 
-  async update(id: string, updatePromptTypeDto: CreatePromptTypeDto) {
-    const promptType = await this.checkIsPromptTypeExists(id);
+  async update(id: string, updatePromptTypeDto: CreatePromptTypeDto, userId: string) {
+    const promptType = await this.checkIsPromptTypeExists(id, userId);
 
     //verify topic title prompt type already exists
     const topic_prompt = await this.systemPrompService.verifySystemPromptType(
@@ -186,8 +195,19 @@ export class PromptTypesService {
       SYSTEM_PROMPT_TYPES.ARTICLE,
     );
 
-    const updatedPromptType = await this.promptTypeModel.findByIdAndUpdate(
-      id,
+    //check if another prompt type with same name exists for this user
+    const isExistPromptType = await this.promptTypeModel.findOne({
+      name: updatePromptTypeDto.name,
+      user: toObjectId(userId),
+      _id: { $ne: id },
+    });
+    if (isExistPromptType)
+      throw new ConflictException(
+        PROMPT_TYPES_STRING.ERROR.PROMPT_TYPE_ALREADY_EXISTS,
+      );
+
+    const updatedPromptType = await this.promptTypeModel.findOneAndUpdate(
+      { _id: id, user: toObjectId(userId) },
       {
         ...updatePromptTypeDto,
         titlePrompt: topic_prompt._id,
@@ -200,17 +220,21 @@ export class PromptTypesService {
     return updatedPromptType;
   }
 
-  async remove(id: string) {
-    await this.checkIsPromptTypeExists(id);
-    return this.promptTypeModel.findByIdAndUpdate(
-      id,
+  async remove(id: string, userId: string) {
+    await this.checkIsPromptTypeExists(id, userId);
+    return this.promptTypeModel.findOneAndUpdate(
+      { _id: id, user: toObjectId(userId) },
       { deleted_at: new Date() },
       { new: true }
     );
   }
 
-  private async checkIsPromptTypeExists(id: string) {
-    const prompt = await this.promptTypeModel.findById(id);
+  private async checkIsPromptTypeExists(id: string, userId?: string) {
+    const query: any = { _id: id };
+    if (userId) {
+      query.user = toObjectId(userId);
+    }
+    const prompt = await this.promptTypeModel.findOne(query);
     if (!prompt) {
       throw new BadRequestException(
         PROMPT_TYPES_STRING.ERROR.PROMPT_TYPE_NOT_FOUND,

@@ -40,7 +40,7 @@ const RatingModel: React.FC<RatingModelProps> = ({
       const payload = {
         rating,
         review,
-        staffid: user?.id,
+        staffid: user?._id,
         taskid: articleId,
       };
       await axios.post('/add/rating', payload); // Adjust base URL as needed

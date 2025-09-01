@@ -72,7 +72,8 @@ const validationSchema = Yup.object({
         promptTypeId: Yup.string().required('Article type is required'),
       })
     )
-    .default([]),
+    .min(1, 'At least one targeted keyword is required')
+    .required('Targeted keywords are required'),
   guideline_id: Yup.string().required('An industry guideline must be selected'),
   guideline_description: Yup.string(),
   targeted_audience: Yup.array()
@@ -167,7 +168,7 @@ export default function NewProject() {
           if (response.data.length > 0) {
             setNewKeyword((prev) => ({
               ...prev,
-              promptTypeId: response.data[0].id,
+              promptTypeId: response.data[0]._id,
             }));
           }
         }
@@ -255,7 +256,7 @@ export default function NewProject() {
                       title: 'Success',
                       description: 'Project created successfully!',
                     });
-                    navigate(`/projects/${response.data.id}`);
+                    navigate(`/projects/${response.data._id}`);
                   } else {
                     toast({
                       title: 'Error',
@@ -654,7 +655,7 @@ export default function NewProject() {
                                           Object.fromEntries(
                                             keywords.map((k) => [
                                               k,
-                                              promptTypes[0]?.id || '',
+                                              promptTypes[0]?._id || '',
                                             ])
                                           )
                                         );
@@ -692,7 +693,7 @@ export default function NewProject() {
                                             keyword: '',
                                             promptTypeId:
                                               promptTypes.length > 0
-                                                ? promptTypes[0].id
+                                                ? promptTypes[0]._id
                                                 : '',
                                           });
                                         }
@@ -719,8 +720,8 @@ export default function NewProject() {
                                     <SelectContent>
                                       {promptTypes.map((type) => (
                                         <SelectItem
-                                          key={type.id}
-                                          value={type.id}
+                                          key={type._id}
+                                          value={type._id}
                                         >
                                           {type.name}
                                         </SelectItem>
@@ -739,7 +740,7 @@ export default function NewProject() {
                                           keyword: '',
                                           promptTypeId:
                                             promptTypes.length > 0
-                                              ? promptTypes[0].id
+                                              ? promptTypes[0]._id
                                               : '',
                                         });
                                       }
@@ -766,7 +767,7 @@ export default function NewProject() {
                                       <span className="text-xs text-muted-foreground">
                                         (
                                         {promptTypes.find(
-                                          (pt) => pt.id === kw.promptTypeId
+                                          (pt) => pt._id === kw.promptTypeId
                                         )?.name || '...'}
                                         )
                                       </span>
@@ -814,8 +815,8 @@ export default function NewProject() {
                             <SelectContent>
                               {guidelines.map((guideline) => (
                                 <SelectItem
-                                  key={guideline.id}
-                                  value={guideline.id}
+                                  key={guideline._id}
+                                  value={guideline._id}
                                 >
                                   {guideline.name}
                                 </SelectItem>

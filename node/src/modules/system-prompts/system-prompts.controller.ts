@@ -8,6 +8,8 @@ import {
   Query,
   Post,
   Delete,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { SystemPromptsService } from './system-prompts.service';
 import { UpdateSystemPromptDto } from './dto/update-system-prompt.dto';
@@ -17,7 +19,9 @@ import {
   successResponse,
   successResponseWithData,
 } from '@shared/utils/reponses.utils';
-import { Response } from 'express';
+import { Request, Response } from 'express';
+import { JwtAuthGuard } from '@shared/guards/jwt-auth.guard';
+import { getUserId, toObjectId } from '@shared/types/populated-entities';
 
 import {
   ListSystemPromptQuery,
@@ -26,119 +30,79 @@ import {
 import { CreateSystemPromptDto } from './dto/create-system-prompt.dto';
 
 @Controller('system-prompts')
+@UseGuards(JwtAuthGuard)
 export class SystemPromptsController {
   constructor(private readonly SystemPromptsService: SystemPromptsService) {}
 
   @Post()
   async create(
     @Body() createSystemPromptDto: CreateSystemPromptDto,
+    @Req() req: Request,
     @Res() res: Response,
   ) {
-    const Guideline = await this.SystemPromptsService.create(
+    const systemPrompt = await this.SystemPromptsService.create(
       createSystemPromptDto,
+      toObjectId(getUserId(req.user!)),
     );
-    // Convert Mongoose document to plain object
-    const plainGuideline = {
-      id: (Guideline as any)._id.toString(),
-      name: (Guideline as any).name,
-      type: (Guideline as any).type,
-      description: (Guideline as any).description,
-      is_default: (Guideline as any).is_default,
-      created_at: (Guideline as any).created_at,
-      updated_at: (Guideline as any).updated_at
-    };
+    // Return system prompt with _id field intact
     return successResponseWithData(
       res,
       SYSTEM_PROMPT_STRING.SUCCESS.SYSTEM_PROMPT_CREATED,
-      plainGuideline,
+      systemPrompt,
     );
   }
 
   @Get('list')
   async findAllList(
     @Query() query: ListSystemPromptQuery,
+    @Req() req: Request,
     @Res() res: Response,
   ) {
-    const SystemPrompts = await this.SystemPromptsService.findAll(query);
-    // Convert Mongoose documents to plain objects
-    const plainSystemPrompts = SystemPrompts.map((systemPrompt: any) => ({
-      id: systemPrompt._id.toString(),
-      name: systemPrompt.name,
-      type: systemPrompt.type,
-      description: systemPrompt.description,
-      is_default: systemPrompt.is_default,
-      created_at: systemPrompt.created_at,
-      updated_at: systemPrompt.updated_at
-    }));
+    const systemPrompts = await this.SystemPromptsService.findAll(query, toObjectId(getUserId(req.user!)));
+    // Return system prompts with _id fields intact
     return successResponseWithData(
       res,
       SYSTEM_PROMPT_STRING.SUCCESS.SYSTEM_PROMPT_FETCHED,
-      plainSystemPrompts,
+      systemPrompts,
     );
   }
 
   @Get()
   async findAll(
     @Query() query: ListSystemPromptQueryPagination,
+    @Req() req: Request,
     @Res() res: Response,
   ) {
-    const result = await this.SystemPromptsService.findAll(query);
+    const result = await this.SystemPromptsService.findAll(query, toObjectId(getUserId(req.user!)));
     
     // Handle both paginated and non-paginated responses
     if (Array.isArray(result)) {
-      // Non-paginated response
-      const plainSystemPrompts = result.map((systemPrompt: any) => ({
-        id: systemPrompt._id.toString(),
-        name: systemPrompt.name,
-        type: systemPrompt.type,
-        description: systemPrompt.description,
-        is_default: systemPrompt.is_default,
-        created_at: systemPrompt.created_at,
-        updated_at: systemPrompt.updated_at
-      }));
+      // Non-paginated response - return with _id fields intact
       return successResponseWithData(
         res,
         SYSTEM_PROMPT_STRING.SUCCESS.SYSTEM_PROMPT_FETCHED,
-        plainSystemPrompts,
+        result,
       );
     } else {
-      // Paginated response
+      // Paginated response - return with _id fields intact
       const { systemPrompts, pagination } = result;
-      const plainSystemPrompts = systemPrompts.map((systemPrompt: any) => ({
-        id: systemPrompt._id.toString(),
-        name: systemPrompt.name,
-        type: systemPrompt.type,
-        description: systemPrompt.description,
-        is_default: systemPrompt.is_default,
-        created_at: systemPrompt.created_at,
-        updated_at: systemPrompt.updated_at
-      }));
       return successPaginationResponseWithData(
         pagination,
         res,
         SYSTEM_PROMPT_STRING.SUCCESS.SYSTEM_PROMPT_FETCHED,
-        plainSystemPrompts,
+        systemPrompts,
       );
     }
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string, @Res() res: Response) {
-    const SystemPrompt = await this.SystemPromptsService.findOne(id);
-    // Convert Mongoose document to plain object
-    const plainSystemPrompt = {
-      id: (SystemPrompt as any)._id.toString(),
-      name: (SystemPrompt as any).name,
-      type: (SystemPrompt as any).type,
-      description: (SystemPrompt as any).description,
-      is_default: (SystemPrompt as any).is_default,
-      created_at: (SystemPrompt as any).created_at,
-      updated_at: (SystemPrompt as any).updated_at
-    };
+  async findOne(@Param('id') id: string, @Req() req: Request, @Res() res: Response) {
+    const systemPrompt = await this.SystemPromptsService.findOne(id, toObjectId(getUserId(req.user!)));
+    // Return system prompt with _id field intact
     return successResponseWithData(
       res,
       SYSTEM_PROMPT_STRING.SUCCESS.SYSTEM_PROMPT_FETCHED,
-      plainSystemPrompt,
+      systemPrompt,
     );
   }
 
@@ -146,32 +110,25 @@ export class SystemPromptsController {
   async update(
     @Param('id') id: string,
     @Body() updateSystemPromptDto: UpdateSystemPromptDto,
+    @Req() req: Request,
     @Res() res: Response,
   ) {
-    const SystemPrompt = await this.SystemPromptsService.update(
+    const systemPrompt = await this.SystemPromptsService.update(
       id,
       updateSystemPromptDto,
+      toObjectId(getUserId(req.user!)),
     );
-    // Convert Mongoose document to plain object
-    const plainSystemPrompt = {
-      id: (SystemPrompt as any)._id.toString(),
-      name: (SystemPrompt as any).name,
-      type: (SystemPrompt as any).type,
-      description: (SystemPrompt as any).description,
-      is_default: (SystemPrompt as any).is_default,
-      created_at: (SystemPrompt as any).created_at,
-      updated_at: (SystemPrompt as any).updated_at
-    };
+    // Return system prompt with _id field intact
     return successResponseWithData(
       res,
       SYSTEM_PROMPT_STRING.SUCCESS.SYSTEM_PROMPT_UPDATED,
-      plainSystemPrompt,
+      systemPrompt,
     );
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string, @Res() res: Response) {
-    await this.SystemPromptsService.remove(id);
+  async remove(@Param('id') id: string, @Req() req: Request, @Res() res: Response) {
+    await this.SystemPromptsService.remove(id, toObjectId(getUserId(req.user!)));
     return successResponse(
       res,
       SYSTEM_PROMPT_STRING.SUCCESS.SYSTEM_PROMPT_DELETED,

@@ -48,7 +48,7 @@ interface ArticleVersionsModelProps {
 }
 
 interface Version {
-  id: string;
+  _id: string;
   content: string;
   timestamp: Date;
   author: {
@@ -96,7 +96,7 @@ const ArticleVersionHistory: React.FC<ArticleVersionsModelProps> = ({
         await getArticleEditorVersions(articleId);
       // Map API versions to local Version type
       const mappedVersions = apiVersions.map((v, idx) => ({
-        id: `v${v.version}`,
+        _id: `v${v.version}`,
         content: '', // Content not included in version list, only metadata
         timestamp: new Date(v.updated_at),
         author: v.updated_by
@@ -143,11 +143,11 @@ const ArticleVersionHistory: React.FC<ArticleVersionsModelProps> = ({
           const [data1, data2] = await Promise.all([
             getArticleEditorContentByVersion(
               articleId,
-              parseInt(selectedVersion1.id.replace('v', ''))
+              parseInt(selectedVersion1._id.replace('v', ''))
             ),
             getArticleEditorContentByVersion(
               articleId,
-              parseInt(selectedVersion2.id.replace('v', ''))
+              parseInt(selectedVersion2._id.replace('v', ''))
             ),
           ]);
           let left = '',
@@ -182,7 +182,7 @@ const ArticleVersionHistory: React.FC<ArticleVersionsModelProps> = ({
     try {
       const data = await getArticleEditorContentByVersion(
         articleId,
-        parseInt(version.id.replace('v', ''))
+        parseInt(version._id.replace('v', ''))
       );
       // Convert Buffer data to string using TextDecoder (browser-safe)
       let content = '';
@@ -210,7 +210,7 @@ const ArticleVersionHistory: React.FC<ArticleVersionsModelProps> = ({
     }
     try {
       // Extract version number from id (e.g., v8 -> 8)
-      const versionNumber = parseInt(version.id.replace('v', ''));
+      const versionNumber = parseInt(version._id.replace('v', ''));
       await api.post(
         `/article-documents/${articleId}/versions/${versionNumber}/restore`,
         { session_id: sessionId }
@@ -267,10 +267,10 @@ const ArticleVersionHistory: React.FC<ArticleVersionsModelProps> = ({
               <div className="flex items-center gap-2">
                 <label className="text-sm font-medium">Compare:</label>
                 <Select
-                  value={selectedVersion1?.id}
+                  value={selectedVersion1?._id}
                   onValueChange={(id) =>
                     setSelectedVersion1(
-                      versions.find((v) => v.id === id) || null
+                      versions.find((v) => v._id === id) || null
                     )
                   }
                 >
@@ -279,7 +279,7 @@ const ArticleVersionHistory: React.FC<ArticleVersionsModelProps> = ({
                   </SelectTrigger>
                   <SelectContent>
                     {versions.map((version) => (
-                      <SelectItem key={version.id} value={version.id}>
+                      <SelectItem key={version._id} value={version._id}>
                         {version.label} - {formatTimestamp(version.timestamp)}
                       </SelectItem>
                     ))}
@@ -289,10 +289,10 @@ const ArticleVersionHistory: React.FC<ArticleVersionsModelProps> = ({
               <span className="text-muted-foreground">vs</span>
               <div className="flex items-center gap-2">
                 <Select
-                  value={selectedVersion2?.id}
+                  value={selectedVersion2?._id}
                   onValueChange={(id) =>
                     setSelectedVersion2(
-                      versions.find((v) => v.id === id) || null
+                      versions.find((v) => v._id === id) || null
                     )
                   }
                 >
@@ -301,7 +301,7 @@ const ArticleVersionHistory: React.FC<ArticleVersionsModelProps> = ({
                   </SelectTrigger>
                   <SelectContent>
                     {versions.map((version) => (
-                      <SelectItem key={version.id} value={version.id}>
+                      <SelectItem key={version._id} value={version._id}>
                         {version.label} - {formatTimestamp(version.timestamp)}
                       </SelectItem>
                     ))}

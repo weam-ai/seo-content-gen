@@ -7,7 +7,7 @@ import { ChecklistSection } from './sections/ChecklistSection';
 import { TimeSection } from './sections/TimeSection';
 import { SettingsSection } from './sections/SettingsSection';
 import { ShareSection } from './sections/ShareSection';
-import { EEATSection } from './sections/EEATSection';
+
 import { ExtrasSection } from './sections/ExtrasSection';
 import { VersionHistorySection } from './sections/VersionHistorySection';
 
@@ -18,8 +18,7 @@ const getSectionTitle = (section: SidebarSection): string => {
     case 'checklist':
       return 'Document Checks';
 
-    case 'eeat':
-      return 'EEAT Analysis';
+
     case 'time':
       return 'Time & History';
     case 'versions':
@@ -40,7 +39,7 @@ const getSectionTitle = (section: SidebarSection): string => {
  * The resize functionality is added via the withResizableSidebar HOC
  */
 const RightSidebarCore: React.FC = () => {
-  const { rightSidebarSection, toggleRightSidebar, article } = useEditor();
+  const { rightSidebarSection, toggleRightSidebar } = useEditor();
 
   const activeSection = rightSidebarSection;
   const onClose = () => toggleRightSidebar(null);
@@ -65,12 +64,7 @@ const RightSidebarCore: React.FC = () => {
           <ChecklistSection />
         </div>
 
-        {/* Mount EEAT only once article is available; then keep it mounted */}
-        {article ? (
-          <div className={activeSection === 'eeat' ? 'block h-full' : 'hidden'}>
-            <EEATSection />
-          </div>
-        ) : null}
+
         <div className={activeSection === 'time' ? 'block h-full' : 'hidden'}>
           <TimeSection />
         </div>

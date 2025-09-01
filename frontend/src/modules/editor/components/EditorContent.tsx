@@ -37,9 +37,7 @@ import {
   Focus,
 } from 'lucide-react';
 import { CustomFormattingToolbar } from '@/components/editor/CustomFormattingToolbar';
-import { CommentMarker } from './markers/CommentMarker';
-import { FloatingComments } from './FloatingComments';
-import { useComments } from '../context/CommentContext';
+// Comment-related imports removed for single-user application
 import {
   getArticleEditorContent,
   getArticleEditorVersions,
@@ -112,12 +110,6 @@ export const EditorContent: React.FC = () => {
   // const setOnApplyAIResult = useAIAssistantStore((s) => s.setOnApplyAIResult);
   const sessionId = useSessionStore((state) => state.sessionId);
 
-  // Comment system
-  const {
-    setActiveSelection,
-    setShowCommentInput,
-    setEditorRef: setCommentEditorRef,
-  } = useComments();
   const editorContainerRef = React.useRef<HTMLDivElement>(null);
 
   // Track current AI highlighted selection - support multiple blocks
@@ -130,7 +122,6 @@ export const EditorContent: React.FC = () => {
   const schema = BlockNoteSchema.create({
     inlineContentSpecs: {
       ...defaultInlineContentSpecs,
-      comment: CommentMarker,
       issue: IssueMarker,
       grammar: GrammarMarker,
     },
@@ -208,35 +199,9 @@ export const EditorContent: React.FC = () => {
     if (editor && setEditorRef) {
       setEditorRef({ current: editor });
     }
-    if (editor && setCommentEditorRef) {
-      setCommentEditorRef({ current: editor });
-    }
-  }, [editor, setEditorRef, setCommentEditorRef]);
+  }, [editor, setEditorRef]);
 
-  // Keyboard shortcut for comments (Ctrl/Cmd + Shift + C)
-  useEffect(() => {
-    if (!editor) return;
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (
-        (event.ctrlKey || event.metaKey) &&
-        event.shiftKey &&
-        event.key === 'C'
-      ) {
-        event.preventDefault();
-
-        const selection = editor.getSelection();
-        const selectedText = editor.getSelectedText();
-
-        if (selection && selectedText && selectedText.trim()) {
-          setShowCommentInput(true);
-        }
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [editor, setShowCommentInput]);
+  // Comment keyboard shortcuts removed for single-user application
 
   // Handle grammar marker clicks
   useEffect(() => {
@@ -325,31 +290,7 @@ export const EditorContent: React.FC = () => {
     [settings.typography]
   );
 
-  // Handle text selection for comments
-  const handleTextSelection = useCallback(() => {
-    if (!editor) return;
-
-    const selection = editor.getSelection();
-    const selectedText = editor.getSelectedText();
-
-    if (selection && selectedText && selectedText.trim()) {
-      // Get the selection range
-      const range = window.getSelection()?.getRangeAt(0);
-      if (range) {
-        const rect = range.getBoundingClientRect();
-
-        setActiveSelection({
-          blockId: selection.blocks[0].id,
-          selectedText: selectedText.trim(),
-          position: {
-            start: 0, // This would need more complex calculation for exact positioning
-            end: selectedText.length,
-          },
-          rect,
-        });
-      }
-    }
-  }, [editor, setActiveSelection]);
+  // Text selection for comments removed for single-user application
 
   // Update word and character count, and track selection state
   useEffect(() => {
@@ -417,8 +358,7 @@ export const EditorContent: React.FC = () => {
       const selection = editor.getSelection();
       const selectedText = editor.getSelectedText();
 
-      // Handle comment selection
-      handleTextSelection();
+      // Comment selection handling removed for single-user application
 
       // If there's a current AI selection and the user selects different text
       if (currentAISelection && selection && selectedText) {
@@ -461,7 +401,7 @@ export const EditorContent: React.FC = () => {
     editor,
     currentAISelection,
     removeAIHighlightFromSelection,
-    handleTextSelection,
+    // handleTextSelection removed for single-user application
     isGrammarReady,
     applyGrammarMarkers,
   ]);
@@ -1104,8 +1044,7 @@ export const EditorContent: React.FC = () => {
                   </BlockNoteView>
                 </div>
 
-                {/* Floating Comments */}
-                <FloatingComments editorRef={editorContainerRef} />
+                {/* Floating Comments removed for single-user application */}
                 {/* Floating Issue Tooltip */}
                 <FloatingIssueTooltip editorRef={editorContainerRef} />
                 {/* Floating Grammar Tooltip */}

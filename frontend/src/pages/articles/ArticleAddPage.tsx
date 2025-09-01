@@ -40,7 +40,7 @@ import {
 import { PageHeader } from '@/components/ui/page-header';
 import { Formik, Form, FieldArray } from 'formik';
 import * as Yup from 'yup';
-import projectService from '@/lib/services/project.service';
+import projectService, { KeywordMetric } from '@/lib/services/project.service';
 import PromptTypeService, {
   PromptType,
 } from '@/lib/services/prompt-type.service';
@@ -57,14 +57,14 @@ import { usePasteHandler } from '@/utils/pasteParser';
 
 // Add the Project interface locally since it is not exported from the service
 interface Project {
-  id: string;
+  _id: string;
   name: string;
   website_url: string;
   created_at: string;
   description: string;
-  keywords: string[];
-  assign_member: any[];
-  agency_name: string | null;
+  keywords: KeywordMetric[];
+  // Removed assign_member field for single-user application
+  // Removed agency_name field for single-user application
 }
 
 // Article validation schema
@@ -496,7 +496,7 @@ export default function ArticleAddPage() {
                               >
                                 <span className="truncate">
                                   {values.project_id
-                                    ? projects.find((p) => p.id === values.project_id)?.name || 'Select a project'
+                                    ? projects.find((p) => p._id === values.project_id)?.name || 'Select a project'
                                     : 'Select a project'}
                                 </span>
                                 <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
@@ -511,8 +511,8 @@ export default function ArticleAddPage() {
                                   ) : (
                                     projects.map((project) => (
                                       <CommandItem
-                                        key={project.id}
-                                        value={`${project.id}|||${project.name.toLowerCase()}`}
+                                        key={project._id}
+                            value={`${project._id}|||${project.name.toLowerCase()}`}
                                         onSelect={async (v) => {
                                           const id = v.split('|||')[0];
                                           await setFieldValue('project_id', id);
@@ -527,7 +527,7 @@ export default function ArticleAddPage() {
                                       >
                                         <Check
                                           className={
-                                            values.project_id === project.id
+                                            values.project_id === project._id
                                               ? 'mr-2 h-4 w-4 opacity-100'
                                               : 'mr-2 h-4 w-4 opacity-0'
                                           }
@@ -592,7 +592,7 @@ export default function ArticleAddPage() {
                             <SelectContent className="max-h-[300px]">
                               <ScrollArea className="h-full">
                                 {articleTypes.map((type) => (
-                                  <SelectItem key={type.id} value={type.id}>
+                                  <SelectItem key={type._id} value={type._id}>
                                     {type.name}
                                   </SelectItem>
                                 ))}
@@ -1031,7 +1031,7 @@ export default function ArticleAddPage() {
                               >
                                 <span className="truncate">
                                   {values.project_id
-                                    ? projects.find((p) => p.id === values.project_id)?.name || 'Select a project'
+                                    ? projects.find((p) => p._id === values.project_id)?.name || 'Select a project'
                                     : 'Select a project'}
                                 </span>
                                 <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
@@ -1046,8 +1046,8 @@ export default function ArticleAddPage() {
                                   ) : (
                                     projects.map((project) => (
                                       <CommandItem
-                                        key={project.id}
-                                        value={`${project.id}|||${project.name.toLowerCase()}`}
+                                        key={project._id}
+                            value={`${project._id}|||${project.name.toLowerCase()}`}
                                         onSelect={async (v) => {
                                           const id = v.split('|||')[0];
                                           await setFieldValue('project_id', id);
@@ -1062,7 +1062,7 @@ export default function ArticleAddPage() {
                                       >
                                         <Check
                                           className={
-                                            values.project_id === project.id
+                                            values.project_id === project._id
                                               ? 'mr-2 h-4 w-4 opacity-100'
                                               : 'mr-2 h-4 w-4 opacity-0'
                                           }
@@ -1128,7 +1128,7 @@ export default function ArticleAddPage() {
                             <SelectContent className="max-h-[300px]">
                               <ScrollArea className="h-full">
                                 {articleTypes.map((type) => (
-                                  <SelectItem key={type.id} value={type.id}>
+                                  <SelectItem key={type._id} value={type._id}>
                                     {type.name}
                                   </SelectItem>
                                 ))}

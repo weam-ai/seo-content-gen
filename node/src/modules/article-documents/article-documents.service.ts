@@ -87,8 +87,8 @@ export class ArticleDocumentsService {
       document = {
         snapshot_data: initialDocument.snapshot_data,
         version: initialDocument.version,
-        created_at: initialDocument.created_at,
-        updated_at: initialDocument.updated_at,
+        created_at: (initialDocument as any).createdAt,
+        updated_at: (initialDocument as any).updatedAt,
       } as any;
     }
 

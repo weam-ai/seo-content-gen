@@ -26,7 +26,7 @@ export interface GetTopicsResponse<T> {
 }
 
 export interface ArticleTypeOption {
-  id: string;
+  _id: string;
   name: string;
 }
 
@@ -70,7 +70,7 @@ export interface GetArticlesParams {
 }
 
 export interface ArticleAIContent {
-  id: string;
+  _id: string;
   created_at: string;
   open_ai_content: string;
   gemini_content: string;
@@ -117,14 +117,14 @@ function mapApiTopicToTopic(apiTopic: any): Topic {
   // Always use the actual outline string, not a boolean or '1'
   const outline = apiTopic.generated_outline || apiTopic.outline || '';
   return {
-    id: apiTopic.id,
+    _id: apiTopic._id,
     title: apiTopic.name,
     relatedProject: {
-      id: apiTopic.project?.id || '',
+      _id: apiTopic.project?._id || '',
       name: apiTopic.project?.name || '',
       description:
         apiTopic.project?.description || apiTopic.project?.description || '',
-      assignedTo: [],
+      // assignedTo field removed for single-user application
       language: apiTopic.project?.language || 'en-US',
       location: Array.isArray(apiTopic.project?.location)
         ? apiTopic.project.location.join(', ')
@@ -180,22 +180,8 @@ function mapApiTopicToTopic(apiTopic: any): Topic {
           apiTopic.status === 'mark as rejected'
         ? 'rejected'
         : apiTopic.status,
-    assignedTo: [], // Removed assigned_members mapping for single-user application
-    followers: [],
-    createdBy: apiTopic.user
-      ? {
-          id: apiTopic.user.id,
-          name: `${apiTopic.user.firstname} ${apiTopic.user.lastname}`.trim(),
-          email: '',
-          avatar: apiTopic.user.profile_image || undefined,
-          // role property removed for single-user application
-        }
-      : {
-          id: '',
-          name: '',
-          email: '',
-          // role property removed for single-user application
-        },
+    // assignedTo and followers fields removed for single-user application
+    // createdBy field removed for single-user application
     createdAt: new Date(apiTopic.created_at),
     startDate: apiTopic.start_date ? new Date(apiTopic.start_date) : undefined,
     dueDate: apiTopic.end_date ? new Date(apiTopic.end_date) : undefined,
@@ -205,22 +191,22 @@ function mapApiTopicToTopic(apiTopic: any): Topic {
     is_outline_generated: apiTopic.is_outline_generated,
     articleType: apiTopic.prompt_type?.name?.trim() || 'blog post',
     avgWordCount: apiTopic.wordCount || apiTopic.avgWordCount || 0,
-    topicId: apiTopic.topicId || apiTopic.id || '',
+    topicId: apiTopic.topicId || '',
   };
 }
 
 function mapApiArticleToArticle(apiArticle: any): Article {
   return {
-    id: apiArticle.id,
+    _id: apiArticle._id,
     title: apiArticle.name,
     relatedProject: {
-      id: apiArticle.project?.id || '',
+      _id: apiArticle.project?._id || '',
       name: apiArticle.project?.name || '',
       description:
         apiArticle.project?.description ||
         apiArticle.project?.description ||
         '',
-      assignedTo: [],
+      // assignedTo field removed for single-user application
       language: apiArticle.project?.language || 'en-US',
       location: Array.isArray(apiArticle.project?.location)
         ? apiArticle.project.location.join(', ')
@@ -270,25 +256,8 @@ function mapApiArticleToArticle(apiArticle: any): Article {
     volume: apiArticle.keyword_volume || 0,
     keywordDifficulty: (apiArticle.keyword_difficulty || 'low').toLowerCase(),
     status: (apiArticle.status || 'not started').replace(/_/g, ' '),
-    assignedTo: [], // Removed assigned_members mapping for single-user application
-    followers: [],
-    createdBy: apiArticle.user
-      ? {
-          id: apiArticle.user.id,
-          name:
-            `${apiArticle.user.firstname || ''} ${
-              apiArticle.user.lastname || ''
-            }`.trim() || 'Unknown',
-          email: '',
-          avatar: apiArticle.user.profile_image || undefined,
-          // role property removed for single-user application
-        }
-      : {
-          id: '',
-          name: '',
-          email: '',
-          // role property removed for single-user application
-        },
+    // assignedTo and followers fields removed for single-user application
+    // createdBy field removed for single-user application
     createdAt: new Date(apiArticle.created_at),
     startDate: apiArticle.start_date
       ? new Date(apiArticle.start_date)
@@ -303,7 +272,7 @@ function mapApiArticleToArticle(apiArticle: any): Article {
       apiArticle.avgWordCount ||
       apiArticle.wordCount ||
       0,
-    topicId: apiArticle.topicId || apiArticle.id || '',
+    topicId: apiArticle.topicId || '',
     author_bio: apiArticle.author_bio,
     meta_title: apiArticle.meta_title,
     meta_description: apiArticle.meta_description,
@@ -348,9 +317,9 @@ export async function getArticleTypes(): Promise<ArticleTypeOption[]> {
   if (!response.status || !response.data) {
     throw new Error(response.message || 'Failed to fetch article types');
   }
-  // Map _id to id for frontend compatibility
+  // Use _id directly for frontend
   return response.data.map((item: any) => ({
-    id: item._id,
+    _id: item._id,
     name: item.name
   }));
 }
@@ -400,7 +369,7 @@ export const getArticleAIContent = async (
     }
 
     return {
-      id: response.data.data.id,
+      _id: response.data.data._id,
       created_at: response.data.data.created_at,
       open_ai_content: response.data.data.open_ai_content || '',
       gemini_content: response.data.data.gemini_content || '',
@@ -496,55 +465,7 @@ export const getArticleEditorContentByVersion = async (
   }
 };
 
-export interface EEATReportResponse {
-  status: boolean;
-  message: string;
-  data: {
-    id: string;
-    overallScore: number;
-    maxOverallScore: number;
-    scores: Array<{
-      category:
-        | 'experience'
-        | 'expertise'
-        | 'authoritativeness'
-        | 'trustworthiness';
-      score: number;
-      maxScore: number;
-      feedback: string[];
-      suggestions: string[];
-    }>;
-    generatedAt: string;
-    status: 'analyzing' | 'completed' | 'failed';
-  };
-}
 
-export const getArticleEEATReport = async (
-  articleId: string,
-  refresh = true
-): Promise<EEATReportResponse> => {
-  try {
-    const response = await api.get(`/article/${articleId}/audit-report`, {
-      params: { refresh },
-    });
-    if (!response.data.status) {
-      throw new Error(response.data.message || 'Failed to fetch EEAT report');
-    }
-
-    // Try to parse the response as JSON for EEAT data
-    try {
-      const eeATData = response.data;
-      return eeATData;
-    } catch (parseError) {
-      throw new Error(
-        'EEAT analysis not available - received markdown instead of EEAT data'
-      );
-    }
-  } catch (error: any) {
-    console.error('API Error:', error);
-    throw error;
-  }
-};
 
 // Generate LLM content for an article (OpenAI, Gemini, Claude)
 export async function generateArticleAIContent(

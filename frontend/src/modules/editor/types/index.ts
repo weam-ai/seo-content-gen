@@ -1,5 +1,5 @@
 export interface ArticleDetails {
-  id: string;
+  _id: string;
   title: string;
   status: string;
   wordCount: number;
@@ -17,7 +17,7 @@ export interface ArticleDetails {
 // }
 
 export interface ChecklistItem {
-  id: string;
+  _id: string;
   name: string;
   description: string;
   status: 'pending' | 'running' | 'completed' | 'failed';
@@ -26,7 +26,7 @@ export interface ChecklistItem {
 }
 
 export interface TimeLogEntry {
-  id: string;
+  _id: string;
   startTime: Date;
   endTime?: Date;
   duration: number;
@@ -50,37 +50,12 @@ export interface EditorSettings {
   };
 }
 
-export interface Collaborator {
-  id: string;
-  name: string;
-  email: string;
-  avatar?: string;
-  // role property removed for single-user application
-}
+// Collaborator interface removed for single-user application
 
-export interface EEATScore {
-  category:
-    | 'experience'
-    | 'expertise'
-    | 'authoritativeness'
-    | 'trustworthiness';
-  score: number;
-  maxScore: number;
-  feedback: string[];
-  suggestions: string[];
-}
 
-export interface EEATReport {
-  id: string;
-  overallScore: number;
-  maxOverallScore: number;
-  scores: EEATScore[];
-  generatedAt: Date;
-  status: 'analyzing' | 'completed' | 'failed';
-}
 
 export interface Thread {
-  id: string;
+  _id: string;
   documentId?: string;
   metadata?: {
     blockId: string;
@@ -97,7 +72,7 @@ export interface Thread {
 }
 
 export interface Comment {
-  id: string;
+  _id: string;
   body: Array<{ text: string }>;
   metadata?: {
     blockId: string;
@@ -107,7 +82,7 @@ export interface Comment {
     };
   };
   author: {
-    id: string;
+    _id: string;
     firstname: string;
     lastname: string;
     profile_image?: string;
@@ -119,10 +94,10 @@ export interface Comment {
 }
 
 export interface LegacyReply {
-  id: string;
+  _id: string;
   text: string;
   author: {
-    id: string;
+    _id: string;
     name: string;
     avatar?: string;
   };
@@ -131,7 +106,7 @@ export interface LegacyReply {
 
 // Legacy interface for backward compatibility
 export interface LegacyComment {
-  id: string;
+  _id: string;
   text: string;
   selectedText: string;
   blockId: string;
@@ -140,7 +115,7 @@ export interface LegacyComment {
     end: number;
   };
   author: {
-    id: string;
+    _id: string;
     name: string;
     avatar?: string;
   };
@@ -167,6 +142,6 @@ export type SidebarSection =
   | 'extras'
   | 'settings'
   | 'share'
-  | 'eeat'
+
   | 'surferseo'
   | null;

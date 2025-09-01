@@ -10,10 +10,20 @@ export enum SiteAuditStatus {
   FAILED = 'failed',
 }
 
-@Schema({ collection: 'solution_seo_site_audit' })
+@Schema({ 
+  collection: 'solution_seo_site_audit',
+  timestamps: {
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+    currentTime: () => new Date()
+  }
+})
 export class SiteAudit extends BaseEntity {
   @Prop({ required: true, maxlength: 500 })
   url: string;
+
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+  user: Types.ObjectId;
 
   @Prop({ type: Object })
   audit_report: Record<string, any>;

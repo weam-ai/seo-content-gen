@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { EditorProvider } from '../context/EditorContext';
-import { CommentProvider } from '../context/CommentContext';
 import useEditor from '../hooks/useEditor';
 import { LeftSidebar } from './LeftSidebar';
 import { EditorContent } from './EditorContent';
@@ -100,9 +99,7 @@ const Editor: React.FC = () => {
 
   return (
     <EditorProvider articleId={articleId}>
-      <CommentProvider>
-        <EditorLayout />
-      </CommentProvider>
+      <EditorLayout />
     </EditorProvider>
   );
 };

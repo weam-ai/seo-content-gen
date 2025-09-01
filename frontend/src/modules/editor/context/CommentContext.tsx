@@ -147,7 +147,7 @@ export const CommentProvider: React.FC<CommentProviderProps> = ({
   const convertThreadToLegacyComment = (thread: Thread): LegacyComment => {
     const firstComment = thread.comments[0];
     return {
-      id: thread.id,
+      _id: thread._id,
       text: firstComment?.body[0]?.text || '',
       selectedText: '', // Will be extracted from marker
       blockId: thread.metadata?.blockId || '', // Handle missing metadata
@@ -156,7 +156,7 @@ export const CommentProvider: React.FC<CommentProviderProps> = ({
         end: thread.metadata?.markerPosition?.to || 0,
       },
       author: {
-        id: firstComment?.author.id || '',
+        _id: firstComment?.author._id || '',
         name: `${firstComment?.author.firstname || ''} ${
           firstComment?.author.lastname || ''
         }`.trim(),
@@ -166,10 +166,10 @@ export const CommentProvider: React.FC<CommentProviderProps> = ({
       resolved: thread.resolved,
       replies: thread.comments.slice(1).map(
         (comment): LegacyReply => ({
-          id: comment.id,
+          _id: comment._id,
           text: comment.body[0]?.text || '',
           author: {
-            id: comment.author.id,
+            _id: comment.author._id,
             name: `${comment.author.firstname} ${comment.author.lastname}`.trim(),
             avatar: comment.author.profile_image,
           },
@@ -287,7 +287,7 @@ export const CommentProvider: React.FC<CommentProviderProps> = ({
 
         // Find the thread to delete
         const threadToDelete = threads.find(
-          (thread) => thread.id === commentId
+          (thread) => thread._id === commentId
         );
 
         if (threadToDelete && editorRef?.current) {
@@ -366,7 +366,7 @@ export const CommentProvider: React.FC<CommentProviderProps> = ({
         setLoading(true);
         setError(null);
 
-        const thread = threads.find((t) => t.id === threadId);
+        const thread = threads.find((t) => t._id === threadId);
         if (thread) {
           if (thread.resolved) {
             await ThreadService.unresolveThread(threadId);

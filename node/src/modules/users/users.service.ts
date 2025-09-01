@@ -33,19 +33,9 @@ export class UsersService {
       throw new ConflictException(USERS_STRING.ERROR.USER_EXIST);
     }
 
-    // Hash password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(createUserDto.password, salt);
-    const verificationCode = await bcrypt.hash(
-      createUserDto.email + Date.now() + Math.random().toString(),
-      salt,
-    );
-
-    // Create user payload
+    // Create user payload - simplified for single-user application
     const userPayload = {
-      ...createUserDto,
-      password: hashedPassword,
-      email_verification_key: verificationCode.replace(/\//g, ''),
+      email: createUserDto.email,
       email_verified_at: new Date(),
     };
 
@@ -175,13 +165,11 @@ export class UsersService {
   }
 
   /**
-   * Verify user password
+   * Verify user password (disabled for single-user app)
    */
   async verifyPassword(user: User, password: string): Promise<boolean> {
-    if (!user.password) {
-      return false;
-    }
-    return await bcrypt.compare(password, user.password);
+    // Always return true for single-user application
+    return true;
   }
 
   /**
@@ -260,41 +248,9 @@ export class UsersService {
   }
 
   /**
-   * Reset password using reset key
+   * Reset password (disabled for single-user app)
    */
   async resetPassword(resetKey: string, newPassword: string): Promise<User> {
-    const user = await this.userModel.findOne({ new_pass_key: resetKey });
-    if (!user) {
-      throw new NotFoundException('Invalid reset key');
-    }
-
-    // Check if reset key is not expired (24 hours)
-    if (user.new_pass_key_requested && 
-        new Date().getTime() - new Date(user.new_pass_key_requested).getTime() < 24 * 60 * 60 * 1000) {
-      throw new BadRequestException('Password reset already requested within 24 hours');
-    }
-
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(newPassword, salt);
-
-    const updatedUser = await this.userModel
-      .findByIdAndUpdate(
-        user._id,
-        {
-          password: hashedPassword,
-          new_pass_key: null,
-          new_pass_key_requested: null,
-          last_password_change: new Date(),
-        },
-        { new: true }
-      )
-      .select('-password -email_verification_key -two_factor_auth_code')
-      .exec();
-
-    if (!updatedUser) {
-      throw new NotFoundException(USERS_STRING.ERROR.USER_NOT_FOUND);
-    }
-
-    return updatedUser;
+    throw new BadRequestException('Password reset not supported in single-user application');
   }
 }

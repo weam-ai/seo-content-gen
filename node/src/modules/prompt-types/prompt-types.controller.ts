@@ -10,6 +10,7 @@ import {
   UseGuards,
   Query,
   NotFoundException,
+  Req,
 } from '@nestjs/common';
 import { PromptTypesService } from './prompt-types.service';
 import { CreatePromptTypeDto } from './dto/create-prompt-type.dto';
@@ -19,7 +20,9 @@ import {
   successPaginationResponseWithData,
   successResponseWithData,
 } from '@/shared/utils/reponses.utils';
-import { Response } from 'express';
+import { Request, Response } from 'express';
+import { JwtAuthGuard } from '@shared/guards/jwt-auth.guard';
+import { getUserId } from '@shared/types/populated-entities';
 import { PROMPT_TYPES_STRING } from '@/shared/utils/string.utils';
 import { instanceToPlain } from 'class-transformer';
 import {
@@ -28,16 +31,18 @@ import {
 } from './dto/list-prompt-types.dto';
 
 @Controller('prompt-types')
+@UseGuards(JwtAuthGuard)
 export class PromptTypesController {
   constructor(private readonly promptTypesService: PromptTypesService) {}
 
   @Post()
   async create(
     @Body() createPromptTypeDto: CreatePromptTypeDto,
+    @Req() req: Request,
     @Res() res: Response,
   ) {
     const promptType =
-      await this.promptTypesService.create(createPromptTypeDto);
+      await this.promptTypesService.create(createPromptTypeDto, getUserId(req.user!));
     return successResponseWithData(
       res,
       PROMPT_TYPES_STRING.SUCCESS.PROMPT_TYPE_CREATED,
@@ -46,42 +51,24 @@ export class PromptTypesController {
   }
 
   @Get('list')
-  async findAllList(@Query() query: ListPromptTypeQuery, @Res() res: Response) {
-    const promptTypes = await this.promptTypesService.findAll(query);
+  async findAllList(@Query() query: ListPromptTypeQuery, @Req() req: Request, @Res() res: Response) {
+    const promptTypes = await this.promptTypesService.findAll(query, getUserId(req.user!));
     
-    // Manually serialize to avoid circular reference issues
-    const serializedPromptTypes = (promptTypes as any[]).map(promptType => ({
-      id: promptType._id.toString(),
-      name: promptType.name,
-      titlePrompt: promptType.titlePrompt ? {
-        id: (promptType.titlePrompt as any)._id?.toString() || promptType.titlePrompt.toString(),
-        name: (promptType.titlePrompt as any).name || null
-      } : null,
-      outlinePrompt: promptType.outlinePrompt ? {
-        id: (promptType.outlinePrompt as any)._id?.toString() || promptType.outlinePrompt.toString(),
-        name: (promptType.outlinePrompt as any).name || null
-      } : null,
-      articlePrompt: promptType.articlePrompt ? {
-        id: (promptType.articlePrompt as any)._id?.toString() || promptType.articlePrompt.toString(),
-        name: (promptType.articlePrompt as any).name || null
-      } : null,
-      created_at: promptType.created_at,
-      updated_at: promptType.updated_at
-    }));
-    
+    // Return prompt types with _id fields intact
     return successResponseWithData(
       res,
       PROMPT_TYPES_STRING.SUCCESS.PROMPT_TYPES_FETCHED,
-      serializedPromptTypes,
+      promptTypes,
     );
   }
 
   @Get()
   async findAll(
     @Query() query: ListPromptTypeQueryPagination,
+    @Req() req: Request,
     @Res() res: Response,
   ) {
-    const result = await this.promptTypesService.findAll(query);
+    const result = await this.promptTypesService.findAll(query, getUserId(req.user!));
     
     // Handle both paginated and non-paginated results
     let promptTypes: any[];
@@ -96,73 +83,35 @@ export class PromptTypesController {
       pagination = result.pagination;
     }
       
-    // Manually serialize to avoid circular reference issues
-    const serializedPromptTypes = promptTypes.map(promptType => ({
-      id: promptType._id.toString(),
-      name: promptType.name,
-      titlePrompt: promptType.titlePrompt ? {
-        id: (promptType.titlePrompt as any)._id?.toString() || promptType.titlePrompt.toString(),
-        name: (promptType.titlePrompt as any).name || null
-      } : null,
-      outlinePrompt: promptType.outlinePrompt ? {
-        id: (promptType.outlinePrompt as any)._id?.toString() || promptType.outlinePrompt.toString(),
-        name: (promptType.outlinePrompt as any).name || null
-      } : null,
-      articlePrompt: promptType.articlePrompt ? {
-        id: (promptType.articlePrompt as any)._id?.toString() || promptType.articlePrompt.toString(),
-        name: (promptType.articlePrompt as any).name || null
-      } : null,
-      created_at: promptType.created_at,
-      updated_at: promptType.updated_at
-    }));
-      
+    // Return prompt types with _id fields intact
     if (pagination) {
       return successPaginationResponseWithData(
         pagination,
         res,
         PROMPT_TYPES_STRING.SUCCESS.PROMPT_TYPES_FETCHED,
-        serializedPromptTypes,
+        promptTypes,
       );
     } else {
       return successResponseWithData(
         res,
         PROMPT_TYPES_STRING.SUCCESS.PROMPT_TYPES_FETCHED,
-        serializedPromptTypes,
+        promptTypes,
       );
     }
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string, @Res() res: Response) {
-    const prompt = await this.promptTypesService.findOne(id);
-    if (!prompt) {
+  async findOne(@Param('id') id: string, @Req() req: Request, @Res() res: Response) {
+    const promptType = await this.promptTypesService.findOne(id, getUserId(req.user!));
+    if (!promptType) {
       throw new NotFoundException(PROMPT_TYPES_STRING.ERROR.PROMPT_TYPE_NOT_FOUND);
     }
     
-    // Manually serialize to avoid circular reference issues
-    const serializedPrompt = {
-      id: (prompt as any)._id.toString(),
-      name: prompt.name,
-      titlePrompt: prompt.titlePrompt ? {
-        id: (prompt.titlePrompt as any)._id?.toString() || prompt.titlePrompt.toString(),
-        name: (prompt.titlePrompt as any).name || null
-      } : null,
-      outlinePrompt: prompt.outlinePrompt ? {
-        id: (prompt.outlinePrompt as any)._id?.toString() || prompt.outlinePrompt.toString(),
-        name: (prompt.outlinePrompt as any).name || null
-      } : null,
-      articlePrompt: prompt.articlePrompt ? {
-        id: (prompt.articlePrompt as any)._id?.toString() || prompt.articlePrompt.toString(),
-        name: (prompt.articlePrompt as any).name || null
-      } : null,
-      created_at: (prompt as any).created_at,
-      updated_at: (prompt as any).updated_at
-    };
-    
+    // Return prompt type with _id field intact
     return successResponseWithData(
       res,
       PROMPT_TYPES_STRING.SUCCESS.PROMPT_TYPE_FETCHED,
-      serializedPrompt,
+      promptType,
     );
   }
 
@@ -170,46 +119,29 @@ export class PromptTypesController {
   async update(
     @Param('id') id: string,
     @Body() updatePromptTypeDto: UpdatePromptTypeDto,
+    @Req() req: Request,
     @Res() res: Response,
   ) {
-    const prompt = await this.promptTypesService.update(
+    const promptType = await this.promptTypesService.update(
       id,
       updatePromptTypeDto as CreatePromptTypeDto,
+      getUserId(req.user!),
     );
-    if (!prompt) {
+    if (!promptType) {
       throw new NotFoundException(PROMPT_TYPES_STRING.ERROR.PROMPT_TYPE_NOT_FOUND);
     }
     
-    // Manually serialize to avoid circular reference issues
-    const serializedPrompt = {
-      id: (prompt as any)._id.toString(),
-      name: prompt.name,
-      titlePrompt: prompt.titlePrompt ? {
-        id: (prompt.titlePrompt as any)._id?.toString() || prompt.titlePrompt.toString(),
-        name: (prompt.titlePrompt as any).name || null
-      } : null,
-      outlinePrompt: prompt.outlinePrompt ? {
-        id: (prompt.outlinePrompt as any)._id?.toString() || prompt.outlinePrompt.toString(),
-        name: (prompt.outlinePrompt as any).name || null
-      } : null,
-      articlePrompt: prompt.articlePrompt ? {
-        id: (prompt.articlePrompt as any)._id?.toString() || prompt.articlePrompt.toString(),
-        name: (prompt.articlePrompt as any).name || null
-      } : null,
-      created_at: (prompt as any).created_at,
-      updated_at: (prompt as any).updated_at
-    };
-    
+    // Return prompt type with _id field intact
     return successResponseWithData(
       res,
       PROMPT_TYPES_STRING.SUCCESS.PROMPT_TYPE_UPDATED,
-      serializedPrompt,
+      prompt,
     );
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string, @Res() res: Response) {
-    await this.promptTypesService.remove(id);
+  async remove(@Param('id') id: string, @Req() req: Request, @Res() res: Response) {
+    await this.promptTypesService.remove(id, getUserId(req.user!));
     return acceptedResponse(
       res,
       PROMPT_TYPES_STRING.SUCCESS.PROMPT_TYPE_DELETED,

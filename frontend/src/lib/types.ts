@@ -1,20 +1,14 @@
 import { EditorSettings } from '@/modules/editor';
 
 export interface User {
-  id: string;
-  name: string;
+  _id: string;
   email: string;
-  avatar?: string;
-  // role property removed for single-user application
-  staffid?: string;
-  agency_id?: string;
 }
 
 export interface Project {
-  id: string;
+  _id: string;
   name: string;
   description?: string;
-  assignedTo: User[];
   language: 'en-US' | 'en-UK' | 'en-AU';
   location: string;
   websiteUrl: string;
@@ -34,7 +28,6 @@ export interface Project {
 
 export interface ProjectFormData {
   name: string;
-  assignedTo: string[];
   language: 'en-US' | 'en-UK' | 'en-AU';
   location: string;
   websiteUrl: string;
@@ -74,7 +67,7 @@ export type ArticleType =
   | 'press release';
 
 export interface Topic {
-  id: string;
+  _id: string;
   title: string;
   relatedProject: Project;
   keyword: string;
@@ -82,9 +75,7 @@ export interface Topic {
   volume: number;
   keywordDifficulty: 'low' | 'medium' | 'high';
   status: TopicStatus;
-  assignedTo: User[];
-  followers: User[];
-  createdBy: User;
+  // createdBy field removed for single-user application
   createdAt: Date;
   startDate?: Date;
   dueDate?: Date;
@@ -98,7 +89,7 @@ export interface Topic {
 }
 
 export interface Article {
-  id: string;
+  _id: string;
   title: string;
   relatedProject: Project;
   keyword: string;
@@ -106,9 +97,7 @@ export interface Article {
   volume: number;
   keywordDifficulty: 'low' | 'medium' | 'high';
   status: ArticleStatus;
-  assignedTo: User[];
-  followers: User[];
-  createdBy: User;
+  // createdBy field removed for single-user application
   createdAt: Date;
   startDate?: Date;
   dueDate?: Date;

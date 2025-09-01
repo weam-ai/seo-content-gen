@@ -13,9 +13,9 @@ export default function ProjectQuickStats({ project }: ProjectQuickStatsProps) {
 
   useEffect(() => {
     async function fetchTargetedKeywordsCount() {
-      if (project?.id) {
+      if (project?._id) {
         try {
-          const response = await ProjectService.getProjectKeywords(project.id);
+          const response = await ProjectService.getProjectKeywords(project._id);
           if (response.status && response.data) {
             setTargetedKeywordsCount(response.data.length);
           }
@@ -26,7 +26,7 @@ export default function ProjectQuickStats({ project }: ProjectQuickStatsProps) {
       }
     }
     fetchTargetedKeywordsCount();
-  }, [project?.id, project.keywords]);
+  }, [project?._id, project.keywords]);
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">

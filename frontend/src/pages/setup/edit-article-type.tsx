@@ -84,9 +84,9 @@ export default function EditArticleTypePage() {
         if (!found) throw new Error('Article type not found');
         setFormData({
           name: found.name,
-          titlePrompt: found.titlePrompt?.id || '',
-          outlinePrompt: found.outlinePrompt?.id || '',
-          articlePrompt: found.articlePrompt?.id || '',
+          titlePrompt: found.titlePrompt?._id || '',
+          outlinePrompt: found.outlinePrompt?._id || '',
+          articlePrompt: found.articlePrompt?._id || '',
         });
       } catch (error: any) {
         toast({ title: 'Error', description: error.message, variant: 'destructive' });
@@ -210,7 +210,7 @@ export default function EditArticleTypePage() {
                           </div>
                         ) : (
                           titlePrompts.map((prompt) => (
-                            <SelectItem key={prompt.id} value={prompt.id}>
+                            <SelectItem key={prompt._id} value={prompt._id}>
                               {prompt.name}
                             </SelectItem>
                           ))
@@ -241,7 +241,7 @@ export default function EditArticleTypePage() {
                           </div>
                         ) : (
                           outlinePrompts.map((prompt) => (
-                            <SelectItem key={prompt.id} value={prompt.id}>
+                            <SelectItem key={prompt._id} value={prompt._id}>
                               {prompt.name}
                             </SelectItem>
                           ))
@@ -272,7 +272,7 @@ export default function EditArticleTypePage() {
                           </div>
                         ) : (
                           articlePrompts.map((prompt) => (
-                            <SelectItem key={prompt.id} value={prompt.id}>
+                            <SelectItem key={prompt._id} value={prompt._id}>
                               {prompt.name}
                             </SelectItem>
                           ))

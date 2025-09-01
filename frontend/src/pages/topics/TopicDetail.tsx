@@ -126,7 +126,7 @@ export default function TopicDetail() {
           const found = options.find(
             (type) => type.name.trim() === topic.articleType.trim()
           );
-          if (found) setArticleType(found.id);
+          if (found) setArticleType(found._id);
         }
       })
       .catch((err: any) => {
@@ -443,7 +443,7 @@ export default function TopicDetail() {
               onStatusChange={handleStatusChange}
               articleType={articleType}
               articleTypeOptions={articleTypeOptions.map((type) => ({
-                id: type.id,
+                _id: type._id,
                 name: type.name.trim(),
               }))}
               onArticleTypeChange={handleArticleTypeSelect}
@@ -764,7 +764,7 @@ export default function TopicDetail() {
             });
             setArticleType(typeToUse);
             const selectedType = articleTypeOptions.find(
-              (type) => type.id === typeToUse
+              (type) => type._id === typeToUse
             );
             setTopic((prev: any) =>
               prev

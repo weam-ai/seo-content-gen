@@ -7,7 +7,7 @@ import {
 import { UpdateSystemPromptDto } from './dto/update-system-prompt.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { SystemPrompt } from './entities/system-prompt.entity';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import {
   ListSystemPromptQuery,
   ListSystemPromptQueryPagination,
@@ -16,6 +16,7 @@ import { Pagination } from '@shared/types/response.t';
 import { SYSTEM_PROMPT_STRING } from '@shared/utils/string.utils';
 import { CreateSystemPromptDto } from './dto/create-system-prompt.dto';
 import { SYSTEM_PROMPT_TYPES } from '@/shared/types/system-prompt.t';
+import { toObjectId } from '@/shared/types/populated-entities';
 
 @Injectable()
 export class SystemPromptsService {
@@ -24,10 +25,11 @@ export class SystemPromptsService {
     private readonly systemPromptModel: Model<SystemPrompt>,
   ) {}
 
-  async create(createSystemPromptDto: CreateSystemPromptDto) {
-    //check if guideline already exists with same name
+  async create(createSystemPromptDto: CreateSystemPromptDto, userId: Types.ObjectId) {
+    //check if guideline already exists with same name for this user
     const isExists = await this.systemPromptModel.findOne({
       name: createSystemPromptDto.name,
+      user: toObjectId(userId),
     });
     if (isExists) {
       throw new ConflictException(
@@ -35,31 +37,37 @@ export class SystemPromptsService {
       );
     }
 
-    //check is there is any same type prompt exists or not to make it default
+    //check is there is any same type prompt exists or not to make it default for this user
     const isSameTypePromptExists = await this.systemPromptModel.findOne({
       type: createSystemPromptDto.type,
+      user: toObjectId(userId),
     });
     if (!isSameTypePromptExists) {
       createSystemPromptDto.is_default = true;
     }
 
-    return await this.systemPromptModel.create(createSystemPromptDto);
+    return await this.systemPromptModel.create({
+      ...createSystemPromptDto,
+      user: toObjectId(userId),
+    });
   }
 
   // Function overloads to match with the expected return type
   async findAll(
     query: ListSystemPromptQueryPagination,
+    userId: Types.ObjectId,
   ): Promise<{ systemPrompts: SystemPrompt[]; pagination: Pagination }>;
-  async findAll(query: ListSystemPromptQuery): Promise<SystemPrompt[]>;
+  async findAll(query: ListSystemPromptQuery, userId: Types.ObjectId): Promise<SystemPrompt[]>;
 
   // Actual implementation
   async findAll(
     query: ListSystemPromptQuery | ListSystemPromptQueryPagination,
+    userId: Types.ObjectId,
   ): Promise<
     SystemPrompt[] | { systemPrompts: SystemPrompt[]; pagination: Pagination }
   > {
     const { search, type } = query;
-    const filter: any = {};
+    const filter: any = { user: toObjectId(userId) };
 
     if (search) {
       filter.name = { $regex: search, $options: 'i' };
@@ -72,14 +80,11 @@ export class SystemPromptsService {
     if (!(query instanceof ListSystemPromptQueryPagination)) {
       const result = await this.systemPromptModel
         .find(filter)
-        .select('name type description is_default created_at updated_at')
+        .select('name type description is_default createdAt updatedAt')
         .sort({ is_default: -1 })
         .lean()
         .exec();
-      return result.map(item => ({
-        ...item,
-        _id: item._id.toString()
-      }));
+      return result;
     }
 
     const total = await this.systemPromptModel.countDocuments(filter);
@@ -105,7 +110,7 @@ export class SystemPromptsService {
     if (typeof limit === 'number' && limit > 0) {
       systemPrompts = await this.systemPromptModel
         .find(filter)
-        .select('name type description is_default created_at updated_at')
+        .select('name type description is_default createdAt updatedAt')
         .sort(sortObj)
         .skip((page - 1) * limit)
         .limit(limit)
@@ -120,11 +125,7 @@ export class SystemPromptsService {
         .exec();
     }
     
-    // Transform ObjectIds to strings
-    systemPrompts = systemPrompts.map(item => ({
-      ...item,
-      _id: item._id.toString()
-    }));
+    // Return system prompts with _id fields intact
         
 
     const pagination: Pagination = {
@@ -139,46 +140,49 @@ export class SystemPromptsService {
     };
   }
 
-  async findOne(id: string): Promise<SystemPrompt> {
-    const systemPrompt = await this.systemPromptModel.findById(id).lean().exec();
+  async findOne(id: string, user?: any): Promise<SystemPrompt> {
+    const query: any = { _id: id };
+    if (user && user._id) {
+      query.user = toObjectId(user._id);
+    }
+    const systemPrompt = await this.systemPromptModel.findOne(query).lean().exec();
     if (!systemPrompt) {
       throw new NotFoundException(
         SYSTEM_PROMPT_STRING.ERROR.SYSTEM_PROMPT_NOT_FOUND,
       );
     }
-    return {
-      ...systemPrompt,
-      id: (systemPrompt._id as any).toString()
-    } as any;
+    return systemPrompt;
   }
 
-  async update(id: string, updateSystemPromptDto: UpdateSystemPromptDto) {
-    //check if guideline already exists with same name
+  async update(id: string, updateSystemPromptDto: UpdateSystemPromptDto, userId: Types.ObjectId) {
+    //check if guideline already exists with same name for this user
     const isExists = await this.systemPromptModel.findOne({
       name: updateSystemPromptDto.name,
+      user: toObjectId(userId),
     }).exec();
-    if (isExists && (isExists._id as any).toString() !== id) {
+    if (isExists && isExists._id.toString() !== id) {
       throw new ConflictException(
         SYSTEM_PROMPT_STRING.ERROR.SYSTEM_PROMPT_ALREADY_EXISTS,
       );
     }
 
-    //If user set is_default true on any specific prompt type, then remove default from existing one
+    //If user set is_default true on any specific prompt type, then remove default from existing one for this user
     const defaultTypePrompt = await this.systemPromptModel.findOne({
       type: updateSystemPromptDto.type,
+      user: toObjectId(userId),
       is_default: true,
     }).exec();
 
     if (defaultTypePrompt) {
       if (
         updateSystemPromptDto.is_default === true &&
-        (defaultTypePrompt._id as any).toString() !== id
+        defaultTypePrompt._id.toString() !== id
       ) {
         defaultTypePrompt.is_default = false;
         await defaultTypePrompt.save();
       } else if (
         updateSystemPromptDto.is_default === false &&
-        (defaultTypePrompt._id as any).toString() === id
+        defaultTypePrompt._id.toString() === id
       ) {
         throw new ConflictException();
       }
@@ -186,8 +190,8 @@ export class SystemPromptsService {
       updateSystemPromptDto.is_default = true;
     }
 
-    const updatedSystemPrompt = await this.systemPromptModel.findByIdAndUpdate(
-      id,
+    const updatedSystemPrompt = await this.systemPromptModel.findOneAndUpdate(
+      { _id: id, user: toObjectId(userId) },
       updateSystemPromptDto,
       { new: true }
     ).lean().exec();
@@ -198,14 +202,11 @@ export class SystemPromptsService {
       );
     }
     
-    return {
-      ...updatedSystemPrompt,
-      _id: updatedSystemPrompt._id.toString()
-    };
+    return updatedSystemPrompt;
   }
 
-  async remove(id: string) {
-    const prompt = await this.systemPromptModel.findById(id).exec();
+  async remove(id: string, userId: Types.ObjectId) {
+    const prompt = await this.systemPromptModel.findOne({ _id: id, user: toObjectId(userId) }).exec();
     if (!prompt) {
       throw new NotFoundException(
         SYSTEM_PROMPT_STRING.ERROR.SYSTEM_PROMPT_NOT_FOUND,
@@ -233,7 +234,7 @@ export class SystemPromptsService {
     //   deleteRecords[prompt.type]();
     // }
 
-    return await this.systemPromptModel.findByIdAndDelete(id).exec();
+    return await this.systemPromptModel.findOneAndDelete({ _id: id, user: toObjectId(userId) }).exec();
   }
 
   async verifySystemPromptType(id: string, type: SYSTEM_PROMPT_TYPES) {

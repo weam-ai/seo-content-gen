@@ -40,16 +40,7 @@ export class ClaudeController {
   //   );
   // }
 
-  @Post('/audit-article')
-  async auditArticle(@Body() body: { content: string }, @Res() res: Response) {
-    const result = await this.claudeService.articleAudit(body.content);
 
-    return successResponseWithData(
-      res,
-      OPENAI_STRING.SUCCESS.CHAT_RESPONSE,
-      { response: result },
-    );
-  }
 
   @Post('/generate-content')
   async generateContent(@Body() body: { prompt: string; options?: any }, @Res() res: Response) {

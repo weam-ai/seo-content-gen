@@ -11,7 +11,7 @@ import {
 } from '../types/python.t';
 import { logger } from '../utils/logger.utils';
 import { createAxiosWithLogging } from '../utils/axios.util';
-import { EmailService } from '../modules/email/email.service';
+// EmailService import removed - email functionality not supported
 
 @Injectable()
 export class PythonService {
@@ -43,7 +43,7 @@ export class PythonService {
 
   constructor(
     private readonly configService: ConfigService,
-    private readonly emailService: EmailService,
+    // private readonly emailService: EmailService, // Removed - email functionality not supported
   ) {
     const baseURL = this.configService.get<string>('PYTHON_API_PATH') || '';
     this.axiosInstance = createAxiosWithLogging({ baseURL }, 'PythonAPI');
@@ -106,13 +106,17 @@ export class PythonService {
     return promise;
   }
 
-  async generateArticle(payload: GenerateArticlePayload) {
+  async generateArticle(payload: GenerateArticlePayload, authToken?: string) {
     try {
       logger.log(
         'info',
         `Python service requested on [/generate-article, ${JSON.stringify(payload)}]`,
       );
-      const response = await this.axiosInstance.post('/generate-article', payload);
+      const headers: any = {};
+      if (authToken) {
+        headers.Authorization = authToken;
+      }
+      const response = await this.axiosInstance.post('/generate-article', payload, { headers });
       logger.log(
         'info',
         `Python service responded successfully for /generate-article with status: ${response.status}`,
@@ -127,11 +131,17 @@ export class PythonService {
 
   async generateTitles(
     payload: GenerateTitlePayload,
+    authToken?: string,
   ): Promise<string[] | null> {
     try {
+      const headers: any = {};
+      if (authToken) {
+        headers.Authorization = authToken;
+      }
       const response = await this.axiosInstance.post<string[]>(
         '/get-titles',
         payload,
+        { headers },
       );
       return response.data;
     } catch (error) {
@@ -143,6 +153,7 @@ export class PythonService {
 
   async generateOutline(
     payload: GenerateOutlinePayload,
+    authToken?: string,
   ): Promise<string | null> {
     const cacheKey = `${payload.articleId}`;
 
@@ -150,8 +161,13 @@ export class PythonService {
       return this.outlineRequestCache.get(cacheKey)!;
     }
 
+    const headers: any = {};
+    if (authToken) {
+      headers.Authorization = authToken;
+    }
+
     const promise = this.axiosInstance
-      .post<string>('/generate-outline', payload)
+      .post<string>('/generate-outline', payload, { headers })
       .then((response) => response.data)
       .catch((error) => {
         logger.error(error);
@@ -173,12 +189,18 @@ export class PythonService {
   async checkExistingProjectTitle(
     projectId: string,
     title: string,
+    authToken?: string,
   ): Promise<string | null> {
     const payload = { ProjectId: projectId, title };
+    const headers: any = {};
+    if (authToken) {
+      headers.Authorization = authToken;
+    }
     try {
       const response = await this.axiosInstance.post<string | null>(
         '/check-title',
         payload,
+        { headers },
       );
       return response.data;
     } catch (error) {
@@ -186,30 +208,33 @@ export class PythonService {
         `Error in check existing project title: payload [${JSON.stringify(payload)}], `,
         error,
       );
-      void this.sendPythonErrorNotification('/check-title', payload, error);
       return null;
     }
   }
   //company-business-summary
   async companyBusinessSummary(
     websiteUrl: string,
+    authToken?: string,
   ): Promise<GenerateCompanyDetailResponse> {
-    const payload = { company_name: websiteUrl };
+    const payload = { 
+      company_name: websiteUrl,
+      company_website: websiteUrl 
+    };
+    const headers: any = {};
+    if (authToken) {
+      headers.Authorization = authToken;
+    }
     try {
       const response =
         await this.axiosInstance.post<GenerateCompanyDetailResponse>(
           '/company-business-summary',
           payload,
+          { headers },
         );
       return response.data;
     } catch (error) {
       logger.error(
         `Error in generate business description: payload [${JSON.stringify(payload)}], `,
-        error,
-      );
-      void this.sendPythonErrorNotification(
-        '/company-business-summary',
-        payload,
         error,
       );
       return {
@@ -270,14 +295,9 @@ export class PythonService {
       debounceInfo.lastEmailSent = now;
       debounceInfo.errorCount = 0;
 
-      await this.emailService.sendMailWithTemplate(
-        this.serviceLogEmail,
-        'python-service-error.email.ejs',
-        '🚨 Python Service API Failure Alert',
-        {
-          endpoint,
-          error: JSON.stringify(error, null, 2),
-          errorDetails: JSON.stringify(error, null, 2),
+      // Email notification removed - not supported in single-user application
+      logger.error(`Python Service API Failure: ${endpoint}`, {
+        error: JSON.stringify(error, null, 2),
           payload: JSON.stringify(payload, null, 2),
           service: 'Python API',
           errorCount: previousErrorCount,

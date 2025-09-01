@@ -81,7 +81,7 @@ export default function IndustryGuidelinesPage() {
     setDeletingId(id);
     // Optimistically remove from UI
     const prev = guidelines;
-    setGuidelines(guidelines.filter((g) => g.id !== id));
+    setGuidelines(guidelines.filter((g) => g._id !== id));
     try {
       await guidelineService.deleteGuideline(id);
       toast({ title: 'Deleted', description: 'Guideline deleted successfully.' });
@@ -166,7 +166,7 @@ export default function IndustryGuidelinesPage() {
         <div>
           {canUpdateIndustryGuidelines && (
             <Button variant="ghost" size="sm" asChild>
-              <Link to={`/setup/industry-guidelines/${row.id}/edit`}>
+              <Link to={`/setup/industry-guidelines/${row._id}/edit`}>
                 <Edit className="h-4 w-4" />
               </Link>
             </Button>
@@ -176,10 +176,10 @@ export default function IndustryGuidelinesPage() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => handleDelete(row.id)}
-              disabled={deletingId === row.id}
+              onClick={() => handleDelete(row._id)}
+              disabled={deletingId === row._id}
             >
-              {deletingId === row.id ? (
+              {deletingId === row._id ? (
                 <span className="animate-spin"><Trash2 className="h-4 w-4 text-destructive" /></span>
               ) : (
                 <Trash2 className="h-4 w-4 text-destructive" />

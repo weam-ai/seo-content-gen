@@ -4,7 +4,15 @@ import { BaseEntity } from '@shared/entities/basic.entity';
 import { Exclude, Transform } from 'class-transformer';
 import { KeywordMetric } from '@shared/types/dataForSeo.t';
 
-@Schema({ collection: 'solution_seo_projects', toJSON: { virtuals: true } })
+@Schema({ 
+  collection: 'solution_seo_projects', 
+  toJSON: { virtuals: true },
+  timestamps: {
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+    currentTime: () => new Date()
+  }
+})
 export class Project extends BaseEntity {
   @Prop({ required: true, maxlength: 191 })
   name: string;

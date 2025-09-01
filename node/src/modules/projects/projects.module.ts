@@ -9,7 +9,7 @@ import { DataForSeoProvider } from '@shared/services/dataforseo.service';
 import { HttpModule } from '@nestjs/axios';
 import { RecommendedKeyword, RecommendedKeywordSchema } from './entities/recommended-keyword.entity';
 import { PythonService } from '@shared/services/python.service';
-import { EmailModule } from '@/shared/modules/email/email.module';
+// EmailModule import removed - email functionality not supported
 import { Article, ArticleSchema } from '../article/entities/article.entity';
 import { ArticleService } from '../article/article.service';
 import { ArticleContent, ArticleContentSchema } from '../article/entities/article-content.entity';
@@ -39,13 +39,13 @@ import { User, UserSchema } from '../users/entities/user.entity';
       { name: User.name, schema: UserSchema },
     ]),
     JwtModule.register({
-      secret: process.env.JWT_SECRET || 'secretKey',
+      secret: process.env.JWT_SECRET || 'razorcopy',
       signOptions: { expiresIn: '24h' },
     }),
     HttpModule,
     ArticleDocumentsModule,
     PromptTypesModule,
-    EmailModule,
+    // EmailModule, // Removed - email functionality not supported
     GeminiModule,
     ClaudeModule,
     OpenaiModule,

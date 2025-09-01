@@ -36,7 +36,7 @@ export default function NewSystemPromptPage() {
     }
     setLoading(true);
     try {
-      await systemPromptService.createSystemPrompt({ name: promptName, description: promptDescription });
+      await systemPromptService.createSystemPrompt({ name: promptName, description: promptDescription, type: promptType });
       toast({ title: 'Success', description: 'System prompt created successfully.' });
       navigate('/setup/system-prompts');
     } catch (error: any) {
@@ -131,4 +131,4 @@ export default function NewSystemPromptPage() {
       </main>
     </div>
   );
-} 
+}

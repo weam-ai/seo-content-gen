@@ -54,7 +54,7 @@ export interface ServerDataTableProps<T> {
   hideInternalExport?: boolean;
 }
 
-export function ServerDataTable<T extends { id: string | number }>(
+export function ServerDataTable<T extends { _id: string | number }>(
   props: ServerDataTableProps<T>
 ) {
   const {
@@ -216,7 +216,7 @@ export function ServerDataTable<T extends { id: string | number }>(
                 </TableRow>
               ) : (
                 data.map((row) => (
-                  <TableRow key={row.id} className="hover:bg-muted/50">
+                  <TableRow key={row._id} className="hover:bg-muted/50">
                     {columns.map((col) => (
                       <TableCell key={col.header} className={col.className}>
                         {col.render

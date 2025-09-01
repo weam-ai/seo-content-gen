@@ -8,7 +8,7 @@ import { User, UserSchema } from '@modules/users/entities/user.entity';
   imports: [
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     JwtModule.register({
-      secret: process.env.JWT_SECRET || 'secretKey',
+      secret: process.env.JWT_SECRET || 'razorcopy',
       signOptions: { expiresIn: '24h' },
     }),
   ],

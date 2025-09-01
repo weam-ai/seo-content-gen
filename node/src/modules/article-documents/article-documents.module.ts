@@ -19,7 +19,7 @@ import { User, UserSchema } from '../users/entities/user.entity';
       // { name: AuthTokens.name, schema: AuthTokensSchema },
     ]),
     JwtModule.register({
-      secret: process.env.JWT_SECRET || 'secretKey',
+      secret: process.env.JWT_SECRET || 'razorcopy',
       signOptions: { expiresIn: '24h' },
     }),
     // forwardRef(() => OpenaiModule),

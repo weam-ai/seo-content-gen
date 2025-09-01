@@ -2,7 +2,14 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import { BaseEntity } from '@shared/entities/basic.entity';
 
-@Schema({ collection: 'solution_seo_project_activity' })
+@Schema({ 
+  collection: 'solution_seo_project_activity',
+  timestamps: {
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+    currentTime: () => new Date()
+  }
+})
 export class ProjectActivity extends BaseEntity {
   @Prop({ type: Types.ObjectId, ref: 'Project' })
   project?: Types.ObjectId;

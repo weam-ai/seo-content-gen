@@ -336,7 +336,7 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
                   {articleTypes
                     .filter((type) => type.name !== article.articleType)
                     .map((type) => (
-                      <option key={type.id} value={type.name}>
+                      <option key={type._id} value={type.name}>
                         {type.name}
                       </option>
                     ))}
@@ -344,35 +344,7 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
               </div>
             </div>
 
-            {/* Created By */}
-            <div>
-              <div className="text-xs text-muted-foreground mb-2">
-                CREATED BY
-              </div>
-              <div className="flex items-center gap-2.5 p-2.5 bg-muted rounded-lg">
-                <div className="h-7 w-7 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center text-xs text-indigo-700 font-medium border border-indigo-200">
-                  {article.createdBy.avatar ? (
-                    <img
-                      src={article.createdBy.avatar}
-                      alt={article.createdBy.name}
-                      className="h-full w-full rounded-full object-cover"
-                    />
-                  ) : (
-                    article.createdBy.name
-                      .split(' ')
-                      .map((n) => n[0])
-                      .join('')
-                      .toUpperCase()
-                  )}
-                </div>
-                <div>
-                  <div className="text-xs font-medium text-foreground">
-                    {article.createdBy.name || 'Unknown'}
-                  </div>
-                  {/* Role display removed for single-user application */}
-                </div>
-              </div>
-            </div>
+            {/* Created by section removed for single-user application */}
 
             {/* Dates */}
             <div className="pt-4 border-t border-border space-y-2.5">

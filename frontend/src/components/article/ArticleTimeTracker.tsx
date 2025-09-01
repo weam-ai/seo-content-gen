@@ -569,7 +569,7 @@ const ArticleTimeTracker: React.FC<ArticleTimeTrackerProps> = ({
                                   <Edit className="h-3 w-3" />
                                 </Button>
                               )}
-                              {currentUser?.id === log.user_id && (
+                              {currentUser?._id === log.user_id && (
                                 <Button
                                   variant="ghost"
                                   size="sm"

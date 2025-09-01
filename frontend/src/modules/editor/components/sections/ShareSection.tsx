@@ -1,22 +1,16 @@
-import React, { useState, useEffect } from 'react';
-// Button import removed - not used in single-user application
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import React from 'react';
 import { toast } from '@/components/ui/use-toast';
 import {
-  Users,
   Download,
   Copy,
   FileText,
   FileDown,
   Globe,
 } from 'lucide-react';
-import { Collaborator } from '../../types/index';
 import useEditor from '../../hooks/useEditor';
-import { User } from '@/lib/types';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { blocksToMarkdown, blocksToHTML } from '@/lib/blocknote.util';
-// useParams import removed - not used in single-user application
 
 // Role-related functions removed for single-user application
 
@@ -145,59 +139,7 @@ async function exportHtmlToA4PDF(html: string, filename: string) {
 }
 
 export const ShareSection: React.FC = () => {
-  // articleId removed - not used in single-user application
   const { article, editorRef } = useEditor();
-  const [collaborators, setCollaborators] = useState<Collaborator[]>(
-    article?.assignedTo?.map((m: User) => ({
-      id: m.id,
-      email: m.email,
-      name: m.name,
-      // role property removed for single-user application
-      avatar: m.avatar,
-    })) ?? []
-  );
-
-  // const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]); // Removed for single-user app
-  // const [isLoadingTeam, setIsLoadingTeam] = useState(false); // Removed for single-user app
-
-  // Load team members - Removed for single-user app
-  // useEffect(() => {
-  //   const fetchTeamMembers = async () => {
-  //     try {
-  //       setIsLoadingTeam(true);
-  //       const response = await UserService.getTeamMembers();
-  //       if (response.status) {
-  //         setTeamMembers(response.data);
-  //       }
-  //     } catch (error) {
-  //       console.error('Failed to load team members:', error);
-  //       toast({
-  //         title: 'Error',
-  //         description: 'Failed to load team members',
-  //         variant: 'destructive',
-  //       });
-  //     } finally {
-  //       setIsLoadingTeam(false);
-  //     }
-  //   };
-
-  //   fetchTeamMembers();
-  // }, []);
-
-  // Update collaborators when article changes
-  useEffect(() => {
-    if (article?.assignedTo) {
-      setCollaborators(
-        article.assignedTo.map((m: User) => ({
-          id: m.id,
-          email: m.email,
-          name: m.name,
-          // role property removed for single-user application
-          avatar: m.avatar,
-        }))
-      );
-    }
-  }, [article?.assignedTo]);
 
   // Helper to trigger file download
   const triggerDownload = (
@@ -293,71 +235,10 @@ export const ShareSection: React.FC = () => {
     }
   };
 
-  // const handleRemoveCollaborator = (collaborator: Collaborator) => { // Removed for single-user app
-  //   setConfirmDialog({
-  //     open: true,
-  //     collaboratorId: collaborator.id,
-  //     collaboratorName: collaborator.name,
-  //     loading: false,
-  //   });
-  // };
-
-  // confirmRemoveCollaborator function removed for single-user app
-
-  // handleAssignmentChange function removed for single-user application
+  // Collaboration functions removed for single-user application
 
   return (
     <div className="p-3 space-y-4">
-      {/* Collaborators */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Users className="h-3 w-3 text-muted-foreground" />
-            <span className="text-xs font-medium">Collaborators</span>
-            <span className="text-xs text-muted-foreground">
-              ({collaborators.length})
-            </span>
-          </div>
-
-          {/* Team management removed for single-user app */}
-        </div>
-
-        <div className="space-y-1">
-          {collaborators.map((collaborator) => (
-            <div
-              key={collaborator.id}
-              className="group flex items-center gap-2 p-2 rounded-md hover:bg-accent/50 transition-colors"
-            >
-              <div className="relative">
-                <Avatar className="h-6 w-6">
-                  <AvatarImage src={collaborator.avatar} />
-                  <AvatarFallback className="text-xs">
-                    {collaborator.name
-                      .split(' ')
-                      .map((n) => n[0])
-                      .join('')}
-                  </AvatarFallback>
-                </Avatar>
-              </div>
-
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-medium truncate">
-                    {collaborator.name}
-                  </span>
-                  {/* Role badge removed for single-user application */}
-                </div>
-                <p className="text-xs text-muted-foreground truncate">
-                  {collaborator.email}
-                </p>
-              </div>
-
-              {/* Remove collaborator button removed for single-user app */}
-            </div>
-          ))}
-        </div>
-      </div>
-
       {/* Download */}
       <div className="space-y-2">
         <div className="flex items-center gap-2">

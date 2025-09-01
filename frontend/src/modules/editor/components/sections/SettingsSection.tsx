@@ -193,9 +193,6 @@ export const SettingsSection: React.FC = () => {
         <div className="flex items-center gap-2">
           <Brain className="h-3 w-3 text-muted-foreground" />
           <Label className="text-xs font-medium">AI</Label>
-          <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">
-            Coming Soon
-          </span>
         </div>
 
         <div className="space-y-2 pl-5">

@@ -34,7 +34,7 @@ export interface TaskSidebarPrimaryKeyword {
 }
 
 export interface TaskSidebarArticleTypeOption {
-  id: string;
+  _id: string;
   name: string;
 }
 
@@ -45,11 +45,7 @@ export interface TaskSidebarBusinessDetails {
   details?: string;
 }
 
-export interface TaskSidebarCreatedBy {
-  name: string;
-  avatar?: string;
-  role?: string;
-}
+// TaskSidebarCreatedBy interface removed for single-user application
 
 export interface TaskSidebarStatusOption {
   value: string;
@@ -490,7 +486,7 @@ export const TaskSidebar: React.FC<TaskSidebarProps> = ({
                 {/* Custom rendering to trim the selected value's label */}
                 {(() => {
                   const selected = articleTypeOptions.find(
-                    (type) => type.id === articleType
+                    (type) => type._id === articleType
                   );
                   return selected ? (
                     <span className="truncate">{selected.name.trim()}</span>
@@ -503,7 +499,7 @@ export const TaskSidebar: React.FC<TaskSidebarProps> = ({
               </SelectTrigger>
               <SelectContent>
                 {articleTypeOptions.map((type) => (
-                  <SelectItem key={type.id} value={type.id}>
+                  <SelectItem key={type._id} value={type._id}>
                     {type.name.trim()}
                   </SelectItem>
                 ))}
@@ -514,7 +510,7 @@ export const TaskSidebar: React.FC<TaskSidebarProps> = ({
             <div className="w-fit min-w-[80px] px-1.5 py-0 rounded-full font-semibold border-0 shadow-none text-[11px] h-6 bg-gray-100 text-gray-800 border-gray-200 flex items-center justify-center">
               {(() => {
                 const selected = articleTypeOptions.find(
-                  (type) => type.id === articleType
+                  (type) => type._id === articleType
                 );
                 return selected ? (
                   <span className="capitalize truncate">{selected.name.trim()}</span>
