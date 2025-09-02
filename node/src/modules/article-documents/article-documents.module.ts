@@ -7,7 +7,7 @@ import { DocumentUpdates, DocumentUpdatesSchema } from './entities/document-upda
 import { Article, ArticleSchema } from '../article/entities/article.entity';
 // import { OpenaiModule } from '@/modules/openai/openai.module';
 // import { TimeTrackingModule } from '../time-tracking/time-tracking.module';
-import { User, UserSchema } from '../users/entities/user.entity';
+// import { User, UserSchema } from '../users/entities/user.entity'; // Removed user import
 // import { AuthTokens, AuthTokensSchema } from '../auth/entities/auth-tokens.entity';
 
 @Module({
@@ -15,7 +15,7 @@ import { User, UserSchema } from '../users/entities/user.entity';
     MongooseModule.forFeature([
       { name: DocumentUpdates.name, schema: DocumentUpdatesSchema },
       { name: Article.name, schema: ArticleSchema },
-      { name: User.name, schema: UserSchema },
+      // { name: User.name, schema: UserSchema }, // Removed user schema
       // { name: AuthTokens.name, schema: AuthTokensSchema },
     ]),
     JwtModule.register({

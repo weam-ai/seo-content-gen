@@ -26,8 +26,8 @@ export class Article extends BaseEntity {
   @Prop({ type: Types.ObjectId, ref: 'Project', required: true })
   project: Types.ObjectId;
 
-  @Prop({ type: Types.ObjectId, ref: 'User', required: false })
-  user?: Types.ObjectId;
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+  user: Types.ObjectId;
 
   @Prop({ type: String })
   keywords: string;

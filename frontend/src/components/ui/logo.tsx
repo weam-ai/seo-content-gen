@@ -1,6 +1,5 @@
 'use client';
 
-import { Zap } from 'lucide-react';
 import { useState } from 'react';
 
 interface LogoProps {
@@ -20,10 +19,7 @@ export function Logo({ className = '', showText = true, onClick }: LogoProps) {
       onClick={onClick}
     >
       <div className={`relative ${isHovered ? 'wiggle' : ''}`}>
-        <Zap className="h-8 w-8 text-[hsl(var(--razor-primary))] fill-current transition-all duration-300" />
-        <div className="absolute inset-0 h-8 w-8 text-[hsl(var(--razor-secondary))] opacity-30 blur-sm">
-          <Zap className="h-8 w-8 fill-current" />
-        </div>
+        <img src="/logo.svg" alt="Weam" className="h-8 w-8 object-contain" />
       </div>
       {showText && (
         <span
@@ -31,7 +27,7 @@ export function Logo({ className = '', showText = true, onClick }: LogoProps) {
             isHovered ? 'scale-105' : ''
           }`}
         >
-          Razorcopy
+          Weam
         </span>
       )}
     </div>

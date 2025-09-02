@@ -17,6 +17,7 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 3001,
       open: true,
+      allowedHosts: ['weam.local'],
     },
     base,
     build: {

@@ -259,7 +259,7 @@ export class ProjectsService {
     // Lookup project creator
     pipeline.push({
       $lookup: {
-        from: 'users',
+        from: 'user',
         localField: 'user',
         foreignField: '_id',
         as: 'user',

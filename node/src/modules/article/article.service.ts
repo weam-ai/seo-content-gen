@@ -94,7 +94,7 @@ export class ArticleService {
     // private readonly timeTrackingService: TimeTrackingService,
   ) {}
 
-  async create(createArticleDto: CreateArticleDto) {
+  async create(createArticleDto: CreateArticleDto, user?: any) {
     try {
       const project = await this.projectModel.findOne({
         _id: createArticleDto.project_id
@@ -109,6 +109,7 @@ export class ArticleService {
       const articleData = {
         ...createArticleDto,
         project: toObjectId(createArticleDto.project_id),
+        user: user ? toObjectId(user._id) : undefined,
         status: ArticleStatus.NOT_STARTED,
         approved_at: new Date(),
       };
@@ -123,7 +124,7 @@ export class ArticleService {
     }
   }
 
-  async findAll(query?: Partial<ListArticleDtoQuery>) {
+  async findAll(query?: Partial<ListArticleDtoQuery>, user?: any) {
     const {
       page: pageParam = 1,
       limit: limitParam = 10,
@@ -147,7 +148,10 @@ export class ArticleService {
       name: { $ne: null }
     };
 
-    // Articles are now project-dependent only, no user filtering needed
+    // Filter articles by authenticated user
+    if (user && user._id) {
+      matchConditions.user = toObjectId(user._id);
+    }
 
     // Build search conditions separately
     const searchConditions: any[] = [];
@@ -236,7 +240,7 @@ export class ArticleService {
       },
       {
         $lookup: {
-          from: 'users',
+          from: 'user',
           localField: 'user',
           foreignField: '_id',
           as: 'user'
@@ -282,7 +286,7 @@ export class ArticleService {
           meta_description: 1,
           settings: 1,
           project: 1,
-          user: 1,
+          // user: 1, // Removed user reference
           article_content: 1,
           priority: 1,
           approved_at: 1,
@@ -351,7 +355,7 @@ export class ArticleService {
       const transformedArticle = {
         ...article,
         project: article.project || null,
-        user: article.user || null,
+        // user: article.user || null, // Removed user reference
         article_content: article.article_content?.toString(),
         // Removed assign_member field - functionality no longer supported
         // Prompt types are no longer supported
@@ -372,7 +376,7 @@ export class ArticleService {
 
     const article = await this.articleModel
       .findOne(query)
-      .select('name keywords keyword_volume keyword_difficulty status start_date end_date created_at updated_at secondary_keywords generated_outline meta_title meta_description settings project user')
+      .select('name keywords keyword_volume keyword_difficulty status start_date end_date created_at updated_at secondary_keywords generated_outline meta_title meta_description settings project')
       .populate({
         path: 'project',
         select: 'name description targeted_audience'
@@ -390,7 +394,6 @@ export class ArticleService {
     return {
       ...article,
       project: article.project || null,
-      user: article.user || null,
     };
   }
 
@@ -772,7 +775,7 @@ export class ArticleService {
         articlesWithoutTitles.forEach((article) => {
           this.eventEmitter.emit(
             iEventType.TOPIC_CREATED,
-            (article.user as any) || (article.project as any).user,
+            (article.project as any).user || null, // Removed article.user reference
             article,
             article.project,
           );
@@ -1004,7 +1007,7 @@ export class ArticleService {
   async saveAiContent(
     articleId: string,
     content: string,
-    model: ArticleFrom,
+    model: ArticleFrom | string,
     avg_word_count: number,
   ) {
     const payload = { avg_word_count };
@@ -1017,11 +1020,14 @@ export class ArticleService {
       throw new NotFoundException(ARTICLES_STRING.ERRORS.ARTICLE_NOT_FOUND);
     }
 
-    if (model === ArticleFrom.OPEN_AI) {
+    // Handle both enum values and string values from Python service
+    const modelStr = typeof model === 'string' ? model : model;
+    
+    if (modelStr === ArticleFrom.OPEN_AI || modelStr === 'open_ai') {
       Object.assign(payload, { open_ai_content: content });
-    } else if (model === ArticleFrom.GEMINI) {
+    } else if (modelStr === ArticleFrom.GEMINI || modelStr === 'gemini') {
       Object.assign(payload, { gemini_content: content });
-    } else if (model === ArticleFrom.CLAUDE) {
+    } else if (modelStr === ArticleFrom.CLAUDE || modelStr === 'claude') {
       Object.assign(payload, { claude_content: content });
     }
 

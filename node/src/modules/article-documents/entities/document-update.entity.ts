@@ -16,8 +16,8 @@ export class DocumentUpdates extends BaseEntity {
   @Prop({ type: Types.ObjectId, ref: 'Article', required: true })
   article: Types.ObjectId;
 
-  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
-  user: Types.ObjectId;
+  @Prop({ type: Types.ObjectId, ref: 'User', required: false })
+  user?: Types.ObjectId;
 
   @Prop({ type: Number, default: 1 })
   version: number;

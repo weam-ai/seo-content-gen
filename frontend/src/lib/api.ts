@@ -1,8 +1,4 @@
-import axios, {
-  AxiosInstance,
-  InternalAxiosRequestConfig,
-  AxiosResponse,
-} from 'axios';
+import axios, { AxiosInstance, AxiosResponse, AxiosRequestHeaders } from 'axios';
 import { useAuthStore } from '@/stores/auth-store';
 
 // API base configuration
@@ -19,14 +15,22 @@ const api: AxiosInstance = axios.create({
 
 // Request interceptor to add auth token
 api.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
-    // Get static token from auth store for single-user application
-    const { token } = useAuthStore.getState();
+  async (config) => {
+    const state = useAuthStore.getState();
+    let jwt = state.getJwtToken();
 
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
+    // No fallback to access_token; only JWT is used
+
+    if (jwt) {
+      const hdrs = config.headers as any;
+      if (hdrs && typeof hdrs.set === 'function') hdrs.set('Authorization', `Bearer ${jwt}`);
+      else {
+        config.headers = { ...(config.headers as any), Authorization: `Bearer ${jwt}` } as AxiosRequestHeaders;
+      }
+      console.debug('Auth header set (JWT).');
+    } else {
+      console.debug('Auth header NOT set (no token available).');
     }
-
     return config;
   },
   (error) => {

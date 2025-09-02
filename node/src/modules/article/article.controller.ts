@@ -14,6 +14,7 @@ import {
   UseGuards,
   BadRequestException,
 } from '@nestjs/common';
+import { JwtAuthGuard } from '@shared/guards/jwt-auth.guard';
 import { ParseObjectIdPipe } from '@shared/pipes/parse-objectid.pipe';
 import { ArticleService } from './article.service';
 import { CreateArticleDto } from './dto/create-article.dto';
@@ -41,9 +42,10 @@ import {
 } from './dto/article-content.dto';
 // Removed ArticleBulkAssignDto import - functionality no longer supported
 import { ArticleTaskPriorityDto } from './dto/article-task-priority.dto';
-import { JwtAuthGuard } from '@shared/guards/jwt-auth.guard';
+
 
 @Controller('article')
+@UseGuards(JwtAuthGuard)
 export class ArticleController {
   constructor(private readonly articleService: ArticleService) {}
 
@@ -54,8 +56,10 @@ export class ArticleController {
     @Res() res: Response,
   ) {
     try {
+      const user = (req as any).user;
       const article = await this.articleService.create(
         createArticleDto,
+        user,
       );
 
       // Return article with _id field intact
@@ -63,7 +67,7 @@ export class ArticleController {
         _id: article._id,
         name: article.name,
         project: article.project,
-        user: article.user,
+        // user: article.user, // Removed user reference
         keywords: article.keywords,
         keyword_volume: article.keyword_volume,
         keyword_difficulty: article.keyword_difficulty,
@@ -103,6 +107,7 @@ export class ArticleController {
     @Res() res: Response,
     @Query() query: Partial<ListArticleDtoQuery>,
   ) {
+    const user = (req as any).user;
     if (query.status && typeof query.status === 'string') {
       Object.assign(query, { status: query.status.split(',') });
     }
@@ -131,6 +136,7 @@ export class ArticleController {
 
     const { articles, pagination } = await this.articleService.findAll(
       query,
+      user,
     );
 
     // Articles already have proper id transformation from service

@@ -76,7 +76,7 @@ import TextareaAutosize from 'react-textarea-autosize';
 import RegenerateTitleModal from '@/components/topics/RegenerateTitleModal';
 import { OutlineRequiredModal } from '@/components/ui/OutlineRequiredModal';
 import SecondaryKeywordModal from '../topics/SecondaryKeywordModal';
-import { useSSE } from '@/hooks/useSSE';
+// Removed useSSE import - now implementing SSE directly in component
 
 // Add a simple skeleton component
 function AISkeleton() {
@@ -396,23 +396,47 @@ export default function ArticleDetails() {
   }, [activeTab, article?._id]);
 
   // --- SSE integration ---
-  aiProviders.forEach((provider) => {
-    const requestId = sseRequestIds[provider.id];
-    useSSE(requestId || '', async (content) => {
-      if (article?._id) {
+  useEffect(() => {
+    const activeConnections: EventSource[] = [];
+    
+    aiProviders.forEach((provider) => {
+      const requestId = sseRequestIds[provider.id];
+      if (!requestId) return;
+      
+      const url = `${import.meta.env.VITE_API_BASE_URL}/sse/${requestId}`;
+      const eventSource = new EventSource(url);
+      activeConnections.push(eventSource);
+      
+      eventSource.onmessage = async (event) => {
         try {
-          const updated = await getArticleAIContent(article._id);
-          setAIContent(updated);
-          toast({
-            title: 'AI content ready!',
-            description: `The ${content.model} content is now available.`,
-          });
-        } catch {}
-      }
-      setSseRequestIds((prev) => ({ ...prev, [provider.id]: null }));
-      setGeneratingProviders((prev) => ({ ...prev, [provider.id]: false }));
+          const data = JSON.parse(event.data);
+          if (data.type === 'content_update' && article?._id) {
+            try {
+              const updated = await getArticleAIContent(article._id);
+              setAIContent(updated);
+              toast({
+                title: 'AI content ready!',
+                description: `The ${data.content.model} content is now available.`,
+              });
+            } catch {}
+            setSseRequestIds((prev) => ({ ...prev, [provider.id]: null }));
+            setGeneratingProviders((prev) => ({ ...prev, [provider.id]: false }));
+          }
+        } catch (error) {
+          console.error('Error parsing SSE data:', error);
+        }
+      };
+      
+      eventSource.onerror = (error) => {
+        console.error('SSE connection error:', error);
+        eventSource.close();
+      };
     });
-  });
+    
+    return () => {
+      activeConnections.forEach(connection => connection.close());
+    };
+  }, [sseRequestIds, article?._id]);
 
   // Placeholder handlers to fix linter errors
   const handleRemoveSecondaryKeyword = async (idx: number) => {

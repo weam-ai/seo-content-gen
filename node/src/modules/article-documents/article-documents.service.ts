@@ -81,7 +81,7 @@ export class ArticleDocumentsService {
          snapshot_data: Buffer.from(emptyBlocks),
          session_id: 'initial',
          version: 1,
-         updated_by: toObjectId(article.user || '000000000000000000000000'),
+         // updated_by: toObjectId(article.user || '000000000000000000000000'), // Removed user requirement
        });
 
       document = {
@@ -103,7 +103,6 @@ export class ArticleDocumentsService {
   async updateDocument(
     articleId: string,
     data: ArticleDocumentUpdateContent,
-    user: User,
   ) {
     let snapshot_data = data.snapshot;
     if (typeof snapshot_data === 'string') {
@@ -141,7 +140,7 @@ export class ArticleDocumentsService {
       article: toObjectId(articleId),
       snapshot_data: snapshot_data,
       session_id: data.session_id,
-      updated_by: toObjectId(user._id || user.id || ''),
+      // updated_by: toObjectId(user._id || user.id || ''), // Removed user requirement
     });
 
     // Update the article's updated_at timestamp
@@ -157,7 +156,6 @@ export class ArticleDocumentsService {
     articleId: string,
     version: number,
     data: ArticleDocumentRestoreContent,
-    user: User,
   ) {
     const document = await this.documentUpdatesModel
       .findOne({ article: toObjectId(articleId), version })
@@ -176,7 +174,7 @@ export class ArticleDocumentsService {
       article: toObjectId(articleId),
       snapshot_data: document.snapshot_data,
       session_id: data.session_id,
-      updated_by: toObjectId(user._id || user.id || ''),
+      // updated_by: toObjectId(user._id || user.id || ''), // Removed user requirement
     });
 
     // Update the article's updated_at timestamp

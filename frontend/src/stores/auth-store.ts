@@ -1,58 +1,63 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { decryptedPersist } from '@/stores/decryption';
+import CryptoJS from 'crypto-js';
 
-export interface User {
-  _id: string;
+interface MinimalUser {
+  id: string;
   email: string;
 }
 
 interface AuthState {
-  user: User | null;
-  token: string | null;
-  refreshToken: string | null;
-  isAuthenticated: boolean;
-  login: (user: User, token: string, refreshToken?: string) => void;
-  logout: () => void;
-  setToken: (token: string) => void;
+  getUser: () => MinimalUser;
+  getJwtToken: () => string;
 }
 
-export const useAuthStore = create<AuthState>()(persist(
-  (set) => ({
-    user: {
-      _id: '68b3753a60d95aed066d72fe',
-      email: 'drabadiya@taskme.biz'
-    },
-    token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGIzNzUzYTYwZDk1YWVkMDY2ZDcyZmUiLCJlbWFpbCI6ImRyYWJhZGl5YUB0YXNrbWUuYml6IiwiaWF0IjoxNzU2NzIzMDA1LCJleHAiOjE3NTY4MDk0MDV9.TcQVZ_rt6ZDTQV9nsABH4993Hch-kIWsTjMJOIL0lu0',
-    refreshToken: null,
-    isAuthenticated: true,
-    
-    login: (user: User, token: string, refreshToken?: string) => {
-      set({
-        user,
-        token,
-        refreshToken: refreshToken || null,
-        isAuthenticated: true
-      });
-    },
-    
-    logout: () => {
-      set({
-        user: null,
-        token: null,
-        refreshToken: null,
-        isAuthenticated: false
-      });
-    },
-    
-    setToken: (token: string) => {
-      set((state) => ({
-        ...state,
-        token,
-        isAuthenticated: !!token
-      }));
+export const useAuthStore = create<AuthState>(() => ({
+  getUser: () => {
+    try {
+      if (typeof window === 'undefined') return null;
+      const decrypted = decryptedPersist('user');
+      const id = decrypted._id;
+      const email = decrypted.email;
+      console.log(id, email)
+      return { id, email } as any;
+    } catch(error){
+      console.error("getUser -> error", error)
     }
-  }),
-  {
-    name: 'auth-storage',
-  }
-));
+    
+  },
+  getJwtToken: () => {
+    if (typeof window === 'undefined') return '';
+    const u = useAuthStore.getState().getUser();
+    if (!u?.id) {
+      console.debug('JWT: no user/_id available when building token');
+      return '';
+    }
+
+    const secret = `${(import.meta as any).env?.VITE_JWT_SECRET || ''}`;
+    if (!secret) {
+      console.debug('JWT: VITE_JWT_SECRET is not set');
+      return '';
+    }
+
+    const header = { alg: 'HS256', typ: 'JWT' };
+    const payload = { id: u.id, email: u.email };
+
+    const toBase64Url = (obj: unknown) => {
+      const json = JSON.stringify(obj);
+      const wordArray = CryptoJS.enc.Utf8.parse(json);
+      const b64 = CryptoJS.enc.Base64.stringify(wordArray);
+      return b64.replace(/=+$/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+    };
+
+    const headerB64 = toBase64Url(header);
+    const payloadB64 = toBase64Url(payload);
+    const base = `${headerB64}.${payloadB64}`;
+    const signature = CryptoJS.HmacSHA256(base, secret);
+    const sigB64 = CryptoJS.enc.Base64.stringify(signature)
+      .replace(/=+$/g, '')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_');
+    return `${base}.${sigB64}`;
+  },
+}));

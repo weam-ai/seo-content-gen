@@ -17,8 +17,8 @@ export class ArticleContent extends BaseEntity {
   // Virtual reference - articles will be populated via virtual
   articles?: Types.ObjectId[];
 
-  @Prop({ type: Types.ObjectId, ref: 'User', required: false })
-  user?: Types.ObjectId;
+  // @Prop({ type: Types.ObjectId, ref: 'User', required: false })
+  // user?: Types.ObjectId; // Removed user reference for single-user application
 
   @Prop({ type: String })
   open_ai_content: string | null;

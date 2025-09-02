@@ -25,10 +25,8 @@ import { ARTICLES_STRING } from '@/shared/utils/string.utils';
 import { Request, Response } from 'express';
 // import { OpenAIService } from '@/modules/openai/openai.service';
 import { ArticleDocumentQualityCheckDto } from './dto/article-document-quality-check.dto';
-import { JwtAuthGuard } from '@shared/guards/jwt-auth.guard';
 
 @Controller('article-documents')
-@UseGuards(JwtAuthGuard)
 export class ArticleDocumentsController {
   constructor(
     private readonly articleDocumentService: ArticleDocumentsService,
@@ -81,7 +79,6 @@ export class ArticleDocumentsController {
     await this.articleDocumentService.updateDocument(
       articleId,
       body,
-      req.user! as any,
     );
     return acceptedResponse(
       res,
@@ -101,7 +98,6 @@ export class ArticleDocumentsController {
       articleId,
       version,
       body,
-      req.user! as any,
     );
     return acceptedResponse(
       res,
