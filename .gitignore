@@ -1,0 +1,5 @@
+.trae
+*/node_modules
+.vscode
+.husky
+/razorcopy-app

@@ -1,0 +1,28 @@
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import path from 'path';
+
+// https://vitejs.dev/config/
+export default defineConfig(({ mode }) => {
+  // Use /seo/ base only when VITE_USE_NGINX_BASE is set to true
+  const base = process.env.VITE_USE_NGINX_BASE === 'true' ? '/seo/' : '/';
+  
+  return {
+    plugins: [react()],
+    resolve: {
+      alias: {
+        '@': path.resolve(__dirname, './src'),
+      },
+    },
+    server: {
+      port: 3001,
+      open: true,
+      allowedHosts: ['weam.local'],
+    },
+    base,
+    build: {
+      outDir: 'dist',
+      assetsDir: 'assets',
+    },
+  };
+});
