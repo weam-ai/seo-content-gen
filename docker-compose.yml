@@ -6,7 +6,7 @@ services:
       context: ./python
     container_name: seo-python
     env_file:
-      - .env
+      - ./python/.env
     ports:
       - "9000:9000"
 
@@ -18,7 +18,7 @@ services:
       - PORT=9001
       - PYTHON_API_PATH=http://python:9000
     env_file:
-      - .env
+      - ./node/.env
     depends_on:
       - python
     ports:
@@ -31,6 +31,8 @@ services:
         VITE_API_BASE_URL: http://localhost:9001
         VITE_API_PYTHON_URL: http://localhost:9000
     container_name: seo-frontend
+    env_file:
+      - ./frontend/.env
     depends_on:
       - node
       - python
