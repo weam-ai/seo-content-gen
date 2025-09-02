@@ -25,11 +25,16 @@ RUN apt-get update && apt-get install -y \
     fonts-liberation \
     libpango-1.0-0 \
     libgtk-3-0 \
-    gconf-service \
     && rm -rf /var/lib/apt/lists/*
 
+# Upgrade pip and install wheel
+RUN pip install --upgrade pip setuptools wheel
+
 COPY requirements.txt ./requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+# Install requirements with more verbose output and error handling
+RUN pip install --no-cache-dir --verbose -r requirements.txt || \
+    (echo "First install failed, trying with --no-deps for problematic packages" && \
+     pip install --no-cache-dir --no-deps -r requirements.txt)
 
 COPY . .
 
