@@ -1,5 +1,107 @@
-.trae
+# Dependencies
 */node_modules
-.vscode
+node_modules/
+/node_modules
+
+# Build outputs
+dist/
+**/dist/
+build/
+**/build/
+/.next
+/out
+*.tsbuildinfo
+next-env.d.ts
+
+# Python specific
+__pycache__/
+*.py[cod]
+*.so
+venv/
+env/
+pip-log.txt
+pip-delete-this-directory.txt
+*.pyenv
+Pipfile
+Pipfile.lock
+.poetry
+poetry.lock
+.virtualenv/
+*.sqlite3
+db.sqlite3
+
+# Debug & Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-debug.log*
+debug.log
+*.out
+*.pid
+
+# Environment variables
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+
+# IDE - VSCode
+.vscode/
+**/.vscode/
+.history/
+*.code-workspace
+
+# IDE and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# Testing & Coverage
+/coverage
+/.nyc_output
+*.cover
+*.coverage
+.coverage.*
+htmlcov/
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+
+# OS generated files
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+ehthumbs.db
+
+# Temporary files
+.temp
+.tmp
+*.bak
+*.swp
+
+# Lock files
+*-lock.json
+package-*.json
+
+# CI/CD
+migrate.sh
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Project specific
+.trae
 .husky
-/razorcopy-app
+/data

@@ -1,0 +1,40 @@
+version: '3.9'
+
+services:
+  python:
+    build:
+      context: ./python
+    container_name: seo-python
+    env_file:
+      - .env
+    ports:
+      - "9000:9000"
+
+  node:
+    build:
+      context: ./node
+    container_name: seo-node
+    environment:
+      - PORT=9001
+      - PYTHON_API_PATH=http://python:9000
+    env_file:
+      - .env
+    depends_on:
+      - python
+    ports:
+      - "9001:9001"
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_BASE_URL: http://localhost:9001
+        VITE_API_PYTHON_URL: http://localhost:9000
+    container_name: seo-frontend
+    depends_on:
+      - node
+      - python
+    ports:
+      - "3001:3001"
+
+
