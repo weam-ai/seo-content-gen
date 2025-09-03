@@ -14,12 +14,11 @@ DB_USERNAME = os.getenv("DB_USERNAME")
 DB_PASSWORD = os.getenv("DB_PASSWORD")
 DB_NAME = os.getenv("DB_DATABASE")
 DB_HOSTNAME = os.getenv("DB_HOST")
-DB_PORT = os.getenv("DB_PORT", "27017")
+DB_PORT = os.getenv("DB_PORT")
 
 # Build MongoDB URL based on whether credentials are provided
 if DB_USERNAME and DB_PASSWORD:
-    encoded_password = quote_plus(DB_PASSWORD)
-    MONGO_URL = f"mongodb://{DB_USERNAME}:{encoded_password}@{DB_HOSTNAME}:{DB_PORT}/{DB_NAME}"
+    MONGO_URL = f"mongodb://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOSTNAME}:{DB_PORT}/{DB_NAME}"
 else:
     MONGO_URL = f"mongodb://{DB_HOSTNAME}:{DB_PORT}/{DB_NAME}"
 
