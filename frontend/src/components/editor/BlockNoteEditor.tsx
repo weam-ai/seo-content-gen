@@ -21,15 +21,6 @@ import { commentSystem } from './CommentSystem';
 // AI assistant functionality removed
 // blocksToMarkdown import removed - unused in single-user app
 
-function getRandomColor() {
-  return (
-    '#' +
-    Math.floor(Math.random() * 16777215)
-      .toString(16)
-      .padStart(6, '0')
-  );
-}
-
 // Define light theme for editor
 const lightTheme = {
   colors: {
@@ -38,30 +29,17 @@ const lightTheme = {
       background: '#ffffff',
     },
     menu: {
-      text: '#333333',
-      background: '#ffffff',
+      background: '#f9fafb',
+      text: '#111827',
+      border: '#e5e7eb',
+      shadow: 'rgba(0, 0, 0, 0.1)',
     },
     tooltip: {
-      text: '#333333',
-      background: '#ffffff',
+      background: '#111827',
+      text: '#f9fafb',
     },
-    hovered: {
-      text: '#333333',
-      background: '#f5f5f5',
-    },
-    selected: {
-      text: '#333333',
-      background: '#e8e8e8',
-    },
-    disabled: {
-      text: '#adadad',
-      background: '#f5f5f5',
-    },
-    shadow: 'rgba(0, 0, 0, 0.1)',
-    border: '#e0e0e0',
   },
   borderRadius: 6,
-  fontFamily: 'inherit',
 };
 
 interface BlockNoteEditorProps {
@@ -266,8 +244,8 @@ export const BlockNoteEditor = forwardRef<any, BlockNoteEditorProps>(
     const editorContainerRef = useRef<HTMLDivElement>(null);
     const editorRef = useRef<any>(null);
     const sessionId = useSessionStore((state) => state.sessionId);
-    const user = useAuthStore((state) => state.user);
-    const token = useAuthStore((state) => state.token);
+    const user = useAuthStore.getState().getUser();
+    const token = useAuthStore.getState().getJwtToken();
     const isInitialLoad = useRef(true);
 
     const provider = useYjsProvider();
@@ -281,23 +259,8 @@ export const BlockNoteEditor = forwardRef<any, BlockNoteEditorProps>(
     });
 
     const activeUser = useMemo(() => {
-      if (!user)
-        return {
-          id: 'anonymous',
-          color: '#888',
-          firstname: 'Anonymous',
-          lastname: '',
-          username: 'Anonymous',
-          profile_image: '',
-        };
-      return {
-        id: user._id,
-        color: getRandomColor(),
-        firstname: 'User',
-        lastname: '',
-        username: user.email || 'User',
-        profile_image: '',
-      };
+      if (!user) return { id: 'anonymous', email: '' } as any;
+      return { id: user.id, email: user.email } as any;
     }, [user]);
 
     const editor = useCreateBlockNote({
@@ -306,8 +269,8 @@ export const BlockNoteEditor = forwardRef<any, BlockNoteEditorProps>(
         provider,
         fragment: doc.getXmlFragment('blocknote'),
         user: {
-          color: activeUser.color,
-          name: activeUser.username,
+          name: user?.email || 'User',
+          color: '#888',
         },
       },
       _tiptapOptions: {

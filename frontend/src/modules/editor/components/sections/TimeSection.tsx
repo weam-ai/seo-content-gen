@@ -52,7 +52,7 @@ const formatDuration = (seconds: number): string => {
 
 export const TimeSection: React.FC = () => {
   const { articleId } = useParams<{ articleId: string }>();
-  const { user: currentUser } = useAuthStore();
+  const currentUser = useAuthStore.getState().getUser();
   const {
     article,
     isTimeTracking,
@@ -422,7 +422,7 @@ export const TimeSection: React.FC = () => {
                 const canEdit =
                   entry.type === 'manual' && entry.status !== 'running';
                 const canDelete =
-                  currentUser?._id === entry.user_id &&
+                  currentUser?.id === entry.user_id &&
                   entry.status !== 'running';
                 const hasActions = canEdit || canDelete;
 
