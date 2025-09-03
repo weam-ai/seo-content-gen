@@ -26,11 +26,12 @@ async function bootstrap() {
   app.use(bodyParser.json({ limit: '50mb' }));
   app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
-  await app.listen(process.env.PORT ?? 9001);
+  const port: number = Number(process.env.SERVER_PORT) || 3000;
+  await app.listen(port);
 
   logger.log(
     'info',
-    `Application is running on: http://localhost:${process.env.SERVER_PORT}`,
+    `Application is running on: http://localhost:${port}`,
   );
 }
 

@@ -19,7 +19,6 @@ export const useAuthStore = create<AuthState>(() => ({
       const decrypted = decryptedPersist('user');
       const id = decrypted._id;
       const email = decrypted.email;
-      console.log(id, email)
       return { id, email } as any;
     } catch(error){
       console.error("getUser -> error", error)
@@ -29,16 +28,8 @@ export const useAuthStore = create<AuthState>(() => ({
   getJwtToken: () => {
     if (typeof window === 'undefined') return '';
     const u = useAuthStore.getState().getUser();
-    if (!u?.id) {
-      console.debug('JWT: no user/_id available when building token');
-      return '';
-    }
 
     const secret = `${(import.meta as any).env?.VITE_JWT_SECRET || ''}`;
-    if (!secret) {
-      console.debug('JWT: VITE_JWT_SECRET is not set');
-      return '';
-    }
 
     const header = { alg: 'HS256', typ: 'JWT' };
     const payload = { id: u.id, email: u.email };

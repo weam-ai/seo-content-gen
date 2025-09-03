@@ -25,9 +25,6 @@ export class GuidelinesService {
 
   async create(createGuidelineDto: any, userId: string): Promise<any> {
     try {
-      console.log('Service: Starting create method');
-      console.log('Service: DTO received:', createGuidelineDto);
-      
       // Check if guideline with same name already exists for this user
       const existingGuideline = await this.guidelineModel.findOne({
         name: createGuidelineDto.name,
@@ -47,7 +44,6 @@ export class GuidelinesService {
       });
       
       const savedGuideline = await newGuideline.save();
-      console.log('Service: Guideline saved to database:', savedGuideline);
       
       return savedGuideline;
     } catch (error) {

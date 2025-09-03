@@ -39,15 +39,11 @@ export class GuidelinesController {
     @Res() res: Response,
   ) {
     try {
-      console.log('Controller: Starting create method');
-      console.log('Controller: DTO received:', createGuidelineDto);
       
       const guideline = await this.guidelinesService.create(
         createGuidelineDto,
         getUserId(req.user!),
       );
-      
-      console.log('Controller: Service returned:', guideline);
       
       return res.json({
         status: true,
@@ -62,13 +58,11 @@ export class GuidelinesController {
 
   @Get('test')
   test() {
-    console.log('Test endpoint reached');
     return { message: 'Guidelines controller is working' };
   }
 
   @Post('simple')
   simpleCreate(@Body() body: any) {
-    console.log('Simple create endpoint reached:', body);
     return {
       status: true,
       message: 'Simple endpoint working',
@@ -79,7 +73,6 @@ export class GuidelinesController {
   @Post('/test')
   async testCreate(@Res() res: Response) {
     try {
-      console.log('Test endpoint called');
       return res.json({ status: true, message: 'Test endpoint working' });
     } catch (error) {
       console.error('Test endpoint error:', error);
