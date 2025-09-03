@@ -8,7 +8,9 @@ services:
     env_file:
       - ./python/.env
     ports:
-      - "9000:9000"
+      - "9002:9002"
+    networks:
+      - weamai_app-network
 
   node:
     build:
@@ -16,20 +18,22 @@ services:
     container_name: seo-node
     environment:
       - PORT=9001
-      - PYTHON_API_PATH=http://python:9000
+      - PYTHON_API_PATH=http://python:9002
     env_file:
       - ./node/.env
     depends_on:
       - python
     ports:
       - "9001:9001"
+    networks:
+      - weamai_app-network
 
   frontend:
     build:
       context: ./frontend
       args:
-        VITE_API_BASE_URL: http://localhost:9001
-        VITE_API_PYTHON_URL: http://localhost:9000
+        VITE_API_BASE_URL: http://node:9001
+        VITE_API_PYTHON_URL: http://python:9002
     container_name: seo-frontend
     env_file:
       - ./frontend/.env
@@ -38,5 +42,9 @@ services:
       - python
     ports:
       - "3001:3001"
+    networks:
+      - weamai_app-network
 
-
+networks:
+  weamai_app-network:
+    external: true

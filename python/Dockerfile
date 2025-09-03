@@ -38,8 +38,8 @@ RUN pip install --no-cache-dir --verbose -r requirements.txt || \
 
 COPY . .
 
-ENV PORT=9000
-EXPOSE 9000
-CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "9000"]
+ENV PORT=9002
+EXPOSE 9002
+CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "9002"]
 
 
