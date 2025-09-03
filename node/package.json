@@ -38,37 +38,32 @@
     "@nestjs/event-emitter": "^3.0.1",
     "@nestjs/jwt": "^11.0.0",
     "@nestjs/mapped-types": "^2.1.0",
+    "@nestjs/mongoose": "^11.0.2",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.1",
-
     "@nestjs/schedule": "^6.0.0",
     "@nestjs/throttler": "^6.4.0",
-    "@nestjs/mongoose": "^11.0.2",
-
-
     "@types/bcrypt": "^5.0.2",
     "@y-sweet/sdk": "^0.8.2",
     "axios": "^1.8.1",
     "bcrypt": "^5.1.1",
+    "body-parser": "^2.2.0",
     "bullmq": "^5.41.3",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "date-fns": "^4.1.0",
-
+    "dotenv": "^17.2.2",
     "googleapis": "^146.0.0",
     "helmet": "^8.0.0",
     "langchain": "^0.3.30",
     "marked": "^15.0.7",
     "moment": "^2.30.1",
-
+    "mongoose": "^8.8.4",
     "npm": "^11.2.0",
     "openai": "^4.94.0",
-    "mongoose": "^8.8.4",
     "pusher": "^5.2.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
-
-
     "winston": "^3.17.0",
     "winston-daily-rotate-file": "^5.0.0",
     "y-sweet": "^0.8.2",

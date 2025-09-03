@@ -12,8 +12,8 @@ load_dotenv()
 
 DB_USERNAME = os.getenv("DB_USERNAME")
 DB_PASSWORD = os.getenv("DB_PASSWORD")
-DB_NAME = os.getenv("DB_NAME")
-DB_HOSTNAME = os.getenv("DB_HOSTNAME")
+DB_NAME = os.getenv("DB_DATABASE")
+DB_HOSTNAME = os.getenv("DB_HOST")
 DB_PORT = os.getenv("DB_PORT", "27017")
 
 # Build MongoDB URL based on whether credentials are provided
