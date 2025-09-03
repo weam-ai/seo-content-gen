@@ -12,9 +12,9 @@ export const mongooseConfig = (
   // Get database connection details from environment variables
   const username = configService.get<string>('DB_USERNAME');
   const password = configService.get<string>('DB_PASSWORD');
-  const hostname = configService.get<string>('DB_HOSTNAME');
+  const hostname = configService.get<string>('DB_HOST');
   const port = configService.get<number>('DB_PORT');
-  const dbName = configService.get<string>('DB_NAME');
+  const dbName = configService.get<string>('DB_DATABASE');
   
   // Build URI based on whether authentication is provided
   let uri: string;
