@@ -20,9 +20,9 @@ export const mongooseConfig = (
   // Build URI based on whether authentication is provided
   let uri: string;
   if (username && password) {
-    uri = `${connection}://${username}:${password}@${hostname}:/${dbName}`;
+    uri = `${connection}://${username}:${password}@${hostname}/${dbName}`;
   } else {
-    uri = `${connection}://${hostname}:/${dbName}`;
+    uri = `${connection}://${hostname}/${dbName}`;
   }
   
   return { uri };
