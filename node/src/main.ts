@@ -30,7 +30,7 @@ async function bootstrap() {
 
   logger.log(
     'info',
-    `Application is running on: http://localhost:${process.env.PORT ?? 9001}`,
+    `Application is running on: http://localhost:${process.env.SERVER_PORT}`,
   );
 }
 
