@@ -52,7 +52,7 @@ function App() {
     }, 30 * 60 * 1000); // 30 minutes
     return () => clearInterval(interval);
   }, [sessionId, initSession]);
-  
+
   return (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
         <Router basename="/seo-content-gen/">
