@@ -4,8 +4,7 @@ import path from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
-  // Use /seo/ base only when VITE_USE_NGINX_BASE is set to true
-  const base = '/seo-content-gen/';
+  const base = '/seo-content-gen';
   
   return {
     plugins: [react()],
