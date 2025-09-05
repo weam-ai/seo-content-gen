@@ -4,9 +4,11 @@ import path from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
-  const base = '/seo-content-gen';
-  
+  // const base = mode === 'production'? '/seo-content-gen/' : '/';
+  const base = '/seo-content-gen/';
+
   return {
+    base,
     plugins: [react()],
     resolve: {
       alias: {

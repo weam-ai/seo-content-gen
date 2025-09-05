@@ -55,7 +55,7 @@ function App() {
 
   return (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-        <Router basename="/seo-content-gen/">
+        <Router basename={import.meta.env.VITE_APP_URL_PREFIX || '/'}>
           <div
             className="min-h-screen"
             style={{
