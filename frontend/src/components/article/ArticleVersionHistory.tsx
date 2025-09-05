@@ -342,7 +342,7 @@ const ArticleVersionHistory: React.FC<ArticleVersionsModelProps> = ({
                               <AvatarImage
                                 src={
                                   selectedVersion1.author.avatar ||
-                                  '/placeholder.svg'
+                                  `${import.meta.env.VITE_FRONTEND_URL}placeholder.svg`
                                 }
                               />
                               <AvatarFallback className="text-xs">
@@ -376,7 +376,7 @@ const ArticleVersionHistory: React.FC<ArticleVersionsModelProps> = ({
                               <AvatarImage
                                 src={
                                   selectedVersion2.author.avatar ||
-                                  '/placeholder.svg'
+                                  `${import.meta.env.VITE_FRONTEND_URL}placeholder.svg`
                                 }
                               />
                               <AvatarFallback className="text-xs">
@@ -439,7 +439,7 @@ const ArticleVersionHistory: React.FC<ArticleVersionsModelProps> = ({
                   >
                     <Avatar className="h-8 w-8 flex-shrink-0">
                       <AvatarImage
-                        src={version.author.avatar || '/placeholder.svg'}
+                        src={version.author.avatar || `${import.meta.env.VITE_FRONTEND_URL}placeholder.svg`}
                       />
                       <AvatarFallback className="text-xs">
                         {version.author.initials}

@@ -19,7 +19,7 @@ export function Logo({ className = '', showText = true, onClick }: LogoProps) {
       onClick={onClick}
     >
       <div className={`relative ${isHovered ? 'wiggle' : ''}`}>
-        <img src="logo.svg" alt="Weam" className="h-8 w-8 object-contain" />
+        <img src={`${import.meta.env.VITE_FRONTEND_URL}logo.svg`} alt="Weam" className="h-8 w-8 object-contain" />
       </div>
       {showText && (
         <span

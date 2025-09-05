@@ -324,7 +324,7 @@ export const VersionHistorySection: React.FC = () => {
           <div className="flex items-center gap-2 text-xs text-blue-700 dark:text-blue-300">
             <Avatar className="h-3 w-3">
               <AvatarImage
-                src={previewVersion.author.avatar || '/placeholder.svg'}
+                src={previewVersion.author.avatar || `${import.meta.env.VITE_FRONTEND_URL}placeholder.svg`}
                 alt={previewVersion.author.name}
               />
               <AvatarFallback className="text-[8px]">
@@ -456,7 +456,7 @@ export const VersionHistorySection: React.FC = () => {
               <div className="flex items-center gap-2 mt-2">
                 <Avatar className="h-4 w-4">
                   <AvatarImage
-                    src={version.author.avatar || '/placeholder.svg'}
+                    src={version.author.avatar || `${import.meta.env.VITE_FRONTEND_URL}placeholder.svg`}
                     alt={version.author.name}
                   />
                   <AvatarFallback className="text-xs text-[8px]">
