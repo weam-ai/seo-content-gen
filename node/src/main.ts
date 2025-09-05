@@ -11,6 +11,8 @@ async function bootstrap() {
 
   app.use(helmet());
   app.enableCors();
+  // Set a global prefix so all routes are under /seo-content-api
+  app.setGlobalPrefix('seo-content-api');
   // Enable global exception filter to debug article creation error
   app.useGlobalFilters(new AllExceptionsFilter());
   // Temporarily disable global validation pipe to debug callback error
