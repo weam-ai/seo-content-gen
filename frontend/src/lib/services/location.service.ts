@@ -14,7 +14,7 @@ let locations: Location[] = [];
 const loadLocations = async () => {
   if (locations.length === 0) {
     try {
-      const response = await axios.get<Location[]>('/locationOptions.json');
+      const response = await axios.get<Location[]>('locationOptions.json');
       console.log(
         'Successfully loaded locationOptions.json:',
         response.data.length,
