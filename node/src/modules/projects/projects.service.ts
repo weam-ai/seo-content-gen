@@ -499,6 +499,9 @@ export class ProjectsService {
       project,
       keywords,
       secondary_keywords,
+      false,
+      undefined,
+      user,
     );
   }
 

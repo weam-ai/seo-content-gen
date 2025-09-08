@@ -106,14 +106,17 @@ export class ArticleService {
         );
       }
       
-      const articleData = {
+      const articleData: any = {
         ...createArticleDto,
         project: toObjectId(createArticleDto.project_id),
-        user: user ? toObjectId(user._id) : undefined,
         status: ArticleStatus.NOT_STARTED,
         approved_at: new Date(),
       };
       
+      if (user && user._id) {
+        articleData.user = toObjectId(user._id);
+      }
+
       const article = new this.articleModel(articleData);
       const newArticle = await article.save();
 
@@ -626,15 +629,20 @@ export class ArticleService {
     secondary_keywords?: string[],
     skipTitleGeneration: boolean = false,
     authToken?: string,
+    user?: User,
   ) {
     //create article at top most priority
     const articles = await Promise.all(
       keywords.map(async (keyword) => {
-        const articleData = {
+        const articleData: any = {
           keywords: keyword.keyword,
           project: toObjectId((project as any)._id),
           secondary_keywords: secondary_keywords ?? [],
         };
+
+        if (user && user._id) {
+          articleData.user = toObjectId(user._id);
+        }
         return await this.articleModel.create(articleData);
       }),
     );

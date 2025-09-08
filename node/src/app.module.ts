@@ -4,7 +4,7 @@ import { AppService } from './app.service';
 
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
-import { mongooseConfig } from '@config/typeorm.config';
+import { mongooseConfig } from '@config/mongoose.config';
 // import { BullModule } from '@nestjs/bullmq';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { ProjectsModule } from './modules/projects/projects.module';
