@@ -68,13 +68,9 @@ class MetaAnalysisResult(BaseModel):
     error: Optional[str] = None
     content_type: Optional[str] = None
 
-class SystemPromptsTypeEnum(str, Enum):
-    pass
-
 class ArticleRequest(BaseModel):
     articleId: str
-    model: Optional[str] = None  
-    requestId: str
+    model: Optional[str] = None
     # avg_word_count: Optional[int] = None 
 
 class KeywordItem(BaseModel):

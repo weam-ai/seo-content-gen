@@ -14,6 +14,7 @@ import { ArticleService } from '../article/article.service';
 import { WEBHOOK_STRING } from '@shared/utils/string.utils';
 import { SseService } from '../sse/sse.service';
 import { StaticTokenGuard } from '@shared/guards/static-token.guard';
+import { ArticleFrom } from '@shared/types/articles.t';
 
 @Controller('webhooks')
 @UseGuards(StaticTokenGuard)
@@ -35,7 +36,7 @@ export class WebhooksController {
       body.model,
       body.avg_word_count,
     );
-    this.sseService.notifyClient(body.requestId, {
+    this.sseService.notifyClient(articleId, {
       articleId,
       model: body.model,
     });

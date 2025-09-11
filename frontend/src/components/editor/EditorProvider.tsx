@@ -1,12 +1,13 @@
 import { Skeleton } from '@/components/ui/skeleton';
 import { BlockNoteEditor } from './BlockNoteEditor';
-import { useState, forwardRef } from 'react';
+import { useEffect, useState, forwardRef } from 'react';
 
 interface EditorProviderProps {
   docId: string;
   initialContent?: any;
   onContentChange?: (content: any) => void;
   onSave?: (content: any) => void;
+  onTokenReceived?: (token: any) => void;
 }
 
 export const EditorProvider = forwardRef<any, EditorProviderProps>(
@@ -15,9 +16,28 @@ export const EditorProvider = forwardRef<any, EditorProviderProps>(
     initialContent,
     onContentChange,
     onSave,
+    onTokenReceived,
   }, ref) => {
-    const [loading] = useState(false);
-    const [error] = useState<string | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+      if (docId) {
+        // Simulate loading for single-user mode (no collaboration needed)
+        const timer = setTimeout(() => {
+          setLoading(false);
+          // Provide mock token data for single-user mode
+          if (onTokenReceived) {
+            onTokenReceived({
+              token: 'single-user-mode',
+              url: null, // No WebSocket needed for single-user
+              docId: docId
+            });
+          }
+        }, 100);
+
+        return () => clearTimeout(timer);
+      }
+    }, [docId, onTokenReceived]);
 
     if (loading)
       return (
@@ -31,7 +51,7 @@ export const EditorProvider = forwardRef<any, EditorProviderProps>(
         </div>
       );
 
-    if (error) return <div className="text-red-500">Error: {error}</div>;
+
 
     return (
       <BlockNoteEditor

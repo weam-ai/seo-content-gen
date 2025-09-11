@@ -72,33 +72,6 @@ def company_google_search_links1(query, api_key, cx, num=5):
 
     return links
 
-def extract_content(query, num=6):
-
-    # Get Google search links
-    links = company_google_search_links1(query, api_key, cx, num=num)
-
-    if not links:
-        return "No links found for the query."
-
-    # Extract content from each link
-    related_pages = []
-    for link in links:
-        content = scrape_page_content(link)
-        if content:  # Only include links that were successfully scraped
-            related_pages.append((link, content))
-
-    if not related_pages:
-        return "Failed to scrape any of the links."
-
-    # Format the result as requested
-    result_text = "Extracted Pages:\n"
-    print(f"Company's URL: {query}\n")
-    for idx, (url, content) in enumerate(related_pages, 1):
-        result_text += f"{idx}. {url}\n"
-        result_text += f"Extracted Content: {content[:13000]}...\n\n"
-
-    return result_text
-
 def scrape_page_content(url):
 
     try:

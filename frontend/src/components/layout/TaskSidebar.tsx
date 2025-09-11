@@ -57,13 +57,15 @@ interface RecommendedKeyword {
   search_volume: number;
 }
 
+import { SecondaryKeyword } from '@/lib/types';
+
 export interface TaskSidebarProps {
   topicId?: string;
   projectName: { id: string; name: string };
   businessDetails: TaskSidebarBusinessDetails | React.ReactNode;
   onShowBusinessDetails?: () => void;
   primaryKeyword: TaskSidebarPrimaryKeyword;
-  secondaryKeywords: string[];
+  secondaryKeywords: SecondaryKeyword[];
   newSecondaryKeyword: string;
   onNewSecondaryKeywordChange: (val: string) => void;
   onAddSecondaryKeyword: () => void | Promise<void>;
@@ -312,7 +314,7 @@ export const TaskSidebar: React.FC<TaskSidebarProps> = ({
                       // Skip if already in secondary keywords
                       if (
                         secondaryKeywords.some(
-                          (kw: string) => kw.trim().toLowerCase() === keyword
+                          (kw: SecondaryKeyword) => kw.keyword.trim().toLowerCase() === keyword
                         )
                       )
                         return false;
@@ -354,13 +356,23 @@ export const TaskSidebar: React.FC<TaskSidebarProps> = ({
               Tip: You can paste multiple keywords from Google Sheets or Excel.
             </div>
             <div className="flex flex-wrap gap-1 mb-2">
-              {secondaryKeywords.map((keyword, idx) => (
+              {secondaryKeywords.map((keywordObj, idx) => (
                 <Badge
-                  key={`secondary-${keyword}-${idx}`}
+                  key={`secondary-${keywordObj.keyword}-${idx}`}
                   variant="outline"
                   className="text-xs flex items-center gap-1"
                 >
-                  {keyword}
+                  <span>{keywordObj.keyword}</span>
+                  {keywordObj.volume && (
+                    <span className="text-[10px] text-muted-foreground ml-1">
+                      {keywordObj.volume.toLocaleString()}
+                    </span>
+                  )}
+                  {keywordObj.competition && (
+                    <span className="text-[10px] text-muted-foreground ml-1">
+                      {keywordObj.competition}
+                    </span>
+                  )}
                   <button
                     type="button"
                     className="ml-1 text-muted-foreground hover:text-destructive"
@@ -388,7 +400,7 @@ export const TaskSidebar: React.FC<TaskSidebarProps> = ({
                         .trim()
                         .toLowerCase();
                       const secondaryKeywordTexts = secondaryKeywords.map(
-                        (kw: string) => kw.trim().toLowerCase()
+                        (kw: SecondaryKeyword) => kw.keyword.trim().toLowerCase()
                       );
 
                       // Exclude primary keyword and already added secondary keywords
@@ -422,8 +434,8 @@ export const TaskSidebar: React.FC<TaskSidebarProps> = ({
                     .trim()
                     .toLowerCase();
                   const secondaryKeywordTexts = secondaryKeywords.map(
-                    (kw: string) => kw.trim().toLowerCase()
-                  );
+                      (kw: SecondaryKeyword) => kw.keyword.trim().toLowerCase()
+                    );
                   return (
                     keywordText !== primaryKeywordText &&
                     !secondaryKeywordTexts.includes(keywordText)

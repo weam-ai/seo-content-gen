@@ -1442,7 +1442,7 @@ export default function Articles() {
           <SecondaryKeywordModal
             open={showAddKeywordModal}
             onOpenChange={setShowAddKeywordModal}
-            initialKeywords={currentApprovalArticle.secondaryKeywords || []}
+            initialKeywords={(currentApprovalArticle.secondaryKeywords || []).map(kw => typeof kw === 'string' ? kw : kw.keyword)}
             recommendedKeywords={recommendedKeywords}
             topicTitle={currentApprovalArticle.title}
             primaryKeyword={currentApprovalArticle.keyword}
@@ -1455,7 +1455,12 @@ export default function Articles() {
                 setArticles(prevArticles =>
                   prevArticles.map(article =>
                     article._id === currentApprovalArticle._id
-                      ? { ...article, secondaryKeywords: updatedKeywords, status: 'not_started' as ArticleStatus }
+                      ? { ...article, secondaryKeywords: updatedKeywords.map(keyword => ({
+                          keyword,
+                          volume: null,
+                          competition: null,
+                          article_type: null
+                        })), status: 'not_started' as ArticleStatus }
                       : article
                   )
                 );

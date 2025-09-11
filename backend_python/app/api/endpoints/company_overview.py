@@ -9,65 +9,6 @@ import json
 
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 
-def company_overview(result):
-    """Generate company overview using both OpenAI (gpt-4.1) and Google Gemini."""
-
-    try:
-        llm = ChatOpenAI(
-            model="gpt-4.1",
-            temperature=0,
-            api_key=OPENAI_API_KEY
-        )
-        
-        openai_messages = [
-            ("system", """
-            You’re a professional business analyst with extensive experience in summarizing corporate information from various sources. 
-            Your expertise lies in extracting key insights and presenting them in a concise, clear, and engaging manner.
-
-            Your task is to provide an overview of a company based on the content from specified articles. Here are the details:
-            - Articles to Review
-            - Key Aspects to Focus On: company mission, products/services, market position, recent news
-            - Desired Length of Summary: 500-800 words
-
-            Please ensure that the overview captures the essence of the business and highlights the most relevant information in an easily digestible format.
-            Note: Only include information from articles if the article links are related to the company's URL or its name. Exclude unrelated pages.
-            """),
-            ("human", f"These are the sources:\n{result}")
-        ]
-
-        openai_response = llm.invoke(openai_messages)
-        openai_summary = openai_response.content
-    except Exception as e:
-        openai_summary = f"Error with OpenAI: {e}"
-
-    try:
-        gemini_messages = [
-            """
-            You’re a professional business analyst with extensive experience in summarizing corporate information from various sources. 
-            Your expertise lies in extracting key insights and presenting them in a concise, clear, and engaging manner.
-
-            Your task is to provide an overview of a company based on the content from specified articles. Here are the details:
-            - Articles to Review
-            - Key Aspects to Focus On: company mission, products/services, market position, recent news
-            - Desired Length of Summary: 500-800 words
-
-            Please ensure that the overview captures the essence of the business and highlights the most relevant information in an easily digestible format.
-            Note: Only include information from articles if the article links are related to the company's URL or its name. Exclude unrelated pages.
-            """,
-            f"These are the sources:\n{result}"
-        ]
-
-        model = genai.GenerativeModel("gemini-2.0-flash")
-        gemini_response = model.generate_content(gemini_messages)
-        gemini_summary = gemini_response.text
-    except Exception as e:
-        gemini_summary = f"Error with Gemini: {e}"
-
-    return {
-        "openai_summary": openai_summary,
-        "gemini_summary": gemini_summary
-    }
-
 def company_overview1(result):
     llm = ChatOpenAI(
         model="gpt-4.1",

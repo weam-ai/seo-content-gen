@@ -97,7 +97,8 @@ export class ProjectsService {
         project,
         createProjectDto.targeted_keywords,
         [],
-        true, // skipTitleGeneration = true, titles will be generated after sitemap
+        true,
+        user
       );
     }
 
@@ -500,7 +501,6 @@ export class ProjectsService {
       keywords,
       secondary_keywords,
       false,
-      undefined,
       user,
     );
   }
@@ -748,7 +748,8 @@ export class ProjectsService {
   // Removed sendAssignMailAndNotification method
 
   async generateBusinessSummary(website_url: string, authToken?: string) {
-    const result = await this.pythonService.companyBusinessSummary(website_url, authToken);
+    console.log('hi')
+    const result = await this.pythonService.companyBusinessSummary(website_url);
 
     if (!result.company_details) {
       throw new InternalServerErrorException(

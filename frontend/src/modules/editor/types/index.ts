@@ -138,7 +138,7 @@ export type SidebarSection =
   | 'profile'
   | 'checklist'
   | 'time'
-  | 'versions'
+
   | 'extras'
   | 'settings'
   | 'share'

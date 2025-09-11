@@ -20,7 +20,6 @@ from app.models.schemas import (
 from app.services.google_search import extract_content
 from app.services.scraper import (
     target_audience_generator,
-    generate_preview,
     generate_target_audience,
     get_sitemap_urls,
     target_audience_generator1,
@@ -28,7 +27,7 @@ from app.services.scraper import (
     article_google_search_links2,
     # generate_owner_bio  # Owner bio functionality removed
 )
-from app.api.endpoints.company_overview import company_overview, company_overview1
+from app.api.endpoints.company_overview import company_overview1
 from contextlib import asynccontextmanager
 import os
 from dotenv import load_dotenv
@@ -43,15 +42,10 @@ import google.generativeai as genai
 import requests
 from app.api.endpoints.company_business_summary import extract_content1
 from app.core.database import get_database
-from app.models.project_model import (
-    Project,
-    Article,
-    Guideline,
-    SystemPrompt,
-)
 import json
 import base64
 from fastapi import APIRouter
+import httpx
 from motor.motor_asyncio import AsyncIOMotorClient
 from bson import ObjectId
 from fuzzywuzzy import fuzz
@@ -76,8 +70,6 @@ import aiohttp
 import anthropic
 from urllib.parse import urlparse
 from app.seo_audit.router import seo_audit_router
-from app.api.endpoints.generate_article import router as generate_article_router
-
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -117,8 +109,6 @@ model_name = "gemini-1.5-pro-latest"
 
 app = FastAPI()
 
-app.mount("/seo-content-pyapi", app)
-
 
 origins = os.getenv("PY_PORT")
 
@@ -138,7 +128,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-BASE_URL_PREVIEW = os.getenv("BASE_URL_PREVIEW")
+BASE_URL = os.getenv("BASE_URL")
+WEBHOOK_AUTH_TOKEN = os.getenv("WEBHOOK_AUTH_TOKEN")
 USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.5481.100 Safari/537.36"
 PLAYWRIGHT_TIMEOUT = 45000
 MAX_RETRIES = 3
@@ -992,7 +983,7 @@ async def extract_content_google(query: str, api_key: str, cx: str, num: int = 5
     return result_text, avg_word_count, successful_urls
 
 
-@app.post("/get-article-data")
+@app.post("/get-articles")
 async def get_all_projects(request: ArticleRequest):
     """
     Retrieve all projects from the database.
@@ -1068,7 +1059,7 @@ async def get_all_projects(request: ArticleRequest):
         article_info = {
             "id": article.get("_id"),
             "name": article.get("name"),
-            "system_prompt": {"description": None},  # Fixed: removed undefined system_prompt variable
+            "system_prompt": {"description": None},
             "generate_outline": article.get("generated_outline"),
             "scraped_content": result_text,
             "reference_links": formatted_top_urls,
@@ -1187,25 +1178,40 @@ async def get_all_projects(request: ArticleRequest):
         else:
             raise HTTPException(status_code=400, detail="Invalid model specified")
         # Calculate word counts and return summaries directly
-        responses = {}
-        total_word_count = 0
-        
+        webhook_responses = {}
+        word_counts = []
+
         for model_name, summary in summaries.items():
             word_count = len(summary.split())
-            total_word_count += word_count
-            responses[model_name] = {
+            webhook_url = f"{BASE_URL}/webhooks/{request.articleId}/content"
+            payload = {
+                "model": model_name,
                 "content": summary,
-                "word_count": word_count
+                "avg_word_count": word_count,
             }
-            logger.info(f"Generated {model_name} content with {word_count} words")
-        
-        avg_word_count = total_word_count // len(summaries) if summaries else 0
-        
-        return {
-            "responses": responses,
-            "avg_word_count": avg_word_count,
-            "total_models": len(summaries)
-        }
+            logger.info(f"Average word count: {avg_word_count}")
+
+            try:
+                with httpx.Client(timeout=10) as client:
+                    response = client.post(
+                        webhook_url,
+                        json=payload,
+                        headers={"Authorization": f"Bearer {WEBHOOK_AUTH_TOKEN}"},
+                    )
+
+                if response.status_code not in [200, 202]:
+                    logger.error(
+                        f"Webhook failed for {model_name}: {response.status_code} - {response.text}"
+                    )
+                    webhook_responses[model_name] = summary
+                else:
+                    webhook_responses[model_name] = summary
+
+            except Exception as e:
+                logger.error(f"Error sending {model_name} webhook: {e}")
+                webhook_responses[model_name] = summary
+
+        return {"webhook_responses": webhook_responses, "avg_word_count": word_count}
 
     except Exception as e:
         logger.error(f"Error retrieving projects: {e}")
@@ -1460,7 +1466,6 @@ async def upload_file(file: UploadFile = File(...)):
 
 
 app.include_router(seo_audit_router, prefix="/seo-audit", tags=["SEO Audit"])
-app.include_router(generate_article_router, tags=["Article Generation"])
 
 
 

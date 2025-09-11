@@ -77,28 +77,30 @@ export interface BlockRendererProps {
 const renderInline = (nodes?: InlineNode[]) =>
   (nodes ?? []).map((node, i) => {
     let el: React.ReactNode = node.text;
-    if (node.bold) el = <strong key={i}>{el}</strong>;
-    if (node.italic) el = <em key={i}>{el}</em>;
-    if (node.underline) el = <u key={i}>{el}</u>;
+    if (node.bold) el = <strong>{el}</strong>;
+    if (node.italic) el = <em>{el}</em>;
+    if (node.underline) el = <u>{el}</u>;
     if (node.code)
       el = (
-        <code key={i} className="bg-gray-100 px-1 rounded">
+        <code className="bg-gray-100 px-1 rounded">
           {el}
         </code>
       );
     // Diff highlighting
     if ((node as any).added)
       el = (
-        <span key={i} className="bg-green-100 text-green-800">
+        <span className="bg-green-100 text-green-800">
           {el}
         </span>
       );
     if ((node as any).removed)
       el = (
-        <span key={i} className="bg-red-100 text-red-800 line-through">
+        <span className="bg-red-100 text-red-800 line-through">
           {el}
         </span>
       );
+    
+    // Return with unique key only at the top level
     return <React.Fragment key={i}>{el}</React.Fragment>;
   });
 

@@ -53,8 +53,21 @@ export class Article extends BaseEntity {
   @Prop({ type: Date })
   end_date: Date;
 
-  @Prop({ type: [String], default: [] })
-  secondary_keywords: string[];
+  @Prop({ 
+    type: [{
+      keyword: { type: String, required: true },
+      volume: { type: Number, default: null },
+      competition: { type: String, default: null },
+      article_type: { type: String, default: null }
+    }], 
+    default: [] 
+  })
+  secondary_keywords: {
+    keyword: string;
+    volume?: number;
+    competition?: string;
+    article_type?: string;
+  }[];
 
   // Removed assigned_members and assign_followers fields
 

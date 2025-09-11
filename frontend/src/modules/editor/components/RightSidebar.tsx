@@ -4,12 +4,12 @@ import { Button } from '@/components/ui/button';
 import { SidebarSection } from '../types';
 import useEditor from '../hooks/useEditor';
 import { ChecklistSection } from './sections/ChecklistSection';
-import { TimeSection } from './sections/TimeSection';
+// TimeSection removed for single-user application
 import { SettingsSection } from './sections/SettingsSection';
 import { ShareSection } from './sections/ShareSection';
 
 import { ExtrasSection } from './sections/ExtrasSection';
-import { VersionHistorySection } from './sections/VersionHistorySection';
+
 
 import { withResizableSidebar } from './hoc/withResizableSidebar';
 
@@ -19,10 +19,10 @@ const getSectionTitle = (section: SidebarSection): string => {
       return 'Document Checks';
 
 
-    case 'time':
-      return 'Time & History';
-    case 'versions':
-      return 'Version History';
+    // Time section removed for single-user application
+    // case 'time':
+    //   return 'Time & History';
+
     case 'extras':
       return 'Extra Information';
     case 'settings':
@@ -65,12 +65,8 @@ const RightSidebarCore: React.FC = () => {
         </div>
 
 
-        <div className={activeSection === 'time' ? 'block h-full' : 'hidden'}>
-          <TimeSection />
-        </div>
-        <div className={activeSection === 'versions' ? 'block' : 'hidden'}>
-          <VersionHistorySection />
-        </div>
+        {/* TimeSection removed for single-user application */}
+
         <div className={activeSection === 'extras' ? 'block h-full' : 'hidden'}>
           <ExtrasSection />
         </div>

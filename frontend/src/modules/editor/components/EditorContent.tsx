@@ -19,17 +19,10 @@ import { BlockNoteView } from '@blocknote/mantine';
 import '@blocknote/core/fonts/inter.css';
 import '@blocknote/react/style.css';
 import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+
 import {
   Undo,
   Redo,
-  History,
   ArrowLeft,
   PanelRight,
   PanelLeft,
@@ -40,13 +33,11 @@ import { CustomFormattingToolbar } from '@/components/editor/CustomFormattingToo
 // Comment-related imports removed for single-user application
 import {
   getArticleEditorContent,
-  getArticleEditorVersions,
-  getArticleEditorContentByVersion,
-  ArticleEditorVersion,
+
 } from '@/lib/services/topics.service';
 import { useParams, useNavigate } from 'react-router-dom';
-import { TimeLogger } from './TimeLogger';
-import { formatVersionDate } from '@/lib/utils/dateFormat';
+// TimeLogger removed for single-user application
+
 // import { useAIAssistantStore } from '@/stores/ai-assistant-store'; // Removed chat functionality
 import { useSessionStore } from '@/lib/store/session-store';
 import { debounce } from 'lodash';
@@ -75,19 +66,15 @@ export const EditorContent: React.FC = () => {
     setSaveStatus,
     setEditorRef,
     isPreviewMode,
-    setPreviewMode,
+
   } = useEditor();
   const [articleContent, setArticleContent] = useState<PartialBlock[] | null>(
     null
   );
   const [isLoading, setIsLoading] = useState(true);
-  const [isVersionLoading, setIsVersionLoading] = useState(false);
-  const [versions, setVersions] = useState<ArticleEditorVersion[]>([]);
-  const [currentVersion, setCurrentVersion] = useState<number | null>(null);
+
   const [error, setError] = useState<string | null>(null);
-  const [originalContent, setOriginalContent] = useState<PartialBlock[] | null>(
-    null
-  );
+
 
   // Use ref to track preview mode synchronously to prevent race conditions
   const isPreviewModeRef = useRef(false);
@@ -131,42 +118,97 @@ export const EditorContent: React.FC = () => {
     },
   });
 
-  // Load article content and versions
-  useEffect(() => {
-    (async function () {
-      if (!articleId) return;
+  // Function to load content
+  const loadContent = useCallback(async () => {
+    if (!articleId) return;
 
-      try {
-        setIsLoading(true);
+    try {
+      setIsLoading(true);
 
-        // Load versions first
-        const versionsData = await getArticleEditorVersions(articleId);
-        setVersions(versionsData);
+      // Load latest content
+      const content = await getArticleEditorContent(articleId);
 
-        // Load latest content (no version specified gets latest)
-        const content = await getArticleEditorContent(articleId);
-        const buffer = new Uint8Array(content.snapshot_data.data);
-        const jsonString = new TextDecoder().decode(buffer);
-        const parsed = JSON.parse(jsonString);
-        setArticleContent(parsed);
-        setCurrentVersion(content.version);
-      } catch (error: any) {
-        console.error('Error fetching editor content:', error);
-        setError(error.message || 'Failed to load editor content');
-      } finally {
-        setIsLoading(false);
+      // Parse the snapshot_data which should always be a JSON string
+      if (content.snapshot_data) {
+        try {
+          let jsonString = '';
+          if (typeof content.snapshot_data === 'string') {
+            // Check if it's base64 encoded (starts with base64 characters and doesn't look like JSON)
+            if (content.snapshot_data.match(/^[A-Za-z0-9+/]+=*$/) && !content.snapshot_data.startsWith('[') && !content.snapshot_data.startsWith('{')) {
+              try {
+                jsonString = atob(content.snapshot_data);
+              } catch (base64Error) {
+                console.warn('Failed to decode base64, treating as plain string:', base64Error);
+                jsonString = content.snapshot_data;
+              }
+            } else {
+              jsonString = content.snapshot_data;
+            }
+          } else if ((content.snapshot_data as any).data) {
+            const buffer = new Uint8Array((content.snapshot_data as any).data);
+            jsonString = new TextDecoder().decode(buffer);
+          }
+          
+          const parsed = JSON.parse(jsonString);
+          isUpdatingContentRef.current = true;
+          setArticleContent(parsed);
+  
+          setTimeout(() => {
+            isUpdatingContentRef.current = false;
+          }, 500);
+        } catch (parseError) {
+          console.error('Failed to parse editor content JSON:', parseError);
+          setError('Failed to parse editor content. The content may be corrupted.');
+        }
+      } else {
+        console.error('No snapshot_data received from server');
+        setError('No content data received from server.');
       }
-    })();
+    } catch (error: any) {
+      console.error('Error fetching editor content:', error);
+      setError(error.message || 'Failed to load editor content');
+    } finally {
+      setIsLoading(false);
+    }
   }, [articleId]);
 
-  // Create editor only after content is loaded
+  // Load article content and versions
+  useEffect(() => {
+    loadContent();
+  }, [loadContent]);
+
+  // Focus event handler removed to prevent unnecessary content reloads
+  // that were causing multiple version saves when switching tabs
+
+
+
+  // Create editor only once - don't recreate when content changes
   const editor = useCreateBlockNote(
     {
       schema,
-      initialContent: articleContent || undefined,
+      initialContent: undefined, // Start with empty content
     },
-    [articleContent]
-  ); // Add dependency array to recreate editor when content changes
+    [] // Empty dependency array - create editor only once
+  );
+
+  // Track if we're updating content programmatically to prevent saves
+  const isUpdatingContentRef = useRef(false);
+
+  // Update editor content when articleContent changes (without recreating editor)
+  useEffect(() => {
+    if (editor && articleContent) {
+      // Set flag to prevent saves during programmatic content update
+      isUpdatingContentRef.current = true;
+      
+      // Use replaceBlocks to update content without triggering onChange
+      editor.replaceBlocks(editor.document, articleContent);
+      
+      // Reset flag after a longer delay to ensure saves are prevented during content loading
+      setTimeout(() => {
+        isUpdatingContentRef.current = false;
+      }, 500);
+    }
+  }, [editor, articleContent]);
 
   // Use custom grammar checking hook
   const {
@@ -406,91 +448,16 @@ export const EditorContent: React.FC = () => {
     applyGrammarMarkers,
   ]);
 
-  // Get the most recent 5 versions, sorted by version number (descending)
-  const recentVersions = useMemo(() => {
-    return versions.sort((a, b) => b.version - a.version).slice(0, 5);
-  }, [versions]);
 
-  const handleVersionChange = async (value: string) => {
-    if (value === 'view-all') {
-      toggleRightSidebar('versions');
-      return;
-    }
-
-    if (value === 'exit-preview') {
-      // Update ref immediately to prevent saves during content restoration
-      isPreviewModeRef.current = false;
-
-      // Exit preview mode and restore original content
-      if (originalContent) {
-        setArticleContent(originalContent);
-        setOriginalContent(null);
-      }
-      setPreviewMode(false);
-      // Reset to latest version
-      const latestVersion =
-        versions.length > 0
-          ? Math.max(...versions.map((v) => v.version))
-          : null;
-      setCurrentVersion(latestVersion);
-      return;
-    }
-
-    const versionNumber = parseInt(value);
-    if (isNaN(versionNumber) || !articleId) return;
-
-    // Check if this is the current version (not preview mode)
-    const latestVersion =
-      versions.length > 0 ? Math.max(...versions.map((v) => v.version)) : null;
-    const isLatestVersion = versionNumber === latestVersion;
-
-    try {
-      setIsVersionLoading(true);
-      setError(null);
-
-      // Store original content if entering preview mode
-      if (!isLatestVersion && !isPreviewMode) {
-        setOriginalContent(articleContent);
-      }
-
-      // Set preview mode BEFORE changing content to prevent saving
-      const versionInfo = versions.find((v) => v.version === versionNumber);
-      const willBeInPreviewMode = !isLatestVersion;
-
-      // Update ref immediately for synchronous access
-      isPreviewModeRef.current = willBeInPreviewMode;
-
-      setPreviewMode(
-        willBeInPreviewMode,
-        versionInfo ? `v${versionInfo.version}` : undefined
-      );
-
-      const content = await getArticleEditorContentByVersion(
-        articleId,
-        versionNumber
-      );
-      const buffer = new Uint8Array(content.snapshot_data.data);
-      const jsonString = new TextDecoder().decode(buffer);
-      const parsed = JSON.parse(jsonString);
-
-      setArticleContent(parsed);
-      setCurrentVersion(versionNumber);
-    } catch (error: any) {
-      console.error('Error fetching version content:', error);
-      setError(error.message || 'Failed to load version content');
-    } finally {
-      setIsVersionLoading(false);
-    }
-  };
 
   const debouncedSave = useMemo(() => {
     return debounce(async () => {
-      // Don't save if there's an active text selection, in preview mode, or loading a version
+      // Don't save if there's an active text selection, in preview mode, or updating content programmatically
       if (
         editor &&
         !editor.getSelectedText() &&
         !isPreviewMode &&
-        !isVersionLoading
+        !isUpdatingContentRef.current
       ) {
         setSaveStatus('saving');
         const documentSnapshot = editor.document;
@@ -560,18 +527,19 @@ export const EditorContent: React.FC = () => {
           setSaveStatus('error', error.message || 'Failed to save changes');
         }
       } else if (isPreviewMode) {
-        console.log('Skipping save - preview mode is active');
-      } else if (isVersionLoading) {
-        console.log('Skipping save - version is loading');
-      }
+          console.log('Skipping save - preview mode is active');
+        }
     }, 1000);
-  }, [editor, sessionId, setSaveStatus, isPreviewMode, isVersionLoading]);
+  }, [editor, sessionId, setSaveStatus, isPreviewMode]);
 
   const saveDocument = useCallback(() => {
     setTimeout(() => {
-      if (!isPreviewModeRef.current) debouncedSave();
+      // Additional check to prevent saves during content loading/updating
+      if (!isPreviewModeRef.current && !isUpdatingContentRef.current && !isLoading) {
+        debouncedSave();
+      }
     }, 0);
-  }, [debouncedSave]);
+  }, [debouncedSave, isLoading]);
 
   // Helper function to replace selected text within a block - Removed for single-user app
   // const replaceSelectedTextInBlock = (
@@ -677,7 +645,7 @@ export const EditorContent: React.FC = () => {
   // }, [editor, currentAISelection, removeAIHighlightFromSelection]); // Removed chat functionality
 
   // Show loading state
-  if (isLoading || !editor) {
+  if (isLoading) {
     return (
       <div className="flex-1 flex items-center justify-center bg-muted/50">
         <div className="text-center">
@@ -739,7 +707,7 @@ export const EditorContent: React.FC = () => {
             variant="ghost"
             size="sm"
             onClick={() =>
-              toggleRightSidebar(rightSidebarSection ? null : null)
+              toggleRightSidebar(rightSidebarSection ? null : 'checklist')
             }
             className={`p-2 backdrop-blur-sm shadow-sm border border-border/50 ${
               settings.theme === 'dark'
@@ -799,116 +767,7 @@ export const EditorContent: React.FC = () => {
                 }`}
               >
                 <div className="flex items-center gap-4">
-                  {/* Version Selection */}
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-muted-foreground">
-                      Version:
-                    </span>
-                    <Select
-                      value={currentVersion?.toString() || ''}
-                      onValueChange={handleVersionChange}
-                      disabled={isVersionLoading}
-                    >
-                      <SelectTrigger
-                        className={`w-48 h-8 text-sm ${
-                          isPreviewMode
-                            ? 'bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800'
-                            : 'bg-background border-border'
-                        }`}
-                      >
-                        <SelectValue placeholder="Select version">
-                          {currentVersion && versions.length > 0 && (
-                            <div className="flex items-center justify-between w-full">
-                              <div className="flex items-center gap-2">
-                                <span className="text-foreground">
-                                  v{currentVersion}
-                                </span>
-                                {isPreviewMode && (
-                                  <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-1 py-0.5 rounded">
-                                    Preview
-                                  </span>
-                                )}
-                              </div>
-                              <span className="text-xs text-muted-foreground ml-2">
-                                {formatVersionDate(
-                                  versions.find(
-                                    (v) => v.version === currentVersion
-                                  )?.updated_at ||
-                                    versions.find(
-                                      (v) => v.version === currentVersion
-                                    )?.created_at ||
-                                    new Date().toISOString()
-                                )}
-                              </span>
-                            </div>
-                          )}
-                        </SelectValue>
-                        {isVersionLoading && (
-                          <div className="animate-spin rounded-full h-3 w-3 border-b border-primary" />
-                        )}
-                      </SelectTrigger>
-                      <SelectContent className="w-48 bg-background border-border">
-                        {recentVersions.map((version) => (
-                          <SelectItem
-                            key={version.version}
-                            value={version.version.toString()}
-                            className="py-2 text-foreground"
-                          >
-                            <div className="flex flex-col w-full max-h-12">
-                              <div className="flex items-center justify-between">
-                                <span className="font-medium text-foreground">
-                                  v{version.version}
-                                </span>
-                                <span className="text-xs text-muted-foreground">
-                                  {formatVersionDate(
-                                    version.updated_at || version.created_at
-                                  )}
-                                </span>
-                              </div>
-                              {version.updated_by && (
-                                <div className="text-xs text-muted-foreground truncate mt-0.5">
-                                  by {version.updated_by.firstname}{' '}
-                                  {version.updated_by.lastname}
-                                </div>
-                              )}
-                            </div>
-                          </SelectItem>
-                        ))}
-                        {versions.length > 5 && (
-                          <div className="px-2 py-1 text-xs text-muted-foreground border-t">
-                            +{versions.length - 5} more versions
-                          </div>
-                        )}
-                        {versions.length > 0 && (
-                          <>
-                            <div className="border-t my-1" />
-                            {isPreviewMode && (
-                              <SelectItem value="exit-preview">
-                                <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
-                                  <ArrowLeft className="h-3 w-3" />
-                                  Exit Preview
-                                </div>
-                              </SelectItem>
-                            )}
-                            <SelectItem value="view-all">
-                              <div className="flex items-center gap-2">
-                                <History className="h-3 w-3" />
-                                View All
-                                {versions.length > 5 && (
-                                  <span className="text-xs text-muted-foreground">
-                                    ({versions.length})
-                                  </span>
-                                )}
-                              </div>
-                            </SelectItem>
-                          </>
-                        )}
-                      </SelectContent>
-                    </Select>
-                  </div>
 
-                  {/* Separator */}
-                  <div className="h-4 w-px bg-border"></div>
 
                   {/* Word Count */}
                   <div className="flex items-center gap-1 text-sm text-muted-foreground">
@@ -920,8 +779,7 @@ export const EditorContent: React.FC = () => {
                   {/* Separator */}
                   <div className="h-4 w-px bg-border"></div>
 
-                  {/* Time Logger */}
-                  <TimeLogger />
+                  {/* Time Logger removed for single-user application */}
 
                   {/* Separator */}
                   <div className="h-4 w-px bg-border"></div>

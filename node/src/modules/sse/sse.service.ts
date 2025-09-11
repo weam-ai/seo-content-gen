@@ -6,30 +6,29 @@ import { Response } from 'express';
 export class SseService {
   private clients = new Map<string, Response>();
 
-  addClient(requestId: string, res: Response) {
+  addClient(articleId: string, res: Response) {
     res.writeHead(200, {
       'Content-Type': 'text/event-stream',
       Connection: 'keep-alive',
       'Cache-Control': 'no-cache',
     });
-    this.clients.set(requestId, res);
+    this.clients.set(articleId, res);
   }
 
-  notifyClient(requestId: string, content: any) {
-    const client = this.clients.get(requestId);
+  notifyClient(articleId: string, content: any) {
+    const client = this.clients.get(articleId);
     if (client) {
       client.write(
         `data: ${JSON.stringify({
           type: 'content_update',
-          requestId,
+          articleId,
           content,
         })}\n\n`,
       );
-      //   this.removeClient(requestId);
     }
   }
 
-  removeClient(requestId: string) {
-    this.clients.delete(requestId);
+  removeClient(articleId: string) {
+    this.clients.delete(articleId);
   }
 }

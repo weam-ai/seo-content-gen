@@ -82,23 +82,10 @@ export interface ArticleAIContent {
 export interface ArticleEditorContent {
   created_at: string;
   updated_at: string;
-  version: number;
-  snapshot_data: {
-    type: string;
-    data: number[];
-  };
+  snapshot_data: string;
 }
 
-export interface ArticleEditorVersion {
-  created_at: string;
-  updated_at: string;
-  version: number;
-  updated_by: {
-    firstname: string;
-    lastname: string;
-    profile_image: string | null;
-  };
-}
+
 
 export interface CreateTopicPayload {
   name: string;
@@ -368,14 +355,17 @@ export const getArticleAIContent = async (
       throw new Error(response.data.message || 'Failed to fetch AI content');
     }
 
+    // Handle both direct data and nested doc structure
+    const contentData = response.data.data.doc || response.data.data;
+    
     return {
-      _id: response.data.data._id,
-      created_at: response.data.data.created_at,
-      open_ai_content: response.data.data.open_ai_content || '',
-      gemini_content: response.data.data.gemini_content || '',
-      claude_content: response.data.data.claude_content || '',
-      selected_content: response.data.data.selected_content ?? null,
-      avg_word_count: response.data.data.avg_word_count || 0,
+      _id: contentData._id,
+      created_at: contentData.created_at,
+      open_ai_content: contentData.open_ai_content || '',
+      gemini_content: contentData.gemini_content || '',
+      claude_content: contentData.claude_content || '',
+      selected_content: contentData.selected_content ?? null,
+      avg_word_count: contentData.avg_word_count || 0,
     };
   } catch (error: any) {
     console.error('API Error:', error); // Debug log
@@ -430,40 +420,7 @@ export const updateArticleEditorContent = async (
   }
 };
 
-export const getArticleEditorVersions = async (
-  articleId: string
-): Promise<ArticleEditorVersion[]> => {
-  try {
-    const response = await api.get(`/article-documents/${articleId}/versions`);
-    if (!response.data.status) {
-      throw new Error(response.data.message || 'Failed to fetch versions');
-    }
-    return response.data.data;
-  } catch (error: any) {
-    console.error('API Error:', error);
-    throw error;
-  }
-};
 
-export const getArticleEditorContentByVersion = async (
-  articleId: string,
-  version: number
-): Promise<ArticleEditorContent> => {
-  try {
-    const response = await api.get(`/article-documents/${articleId}/content`, {
-      params: { version },
-    });
-    if (!response.data.status) {
-      throw new Error(
-        response.data.message || 'Failed to fetch version content'
-      );
-    }
-    return response.data.data;
-  } catch (error: any) {
-    console.error('API Error:', error);
-    throw error;
-  }
-};
 
 
 
@@ -471,11 +428,9 @@ export const getArticleEditorContentByVersion = async (
 export async function generateArticleAIContent(
   articleId: string,
   model: 'open_ai' | 'gemini' | 'claude',
-  requestId: string
 ) {
   const response = await api.post(`/article/${articleId}/ai-content`, {
     model,
-    requestId,
   });
   return response.data;
 }
@@ -533,10 +488,12 @@ export async function addKeywordsToProject(
 // Select AI content for an article
 export async function selectArticleAIContent(
   articleId: string,
-  selected_content: 'open_ai' | 'gemini' | 'claude'
+  selected_content: 'open_ai' | 'gemini' | 'claude',
+  session_id?: string
 ): Promise<any> {
   const response = await api.post(`/article/${articleId}/select-ai-content`, {
     selected_content,
+    session_id,
   });
   return response.data;
 }
