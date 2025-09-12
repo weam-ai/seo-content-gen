@@ -108,7 +108,7 @@ model_name = "gemini-1.5-pro-latest"
 
 
 app = FastAPI()
-
+app.mount("/seo-content-pyapi", app)
 
 origins = os.getenv("PY_PORT")
 
