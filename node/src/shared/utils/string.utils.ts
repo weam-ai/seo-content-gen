@@ -86,7 +86,7 @@ export const SYSTEM_PROMPT_STRING = {
     SYSTEM_PROMPT_NOT_FOUND: 'System prompt not found',
     SYSTEM_PROMPT_ALREADY_EXISTS: 'System prompt with this name already exists',
     SYSTEM_PROMPT_DEFAULT_NO_DELETE:
-      'Default system prompt could not be delete',
+      'Cannot delete the default system prompt. Please set another prompt as default first.',
   },
 };
 

@@ -5,6 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { JwtModule } from '@nestjs/jwt';
 import { PromptType, PromptTypeSchema } from './entities/prompt-type.entity';
 import { User, UserSchema } from '../users/entities/user.entity';
+import { Article, ArticleSchema } from '../article/entities/article.entity';
 import { SystemPromptsModule } from '../system-prompts/system-prompts.module';
 
 @Module({
@@ -12,6 +13,7 @@ import { SystemPromptsModule } from '../system-prompts/system-prompts.module';
     MongooseModule.forFeature([
       { name: PromptType.name, schema: PromptTypeSchema },
       { name: User.name, schema: UserSchema },
+      { name: Article.name, schema: ArticleSchema },
     ]),
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'razorcopy',

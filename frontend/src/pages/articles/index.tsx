@@ -19,6 +19,7 @@ import {
   ChevronRight,
   Settings,
   Brain,
+  Trash2,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -34,7 +35,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { getArticles, GetArticlesParams, getArticlesCalendarView, GetArticlesCalendarParams, updateArticle, generateOutline, getRecommendedKeywords } from '@/lib/services/topics.service';
+import { getArticles, GetArticlesParams, getArticlesCalendarView, GetArticlesCalendarParams, updateArticle, generateOutline, getRecommendedKeywords, deleteArticle } from '@/lib/services/topics.service';
 import RegenerateTitleModal from '@/components/topics/RegenerateTitleModal';
 import { toast } from '@/components/ui/use-toast';
 import {
@@ -220,6 +221,11 @@ export default function Articles() {
   // State for regenerate title functionality
   const [showRegenerateTitleModal, setShowRegenerateTitleModal] = useState(false);
   const [regenerateTitleArticle, setRegenerateTitleArticle] = useState<Article | null>(null);
+
+  // State for delete confirmation dialog
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [articleToDelete, setArticleToDelete] = useState<Article | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   // Clear navigation state after component mounts to prevent persistence on refresh
   useEffect(() => {
@@ -676,6 +682,47 @@ export default function Articles() {
     setShowRegenerateTitleModal(true);
   };
 
+  // Handle delete article
+  const handleDeleteArticle = (article: Article) => {
+    setArticleToDelete(article);
+    setShowDeleteDialog(true);
+  };
+
+  // Confirm delete article
+  const handleConfirmDelete = async () => {
+    if (!articleToDelete) return;
+    
+    setDeleteLoading(true);
+    try {
+      await deleteArticle(articleToDelete._id);
+      
+      // Remove article from local state
+      setArticles(prevArticles => 
+        prevArticles.filter(article => article._id !== articleToDelete._id)
+      );
+      
+      // Update total records
+      setTotalRecords(prev => prev - 1);
+      
+      toast({
+        title: 'Article deleted',
+        description: 'The article has been successfully deleted.',
+      });
+      
+      setShowDeleteDialog(false);
+      setArticleToDelete(null);
+    } catch (error) {
+      console.error('Error deleting article:', error);
+      toast({
+        title: 'Delete failed',
+        description: 'Failed to delete the article. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
   // Handle regenerate title save and redirect
   const handleRegenerateTitleSaveAndRedirect = async (newTitle: string) => {
     if (!regenerateTitleArticle) return;
@@ -877,6 +924,14 @@ export default function Articles() {
                                   ))}
                                 </DropdownMenuSubContent>
                               </DropdownMenuSub>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={() => handleDeleteArticle(article)}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Delete Article
+                              </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </div>
@@ -1489,6 +1544,33 @@ export default function Articles() {
             onSaveAndGenerateOutline={handleRegenerateTitleSaveAndRedirect}
           />
         )}
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Article</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete "{articleToDelete?.title}"? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => {
+                setShowDeleteDialog(false);
+                setArticleToDelete(null);
+              }}>
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleConfirmDelete}
+                disabled={deleteLoading}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                {deleteLoading ? 'Deleting...' : 'Delete'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </TooltipProvider>
   );

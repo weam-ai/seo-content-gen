@@ -147,7 +147,7 @@ export class ArticleService {
 
     // Build match conditions
     const matchConditions: any = {
-      deleted_at: null,
+      deletedAt: null,
       name: { $ne: null }
     };
 
@@ -374,7 +374,7 @@ export class ArticleService {
   }
 
   async findOne(id: string) {
-    const query: any = { _id: toObjectId(id) };
+    const query: any = { _id: toObjectId(id), deletedAt: null };
     // Articles are now project-dependent only, no user filtering needed
 
     const article = await this.articleModel
@@ -568,7 +568,7 @@ export class ArticleService {
     const result = await this.articleModel.aggregate([
       {
         $match: {
-          deleted_at: null,
+          deletedAt: null,
           name: { $ne: null }
         }
       },
@@ -592,7 +592,7 @@ export class ArticleService {
     taskType?: string | null,
   ): Promise<any> {
     const matchConditions: any = {
-      deleted_at: null,
+      deletedAt: null,
     };
 
     if (taskType) {

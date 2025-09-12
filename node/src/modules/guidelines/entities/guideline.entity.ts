@@ -18,7 +18,7 @@ export class Guideline {
   description: string;
 
   @Prop({ type: Date, default: null })
-  deleted_at?: Date;
+  deletedAt?: Date;
 }
 
 export const GuidelineSchema = SchemaFactory.createForClass(Guideline);

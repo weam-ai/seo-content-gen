@@ -354,8 +354,8 @@ export default function ArticleDetails() {
         setLoading(false);
       }
     }
-    if (articleId && articleTypeOptions.length) fetchArticle();
-  }, [articleId, articleTypeOptions]);
+    if (articleId) fetchArticle();
+  }, [articleId]);
 
   useEffect(() => {
     setArticleTypeLoading(true);
