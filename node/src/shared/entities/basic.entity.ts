@@ -11,7 +11,7 @@ import { Exclude } from 'class-transformer';
 export class BaseEntity {
   @Exclude()
   @Prop({ type: Date, default: null })
-  deleted_at?: Date;
+  deletedAt?: Date;
 
   @Prop({ type: Date })
   created_at: Date;

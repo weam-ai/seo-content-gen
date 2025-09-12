@@ -8,6 +8,8 @@ import {
 } from '@shared/types/articles.t';
 import { Exclude } from 'class-transformer';
 
+export type ArticleDocument = Article & Document;
+
 @Schema({ 
   collection: 'solution_seo_articles',
   timestamps: {

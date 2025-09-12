@@ -148,7 +148,7 @@ export class ProjectsService {
     matchStage.user = toObjectId(user._id);
     
     // Filter out deleted projects
-    matchStage.deleted_at = null;
+    matchStage.deletedAt = null;
 
     // Search filtering
     if (search) {
@@ -255,6 +255,8 @@ export class ProjectsService {
     if (user && user._id) {
       matchStage.user = toObjectId(user._id);
     }
+    // Filter out deleted projects
+    matchStage.deletedAt = null;
     pipeline.push({ $match: matchStage });
 
     // Lookup project creator
@@ -303,7 +305,7 @@ export class ProjectsService {
                 { keywords: { $exists: true } },
                 { keywords: { $ne: '' } }
               ],
-              deleted_at: null
+              deletedAt: null
             }
           },
           {
@@ -721,7 +723,7 @@ export class ProjectsService {
       {
         $match: {
           project: new Types.ObjectId(projectId),
-          deleted_at: null
+          deletedAt: null
         }
       },
       {

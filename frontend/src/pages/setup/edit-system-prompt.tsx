@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageHeader } from '@/components/ui/page-header';
 import { ArrowLeft } from 'lucide-react';
@@ -35,6 +36,7 @@ export default function EditSystemPromptPage() {
   const [promptName, setPromptName] = useState('');
   const [promptDescription, setPromptDescription] = useState('');
   const [promptType, setPromptType] = useState('');
+  const [isDefault, setIsDefault] = useState(false);
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const { toast } = useToast();
@@ -50,6 +52,7 @@ export default function EditSystemPromptPage() {
         setPromptName(found.name);
         setPromptDescription(found.description);
         setPromptType(found.type || '');
+        setIsDefault(found.is_default || false);
       } catch (error: any) {
         toast({ title: 'Error', description: error.message, variant: 'destructive' });
         navigate('/setup/system-prompts');
@@ -68,7 +71,7 @@ export default function EditSystemPromptPage() {
     }
     setLoading(true);
     try {
-      await systemPromptService.updateSystemPrompt(id!, { name: promptName, description: promptDescription, type: promptType });
+      await systemPromptService.updateSystemPrompt(id!, { name: promptName, description: promptDescription, type: promptType, is_default: isDefault });
       toast({ title: 'Success', description: 'System prompt updated successfully.' });
       navigate('/setup/system-prompts');
     } catch (error: any) {
@@ -162,6 +165,17 @@ export default function EditSystemPromptPage() {
                     className="min-h-[200px]"
                     disabled={loading}
                   />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="isDefault"
+                    checked={isDefault}
+                    onCheckedChange={(checked) => setIsDefault(checked as boolean)}
+                    disabled={loading}
+                  />
+                  <Label htmlFor="isDefault" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    Set as default prompt for this type
+                  </Label>
                 </div>
               </CardContent>
             </Card>

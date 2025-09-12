@@ -2,11 +2,13 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { CreateGuidelineDto } from './dto/create-guideline.dto';
 import { UpdateGuidelineDto } from './dto/update-guideline.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Guideline, GuidelineDocument } from './entities/guideline.entity';
+import { Project, ProjectDocument } from '../projects/entities/projects.entity';
 import { Model } from 'mongoose';
 import { GUIDELINES_STRING } from '@shared/utils/string.utils';
 import {
@@ -21,6 +23,8 @@ export class GuidelinesService {
   constructor(
     @InjectModel(Guideline.name)
     private readonly guidelineModel: Model<GuidelineDocument>,
+    @InjectModel(Project.name)
+    private readonly projectModel: Model<ProjectDocument>,
   ) {}
 
   async create(createGuidelineDto: any, userId: string): Promise<any> {
@@ -29,7 +33,7 @@ export class GuidelinesService {
       const existingGuideline = await this.guidelineModel.findOne({
         name: createGuidelineDto.name,
         user: toObjectId(userId),
-        deleted_at: null
+        deletedAt: null
       });
       
       if (existingGuideline) {
@@ -75,7 +79,7 @@ export class GuidelinesService {
     const pipeline: any[] = [];
 
     // Match stage for filtering
-    const matchStage: any = { deleted_at: null, user: toObjectId(userId) };
+    const matchStage: any = { deletedAt: null, user: toObjectId(userId) };
     if (search) {
       matchStage.$or = [
         { name: { $regex: search, $options: 'i' } },
@@ -91,7 +95,7 @@ export class GuidelinesService {
         localField: '_id',
         foreignField: 'guideline',
         as: 'projects',
-        pipeline: [{ $match: { deleted_at: null } }],
+        pipeline: [{ $match: { deletedAt: null } }],
       },
     });
 
@@ -149,7 +153,7 @@ export class GuidelinesService {
 
   async findAllList(query: ListGuidelineDtoQuery, userId: string): Promise<Guideline[]> {
     const { search } = query;
-    const matchStage: any = { deleted_at: null, user: toObjectId(userId) };
+    const matchStage: any = { deletedAt: null, user: toObjectId(userId) };
     
     if (search) {
       matchStage.$or = [
@@ -168,7 +172,7 @@ export class GuidelinesService {
   async findOne(id: string, user?: any): Promise<Guideline> {
     const query: any = {
       _id: id,
-      deleted_at: null,
+      deletedAt: null,
     };
     if (user && user._id) {
       query.user = user._id;
@@ -191,7 +195,7 @@ export class GuidelinesService {
         name: updateGuidelineDto.name,
         _id: { $ne: id },
         user: toObjectId(userId),
-        deleted_at: null,
+        deletedAt: null,
       });
       if (isExists) {
         throw new ConflictException(
@@ -202,7 +206,7 @@ export class GuidelinesService {
 
     const guideline = await this.findOne(id, { _id: userId });
     const updatedGuideline = await this.guidelineModel.findOneAndUpdate(
-      { _id: id, user: toObjectId(userId), deleted_at: null },
+      { _id: id, user: toObjectId(userId), deletedAt: null },
       updateGuidelineDto,
       { new: true },
     );
@@ -215,10 +219,23 @@ export class GuidelinesService {
   }
 
   async remove(id: string, userId: string): Promise<void> {
-    const guideline = await this.findOne(id, { _id: userId });
+    const guideline = await this.findOne(id, { _id: toObjectId(userId) });
+    
+    // Check if any projects are using this guideline
+    const projectsUsingGuideline = await this.projectModel.countDocuments({
+      guideline: toObjectId(id),
+      deletedAt: null,
+    });
+    
+    if (projectsUsingGuideline > 0) {
+      throw new BadRequestException(
+        `Cannot delete guideline. It is currently being used by ${projectsUsingGuideline} project(s). Please remove the guideline from all projects before deleting it.`
+      );
+    }
+    
     await this.guidelineModel.findOneAndUpdate(
-      { _id: id, user: toObjectId(userId), deleted_at: null },
-      { deleted_at: new Date() },
+      { _id: id, user: toObjectId(userId), deletedAt: null },
+      { deletedAt: new Date() },
     );
   }
 }
