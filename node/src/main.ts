@@ -11,6 +11,8 @@ async function bootstrap() {
 
   app.use(helmet());
   app.enableCors();
+  // Set a global prefix so all routes are under /seo-content-api
+  app.setGlobalPrefix('seo-content-api');
   // Enable global exception filter to debug article creation error
   app.useGlobalFilters(new AllExceptionsFilter());
   // Temporarily disable global validation pipe to debug callback error
@@ -26,11 +28,12 @@ async function bootstrap() {
   app.use(bodyParser.json({ limit: '50mb' }));
   app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
-  await app.listen(process.env.PORT ?? 9001);
+  const port: number = Number(process.env.SERVER_PORT);
+  await app.listen(port);
 
   logger.log(
     'info',
-    `Application is running on: http://localhost:${process.env.PORT ?? 9001}`,
+    `Application is running on: http://localhost:${port}`,
   );
 }
 

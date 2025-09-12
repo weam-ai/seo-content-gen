@@ -535,7 +535,12 @@ export default function Topics() {
             setTopics((prev) =>
               prev.map((t) =>
                 t._id === keywordModalTopic._id
-                  ? { ...t, secondaryKeywords: updatedKeywords }
+                  ? { ...t, secondaryKeywords: updatedKeywords.map(keyword => ({
+                      keyword,
+                      volume: null,
+                      competition: null,
+                      article_type: null
+                    })) }
                   : t
               )
             );

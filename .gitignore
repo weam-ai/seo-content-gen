@@ -43,12 +43,11 @@ debug.log
 *.pid
 
 # Environment variables
-.env
 .env.development.local
 .env.test.local
 .env.production.local
 .env.local
-
+.env
 # IDE - VSCode
 .vscode/
 **/.vscode/

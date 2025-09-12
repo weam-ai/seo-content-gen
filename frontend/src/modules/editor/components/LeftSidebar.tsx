@@ -42,7 +42,7 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
 
         setArticle(articleData);
         setArticleTypes(articleTypesData);
-        setSecondaryKeywords(articleData.secondaryKeywords || []);
+        setSecondaryKeywords((articleData.secondaryKeywords || []).map(kw => typeof kw === 'string' ? kw : kw.keyword));
       } catch (err) {
         console.error('Failed to fetch article data:', err);
         setError(
@@ -67,7 +67,12 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
       setSecondaryKeywords(newKeywords);
       // Update the article state to reflect the change
       setArticle((prev) =>
-        prev ? { ...prev, secondaryKeywords: newKeywords } : null
+        prev ? { ...prev, secondaryKeywords: newKeywords.map(keyword => ({
+          keyword,
+          volume: null,
+          competition: null,
+          article_type: null
+        })) } : null
       );
     } catch (err) {
       console.error('Failed to update secondary keywords:', err);

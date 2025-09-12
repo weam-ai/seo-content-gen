@@ -5,7 +5,7 @@
   "compilerOptions": {
     "assets": [
       {
-        "include": "**/*.{ejs,json,sql}",
+        "include": "**/*.{ejs,json}",
         "watchAssets": false
       }
     ],

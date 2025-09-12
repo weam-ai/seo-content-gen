@@ -3,19 +3,12 @@ import React, {
   useState,
   useCallback,
   ReactNode,
-  useEffect,
 } from 'react';
 import { SidebarSection, EditorSettings } from '../types';
 import { useTheme } from '@/components/theme-provider';
 import { Article } from '@/lib/types';
-import {
-  startTimeTracking as apiStartTimeTracking,
-  stopTimeTracking as apiStopTimeTracking,
-  getTimeTrackingStatus,
-} from '@/lib/services/time-tracking.service';
+// Time tracking services removed for single-user application
 import { getArticleDetail } from '@/lib/services/topics.service';
-
-import { toast } from 'sonner';
 
 interface EditorContextType {
   leftSidebarOpen: boolean;
@@ -30,11 +23,7 @@ interface EditorContextType {
   // Save status state
   saveStatus: 'idle' | 'saving' | 'saved' | 'error';
   saveError: string | null;
-  // Time tracking state
-  isTimeTracking: boolean;
-  totalTimeSeconds: number;
-  isLoading: boolean;
-  error: string | null;
+  // Time tracking removed for single-user application
   // Preview mode state
   isPreviewMode: boolean;
   previewVersion: string | null;
@@ -51,13 +40,9 @@ interface EditorContextType {
     status: 'idle' | 'saving' | 'saved' | 'error',
     error?: string
   ) => void;
-  // Time tracking methods
-  startTimeTracking: (articleId: string) => Promise<void>;
-  pauseTimeTracking: (articleId: string) => Promise<void>;
+  // Time tracking methods removed for single-user application
   // Preview mode methods
   setPreviewMode: (isPreview: boolean, version?: string) => void;
-  resetTimeTracking: () => void;
-  loadTimeTrackingStatus: (articleId: string) => Promise<void>;
 }
 
 export const EditorContext = createContext<EditorContextType | undefined>(
@@ -71,7 +56,6 @@ interface EditorProviderProps {
 
 export const EditorProvider: React.FC<EditorProviderProps> = ({
   children,
-  articleId,
 }) => {
   const { setTheme: setAppTheme } = useTheme();
   const [leftSidebarOpen, setLeftSidebarOpen] = useState(false);
@@ -109,12 +93,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
   >('idle');
   const [saveError, setSaveError] = useState<string | null>(null);
 
-  // Time tracking state
-  const [isTimeTracking, setIsTimeTracking] = useState(false);
-  const [totalTimeSeconds, setTotalTimeSeconds] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [startTime, setStartTime] = useState<Date | null>(null);
+  // Time tracking state removed for single-user application
 
   // Preview mode state
   const [isPreviewMode, setIsPreviewModeState] = useState(false);
@@ -189,96 +168,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
     }
   }, []);
 
-  // Load time tracking status from API
-  const loadTimeTrackingStatus = useCallback(async (articleId: string) => {
-    if (!articleId) return;
-
-    try {
-      setIsLoading(true);
-      setError(null);
-      const status = await getTimeTrackingStatus(articleId);
-
-      setIsTimeTracking(status.status === 'running');
-      setTotalTimeSeconds(status.totalDuration);
-
-      if (status.status === 'running') {
-        setStartTime(new Date());
-      }
-    } catch (err: any) {
-      const errorMessage = err.message || 'Failed to load time tracking status';
-      setError(errorMessage);
-      console.error('Failed to load time tracking status:', err);
-
-      // Show toast notification for API error
-      toast.error(`Timer Status Error : ` + errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  // Time tracking methods
-  const startTimeTracking = useCallback(async (articleId: string) => {
-    if (!articleId) return;
-
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      const response = await apiStartTimeTracking(articleId);
-
-      if (response.status) {
-        setIsTimeTracking(true);
-        setStartTime(new Date());
-        // Don't reset totalTimeSeconds here - it should continue from current value
-      } else {
-        throw new Error(response.message || 'Failed to start time tracking');
-      }
-    } catch (err: any) {
-      const errorMessage = err.message || 'Failed to start time tracking';
-      setError(errorMessage);
-      console.error('Failed to start time tracking:', err);
-
-      // Show toast notification for API error
-      toast.error(`Timer Status Error : ` + errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  const pauseTimeTracking = useCallback(async (articleId: string) => {
-    if (!articleId) return;
-
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      const response = await apiStopTimeTracking(articleId);
-
-      if (response.status) {
-        setIsTimeTracking(false);
-        setStartTime(null);
-        // Keep totalTimeSeconds as is - it represents the total tracked time
-      } else {
-        throw new Error(response.message || 'Failed to stop time tracking');
-      }
-    } catch (err: any) {
-      const errorMessage = err.message || 'Failed to stop time tracking';
-      setError(errorMessage);
-      console.error('Failed to stop time tracking:', err);
-
-      // Show toast notification for API error
-      toast.error(`Timer Status Error : ` + errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  const resetTimeTracking = useCallback(() => {
-    setIsTimeTracking(false);
-    setTotalTimeSeconds(0);
-    setStartTime(null);
-    setError(null);
-  }, []);
+  // Time tracking methods removed for single-user application
 
   // Preview mode methods
   const setPreviewMode = useCallback((isPreview: boolean, version?: string) => {
@@ -302,31 +192,6 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
     []
   );
 
-
-
-  // Timer effect - only increment local counter when tracking is active
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-
-    if (isTimeTracking && startTime) {
-      interval = setInterval(() => {
-        setTotalTimeSeconds((prev) => prev + 1);
-      }, 1000);
-    }
-
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [isTimeTracking, startTime]);
-
-  // Load initial data when articleId changes
-  useEffect(() => {
-    if (articleId) {
-      loadArticle(articleId);
-      loadTimeTrackingStatus(articleId);
-    }
-  }, [articleId, loadArticle, loadTimeTrackingStatus]);
-
   return (
     <EditorContext.Provider
       value={{
@@ -339,20 +204,12 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
         articleError,
         saveStatus,
         saveError,
-        isTimeTracking,
-        totalTimeSeconds,
-        isLoading,
-        error,
         toggleLeftSidebar,
         toggleRightSidebar,
         updateSettings,
         setEditorRef,
         loadArticle,
         setSaveStatus,
-        startTimeTracking,
-        pauseTimeTracking,
-        resetTimeTracking,
-        loadTimeTrackingStatus,
         isPreviewMode,
         previewVersion,
         setPreviewMode,

@@ -27,7 +27,6 @@ api.interceptors.request.use(
       else {
         config.headers = { ...(config.headers as any), Authorization: `Bearer ${jwt}` } as AxiosRequestHeaders;
       }
-      console.debug('Auth header set (JWT).');
     } else {
       console.debug('Auth header NOT set (no token available).');
     }

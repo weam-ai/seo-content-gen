@@ -84,7 +84,7 @@ export class ArticleService {
     // private readonly dataForSeoService: DataForSeoService, // Temporarily disabled
     private readonly pythonService: PythonService,
     // private readonly emailService: EmailService, // Temporarily disabled
-    // private readonly articleDocumentService: ArticleDocumentsService, // Temporarily disabled
+    private readonly articleDocumentService: ArticleDocumentsService,
     private readonly geminiService: GeminiService,
     private readonly eventEmitter: EventEmitter2,
     private readonly claudeService: ClaudeService,
@@ -106,13 +106,16 @@ export class ArticleService {
         );
       }
       
-      const articleData = {
+      const articleData: any = {
         ...createArticleDto,
         project: toObjectId(createArticleDto.project_id),
-        user: user ? toObjectId(user._id) : undefined,
         status: ArticleStatus.NOT_STARTED,
         approved_at: new Date(),
       };
+      
+      if (user && user._id) {
+        articleData.user = toObjectId(user._id);
+      }
       
       const article = new this.articleModel(articleData);
       const newArticle = await article.save();
@@ -144,7 +147,7 @@ export class ArticleService {
 
     // Build match conditions
     const matchConditions: any = {
-      deleted_at: null,
+      deletedAt: null,
       name: { $ne: null }
     };
 
@@ -371,7 +374,7 @@ export class ArticleService {
   }
 
   async findOne(id: string) {
-    const query: any = { _id: toObjectId(id) };
+    const query: any = { _id: toObjectId(id), deletedAt: null };
     // Articles are now project-dependent only, no user filtering needed
 
     const article = await this.articleModel
@@ -565,7 +568,7 @@ export class ArticleService {
     const result = await this.articleModel.aggregate([
       {
         $match: {
-          deleted_at: null,
+          deletedAt: null,
           name: { $ne: null }
         }
       },
@@ -589,7 +592,7 @@ export class ArticleService {
     taskType?: string | null,
   ): Promise<any> {
     const matchConditions: any = {
-      deleted_at: null,
+      deletedAt: null,
     };
 
     if (taskType) {
@@ -625,16 +628,28 @@ export class ArticleService {
     keywords: TargetedKeyword[],
     secondary_keywords?: string[],
     skipTitleGeneration: boolean = false,
-    authToken?: string,
+    user?: User,
   ) {
     //create article at top most priority
     const articles = await Promise.all(
       keywords.map(async (keyword) => {
-        const articleData = {
+        // Convert string array to object array for secondary keywords
+        const formattedSecondaryKeywords = secondary_keywords?.map(kw => ({
+          keyword: kw,
+          volume: null,
+          competition: null,
+          article_type: null
+        })) ?? [];
+        
+        const articleData: any = {
           keywords: keyword.keyword,
           project: toObjectId((project as any)._id),
-          secondary_keywords: secondary_keywords ?? [],
+          secondary_keywords: formattedSecondaryKeywords,
         };
+        
+        if (user && user._id) {
+          articleData.user = toObjectId(user._id);
+        }
         return await this.articleModel.create(articleData);
       }),
     );
@@ -672,7 +687,7 @@ export class ArticleService {
         const generateTitles = await this.pythonService.generateTitles({
           ProjectId: (project as any)._id.toString(),
           Keywords: keywordsWithPromptType,
-        }, authToken);
+        });
 
         if (!generateTitles) {
           throw new InternalServerErrorException(
@@ -720,7 +735,6 @@ export class ArticleService {
   async generateTitlesForProject(
     projectId: string,
     keywords: TargetedKeyword[],
-    authToken?: string,
   ) {
     // Find articles that don't have titles yet for this project
     const articlesWithoutTitles = await this.articleModel
@@ -750,7 +764,7 @@ export class ArticleService {
       const generateTitles = await this.pythonService.generateTitles({
         ProjectId: projectId,
         Keywords: requestKeywords,
-      }, authToken);
+      });
 
       if (!generateTitles) {
         throw new InternalServerErrorException(
@@ -899,16 +913,13 @@ export class ArticleService {
   async requestPythonAIContentGenerate(
     articleId: string,
     body: GenerateArticlePayloadRequest,
-    authToken?: string,
-  ) {
-    try {
-      await this.pythonService.generateArticle({
-        articleId,
-        ...body,
-      }, authToken);
-      // Python service processes asynchronously and sends results via webhook
-      // No need to check result as it's a fire-and-forget operation
-    } catch (error) {
+  ): Promise<string> {
+    const result = await this.pythonService.generateArticle({
+      articleId,
+      ...body,
+    });
+
+    if (!result) {
       throw new InternalServerErrorException(
         ARTICLES_STRING.ERRORS.FAILED_ARTICLE_GENERATION_FROM_SERVER,
       );
@@ -962,6 +973,16 @@ export class ArticleService {
         { $set: updatePayload },
       );
     }
+
+    if (result.data) {
+      const resultArticle = result.data.webhook_responses.open_ai;
+      await this.articleContentModel.updateOne(
+        { _id: toObjectId(article.article_content._id) },
+        { open_ai_content: resultArticle },
+      );
+      return resultArticle;
+    }
+    return '';
   }
 
   async fetchArticleContent(articleId: string) {
@@ -1021,7 +1042,8 @@ export class ArticleService {
     }
 
     // Handle both enum values and string values from Python service
-    const modelStr = typeof model === 'string' ? model : model;
+    // Convert model to string for comparison
+    const modelStr = String(model);
     
     if (modelStr === ArticleFrom.OPEN_AI || modelStr === 'open_ai') {
       Object.assign(payload, { open_ai_content: content });
@@ -1038,12 +1060,12 @@ export class ArticleService {
         { $set: payload }
       );
     } else {
-      const newContent = await this.articleContentModel.create(payload);
+      const content = await this.articleContentModel.create(payload);
       await this.articleModel.updateOne(
-        { _id: toObjectId((article._id as any)) },
+        { _id: toObjectId(article._id) },
         { 
           $set: { 
-            article_content: newContent._id, 
+            article_content: content._id, 
             is_content_generated: true 
           }
         }
@@ -1083,16 +1105,18 @@ export class ArticleService {
     }
 
     const blocks = markdownToBlocks(content);
-    // await this.articleDocumentService.updateDocument(
-    //   article._id.toString(),
-    //   { snapshot: Buffer.from(JSON.stringify(blocks)) },
-    //   user,
-    // ); // Disabled
+    await this.articleDocumentService.updateDocument(
+      article._id.toString(),
+      { 
+        snapshot: Buffer.from(JSON.stringify(blocks)),
+        session_id: 'ai_content_selection'
+      }
+    );
 
 
 
     await this.articleContentModel.updateOne(
-      { _id: toObjectId((article.article_content as any)._id) },
+      { _id: toObjectId(article.article_content._id) },
       { $set: { selected_content: data.selected_content } },
     );
   }
@@ -1113,7 +1137,7 @@ export class ArticleService {
 
     const result = await this.pythonService.generateOutline({
       articleId: article._id.toString(),
-    }, authToken);
+    });
 
     if (!result) {
       throw new InternalServerErrorException(
@@ -1128,7 +1152,7 @@ export class ArticleService {
     return result;
   }
 
-  async regenerateTitle(articleId: string, is_save?: boolean, authToken?: string) {
+  async regenerateTitle(articleId: string, is_save?: boolean) {
     const article = await this.articleModel.findById(toObjectId(articleId))
       .populate('project')
       .exec();
@@ -1149,7 +1173,7 @@ export class ArticleService {
         Keywords: [
           { promptTypeId: defaultPromptType._id.toString(), keyword: article.keywords },
         ],
-      }, authToken);
+      });
 
     if (!topics || !topics.length) {
       throw new InternalServerErrorException(
@@ -1167,83 +1191,8 @@ export class ArticleService {
     return topics[0];
   }
 
-  private readonly logger = new Logger(ArticleService.name);
-
-  async generateTopicsWithAI(articleId: string, model: ArticleFrom, requestId: string) {
-    const article = await this.articleModel.findById(toObjectId(articleId))
-      .populate('project')
-      .exec();
-      
-    if (!article) {
-      throw new NotFoundException(ARTICLES_STRING.ERRORS.ARTICLE_NOT_FOUND);
-    }
-
-    let topics: string[];
-    const prompt = `Generate 5-10 relevant topic suggestions for an article with the following keywords: ${article.keywords}. Return only the topic titles, one per line.`;
-
-    try {
-      let response: string;
-      
-      switch (model) {
-        case ArticleFrom.OPEN_AI:
-          // Use OpenAI service - create a simple content generation method
-          response = await this.generateContentWithOpenAI(prompt);
-          break;
-
-        case ArticleFrom.GEMINI:
-          // Use Gemini service - create a simple content generation method
-          response = await this.generateContentWithGemini(prompt);
-          break;
-
-        case ArticleFrom.CLAUDE:
-          // Use Claude service for topic generation
-          response = await this.claudeService.generateContent(prompt);
-          break;
-
-        default:
-          throw new BadRequestException('Unsupported AI model specified');
-      }
-
-      topics = response.split('\n').filter(topic => topic.trim().length > 0);
-
-      if (!topics || topics.length === 0) {
-        throw new InternalServerErrorException('Failed to generate topics');
-      }
-
-      // Log the request for tracking
-      this.logger.log(`Generated ${topics.length} topics for article ${articleId} using ${model} (Request ID: ${requestId})`);
-
-      return {
-        topics,
-        model,
-        requestId,
-        articleId,
-        generatedAt: new Date().toISOString()
-      };
-    } catch (error) {
-      this.logger.error(`Failed to generate topics for article ${articleId} using ${model}:`, error);
-      throw new InternalServerErrorException(`Failed to generate topics using ${model}`);
-    }
-  }
-
-  private async generateContentWithOpenAI(prompt: string): Promise<string> {
-    // Use the existing regenerateArticlePortion method as a base
-    const result = await this.openaiService.regenerateArticlePortion({
-      article: '',
-      text: prompt,
-      prompt: 'Generate topic suggestions based on the provided keywords'
-    });
-    return result.modifiedPortion;
-  }
-
-  private async generateContentWithGemini(prompt: string): Promise<string> {
-    // For now, return a placeholder since Gemini service doesn't have a simple generateContent method
-    // This would need to be implemented based on the actual Gemini service capabilities
-    throw new InternalServerErrorException('Gemini topic generation not yet implemented');
-  }
-
-  checkExistinProjectTitles(projectId: string, title: string, authToken?: string) {
-    return this.pythonService.checkExistingProjectTitle(projectId, title, authToken);
+  checkExistinProjectTitles(projectId: string, title: string) {
+    return this.pythonService.checkExistingProjectTitle(projectId, title);
   }
 
   // Removed articleBulkAssign method - functionality no longer supported
@@ -1340,7 +1289,7 @@ export class ArticleService {
 
     // Exclude keywords already in secondary_keywords
     const excludeSet = new Set(
-      (article.secondary_keywords || []).map((k) => k.toLowerCase()),
+      (article.secondary_keywords || []).map((k) => k.keyword.toLowerCase()),
     );
 
     // Filter and map

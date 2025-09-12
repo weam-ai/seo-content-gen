@@ -86,7 +86,7 @@ export const SYSTEM_PROMPT_STRING = {
     SYSTEM_PROMPT_NOT_FOUND: 'System prompt not found',
     SYSTEM_PROMPT_ALREADY_EXISTS: 'System prompt with this name already exists',
     SYSTEM_PROMPT_DEFAULT_NO_DELETE:
-      'Default system prompt could not be delete',
+      'Cannot delete the default system prompt. Please set another prompt as default first.',
   },
 };
 
@@ -265,26 +265,4 @@ export const DASHBOARD_STRING = {
 
 
 
-export const TIME_TRACKING_STRING = {
-  SUCCESS: {
-    TIMER_STARTED: 'Timer started successfully',
-    TIMER_STOPPED: 'Timer stopped successfully',
-    LOGS_FETCHED: 'Time logs fetched successfully',
-    ARTICLE_TRACK_STATUS_FETCHED: 'Article time track status fetched',
-    MANUAL_LOG_CREATED: 'Manual time log created successfully',
-    MANUAL_LOG_UPDATED: 'Manual time log updated successfully',
-    MANUAL_LOG_DELETED: 'Manual time log deleted successfully',
-  },
-  ERROR: {
-    ALREADY_RUNNING_ERROR:
-      'You have already started timer, please stop that before start new one',
-    ARTICLE_NOT_FOUND: 'Article not found',
-    // Removed assignment-related messages for single-user application
-    NOT_ALLOWED_OTHERS_LOG: 'You can delete logs created by you',
-    ACTIVE_TIMER_NOT_FOUND: 'Active timer not found',
-    TIME_LOG_NOT_FOUND: 'Time log not found',
-    TRACKED_LOG_NOT_EDIT: 'Tracked time log cannot edit',
-    INVALID_TIME_RANGE: 'End time must be after start time',
-    CANNOT_MODIFY_RUNNING_LOG: 'Cannot modify a running time log',
-  },
-};
+// TIME_TRACKING_STRING removed for single-user application

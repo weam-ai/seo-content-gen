@@ -106,42 +106,29 @@ export class PythonService {
     return promise;
   }
 
-  async generateArticle(payload: GenerateArticlePayload, authToken?: string) {
+  async generateArticle(payload: GenerateArticlePayload) {
     try {
       logger.log(
         'info',
         `Python service requested on [/generate-article, ${JSON.stringify(payload)}]`,
       );
-      const headers: any = {};
-      if (authToken) {
-        headers.Authorization = authToken;
-      }
-      const response = await this.axiosInstance.post('/generate-article', payload, { headers });
-      logger.log(
-        'info',
-        `Python service responded successfully for /generate-article with status: ${response.status}`,
-      );
-      return response.data;
+      return this.axiosInstance.post<{
+        webhook_responses: { open_ai: string };
+      }>('/get-articles', payload);
     } catch (error) {
-      logger.error('Python service error for /generate-article:', error);
-      void this.sendPythonErrorNotification('/generate-article', payload, error);
-      throw error; // Re-throw the error instead of returning null
+      logger.error(error);
+      void this.sendPythonErrorNotification('/get-articles', payload, error);
+      return null;
     }
   }
 
   async generateTitles(
     payload: GenerateTitlePayload,
-    authToken?: string,
   ): Promise<string[] | null> {
     try {
-      const headers: any = {};
-      if (authToken) {
-        headers.Authorization = authToken;
-      }
       const response = await this.axiosInstance.post<string[]>(
         '/get-titles',
         payload,
-        { headers },
       );
       return response.data;
     } catch (error) {
@@ -153,7 +140,6 @@ export class PythonService {
 
   async generateOutline(
     payload: GenerateOutlinePayload,
-    authToken?: string,
   ): Promise<string | null> {
     const cacheKey = `${payload.articleId}`;
 
@@ -161,13 +147,8 @@ export class PythonService {
       return this.outlineRequestCache.get(cacheKey)!;
     }
 
-    const headers: any = {};
-    if (authToken) {
-      headers.Authorization = authToken;
-    }
-
     const promise = this.axiosInstance
-      .post<string>('/generate-outline', payload, { headers })
+      .post<string>('/generate-outline', payload)
       .then((response) => response.data)
       .catch((error) => {
         logger.error(error);
@@ -188,19 +169,14 @@ export class PythonService {
 
   async checkExistingProjectTitle(
     projectId: string,
-    title: string,
-    authToken?: string,
+    title: string
   ): Promise<string | null> {
     const payload = { ProjectId: projectId, title };
-    const headers: any = {};
-    if (authToken) {
-      headers.Authorization = authToken;
-    }
+
     try {
       const response = await this.axiosInstance.post<string | null>(
         '/check-title',
         payload,
-        { headers },
       );
       return response.data;
     } catch (error) {
@@ -214,22 +190,16 @@ export class PythonService {
   //company-business-summary
   async companyBusinessSummary(
     websiteUrl: string,
-    authToken?: string,
   ): Promise<GenerateCompanyDetailResponse> {
     const payload = { 
       company_name: websiteUrl,
       company_website: websiteUrl 
     };
-    const headers: any = {};
-    if (authToken) {
-      headers.Authorization = authToken;
-    }
     try {
       const response =
         await this.axiosInstance.post<GenerateCompanyDetailResponse>(
           '/company-business-summary',
           payload,
-          { headers },
         );
       return response.data;
     } catch (error) {

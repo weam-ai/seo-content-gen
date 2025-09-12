@@ -22,7 +22,6 @@ export type SitemapDetailedInterface = {
 export type GenerateArticlePayload = {
   articleId: string;
   model?: ArticleFrom;
-  requestId: string;
 };
 
 export type GenerateTitlePayload = {

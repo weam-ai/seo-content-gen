@@ -20,11 +20,7 @@ export class UpdateArticleContent {
 export class GenerateArticlePayloadRequest {
   @IsEnum(ArticleFrom)
   @IsOptional()
-  model?: ArticleFrom; //optionally, to generate for all models
-
-  @IsNotEmpty()
-  @IsString()
-  requestId: string;
+  model?: ArticleFrom;
 }
 
 export class ImplementArticleRequestDto {

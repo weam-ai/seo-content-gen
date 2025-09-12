@@ -148,9 +148,3 @@ export function useProjectActivityPermissions() {
     canViewProjectActivity: true,
   };
 }
-
-export function useTimeTrackingPermissions() {
-  return {
-    canViewTimeTrackingLogs: true,
-  };
-}

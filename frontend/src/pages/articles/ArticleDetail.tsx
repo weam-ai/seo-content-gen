@@ -23,7 +23,6 @@ import {
   ArrowLeft,
   Edit,
   FileText,
-  History,
   RotateCcw,
   X,
   Loader2,
@@ -32,11 +31,13 @@ import {
   Zap,
   BarChart3,
   Save,
-  Lock,
   Copy,
   Clock,
   CheckCircle,
   XCircle,
+  Download,
+  FileDown,
+  Globe,
 } from 'lucide-react';
 import {
   AlertDialog,
@@ -51,7 +52,7 @@ import {
 import { toast } from '@/components/ui/use-toast';
 import type { Article } from '@/lib/types';
 import ReactMarkdown from 'react-markdown';
-import { EditorProvider } from '@/components/editor/EditorProvider';
+
 import {
   Dialog,
   DialogContent,
@@ -64,19 +65,18 @@ import TaskSidebar from '@/components/layout/TaskSidebar';
 // Removed useAuthStore import - not needed for single user application
 // Removed hasPermission import - single user application has full access
 // Removed ArticleAuditReport import - audit report functionality removed for single-user application
-import { marked } from 'marked';
-import { blocksToMarkdown } from '@/lib/blocknote.util';
+
 import { markdownToBlocks } from '@/lib/blocknote.util';
 import ImplementMergeModal from '@/components/article/ImplementMergeModal';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import ArticlePublishModel from '@/components/article/ArticlePublishModel';
-import ArticleVersionHistory from '@/components/article/ArticleVersionHistory';
+
 // Removed ArticleTimeTracker import for single-user application
 import TextareaAutosize from 'react-textarea-autosize';
 import RegenerateTitleModal from '@/components/topics/RegenerateTitleModal';
 import { OutlineRequiredModal } from '@/components/ui/OutlineRequiredModal';
 import SecondaryKeywordModal from '../topics/SecondaryKeywordModal';
-// Removed useSSE import - now implementing SSE directly in component
+import { useSessionStore } from '@/lib/store/session-store';
 
 // Add a simple skeleton component
 function AISkeleton() {
@@ -115,9 +115,18 @@ export default function ArticleDetails() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const articleId = params.id as string;
+  const sessionId = useSessionStore((state) => state.sessionId);
+  const initSession = useSessionStore((state) => state.initSession);
+
+  // Initialize session ID on component mount
+  useEffect(() => {
+    if (!sessionId) {
+      initSession();
+    }
+  }, [sessionId, initSession]);
   const [articleType, setArticleType] = useState('');
   const [activeTab, setActiveTab] = useState('open_ai');
-  const [showVersionHistory, setShowVersionHistory] = useState(false);
+
   const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -130,19 +139,11 @@ export default function ArticleDetails() {
   const [aiContent, setAIContent] = useState<ArticleAIContent | null>(null);
   const [editorContent, setEditorContent] =
     useState<ArticleEditorContent | null>(null);
-  const [editorContentLoading, setEditorContentLoading] = useState(false);
-  const [editorContentError, setEditorContentError] = useState<string | null>(
-    null
-  );
-  const [editorRefreshKey] = useState(0); // Add a key to force re-render
 
   // Add per-provider loading state
   const [regeneratingProviders, setRegeneratingProviders] = useState<{
     [key: string]: boolean;
   }>({});
-  const [proceedingProvider, setProceedingProvider] = useState<string | null>(
-    null
-  );
 
   // Add state for outline editing
   const [isEditingOutline, setIsEditingOutline] = useState(false);
@@ -184,15 +185,121 @@ export default function ArticleDetails() {
   // Removed user variable for single-user application
 
   const hasFetchedAfterToken = useRef(false);
-  const [sseRequestIds, setSseRequestIds] = useState<{
-    [key: string]: string | null;
-  }>({});
   const [generatingProviders, setGeneratingProviders] = useState<{
     [key: string]: boolean;
   }>({});
 
   // Add state to track selected provider
-  const [selectedProvider, setSelectedProvider] = useState<string | null>(null);
+
+  // Share functionality helpers
+  const triggerDownload = (
+    content: string | Blob,
+    filename: string,
+    type: string
+  ) => {
+    const blob =
+      typeof content === 'string' ? new Blob([content], { type }) : content;
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleDownloadAIContent = async (format: string, provider: string) => {
+    let content = '';
+    const filename = article?.title || 'ai-content';
+    
+    try {
+      switch (provider) {
+        case 'open_ai':
+          content = aiContent?.open_ai_content || '';
+          break;
+        case 'gemini':
+          content = aiContent?.gemini_content || '';
+          break;
+        case 'claude':
+          content = aiContent?.claude_content || '';
+          break;
+        default:
+          return;
+      }
+
+      if (!content) {
+        toast({ title: 'No content to download' });
+        return;
+      }
+
+      switch (format) {
+        case 'Markdown':
+          triggerDownload(content, `${filename}-${provider}.md`, 'text/markdown');
+          break;
+        case 'HTML':
+          const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${filename}</title></head><body>${content.replace(/\n/g, '<br>')}</body></html>`;
+          triggerDownload(html, `${filename}-${provider}.html`, 'text/html');
+          break;
+        case 'TXT':
+          triggerDownload(content, `${filename}-${provider}.txt`, 'text/plain');
+          break;
+        default:
+          toast({ title: 'Unknown format' });
+      }
+      
+      toast({
+        title: 'Download started',
+        description: `Downloading ${provider} content as ${format}`,
+      });
+    } catch (e) {
+      console.log(e);
+      toast({ title: 'Error', description: 'Failed to download content' });
+    }
+  };
+
+  const handleCopyAIContent = async (format: string, provider: string) => {
+    let content = '';
+    
+    try {
+      switch (provider) {
+        case 'open_ai':
+          content = aiContent?.open_ai_content || '';
+          break;
+        case 'gemini':
+          content = aiContent?.gemini_content || '';
+          break;
+        case 'claude':
+          content = aiContent?.claude_content || '';
+          break;
+        default:
+          return;
+      }
+
+      if (!content) {
+        toast({ title: 'No content to copy' });
+        return;
+      }
+
+      if (format === 'Markdown' || format === 'TXT') {
+        await navigator.clipboard.writeText(content);
+      } else if (format === 'HTML') {
+        const html = content.replace(/\n/g, '<br>');
+        await navigator.clipboard.write([
+          new window.ClipboardItem({
+            'text/html': new Blob([html], { type: 'text/html' }),
+            'text/plain': new Blob([content], { type: 'text/plain' }),
+          }),
+        ]);
+      }
+      
+      toast({
+        title: 'Content copied',
+        description: `${provider} content copied as ${format}`,
+      });
+    } catch (e) {
+      toast({ title: 'Error', description: 'Failed to copy content' });
+    }
+  };
+
 
   // Add state for confirmation dialog
   const [confirmProvider, setConfirmProvider] = useState<string | null>(null);
@@ -209,46 +316,7 @@ export default function ArticleDetails() {
   const [authorBio, setAuthorBio] = useState('');
   const [authorBioSaving, setAuthorBioSaving] = useState(false);
 
-  // Reintroduce hasEditorContent computed boolean
-  const hasEditorContent = useMemo(
-    () =>
-      !!(
-        editorContent &&
-        editorContent.snapshot_data &&
-        editorContent.snapshot_data.data &&
-        (() => {
-          try {
-            const buffer = new Uint8Array(editorContent.snapshot_data.data);
-            const jsonString = new TextDecoder().decode(buffer);
-            const parsed = JSON.parse(jsonString);
-            // Check for at least one non-empty block
-            return (
-              Array.isArray(parsed) &&
-              parsed.some((block) => {
-                if (block && block.content && Array.isArray(block.content)) {
-                  return block.content.some(
-                    (c: { text?: string }) => c.text && c.text.trim() !== ''
-                  );
-                }
-                return false;
-              })
-            );
-          } catch {
-            return false;
-          }
-        })()
-      ),
-    [editorContent]
-  );
-
-  // Automatically open the editor tab if there is editor content
-  const hasSetInitialTab = useRef(false);
-  useEffect(() => {
-    if (!loading && hasEditorContent && !hasSetInitialTab.current) {
-      setActiveTab('editor');
-      hasSetInitialTab.current = true;
-    }
-  }, [hasEditorContent, loading]);
+  // Keep the OpenAI tab as default - removed editor auto-switching logic
 
   useEffect(() => {
     // Reset the flag when switching tabs
@@ -286,8 +354,8 @@ export default function ArticleDetails() {
         setLoading(false);
       }
     }
-    if (articleId && articleTypeOptions.length) fetchArticle();
-  }, [articleId, articleTypeOptions]);
+    if (articleId) fetchArticle();
+  }, [articleId]);
 
   useEffect(() => {
     setArticleTypeLoading(true);
@@ -344,6 +412,7 @@ export default function ArticleDetails() {
 
     try {
       const content = await getArticleAIContent(article._id);
+      console.log('Fetched AI content:', content); // Debug log
       setAIContent(content);
     } catch (error: any) {
       console.error('Error fetching AI content:', error); // Debug log
@@ -358,22 +427,16 @@ export default function ArticleDetails() {
   const fetchEditorContent = useCallback(async () => {
     if (!article?._id) return;
 
-    setEditorContentLoading(true);
-    setEditorContentError(null);
-
     try {
       const content = await getArticleEditorContent(article._id);
       setEditorContent(content);
     } catch (error: any) {
       console.error('Error fetching editor content:', error);
-      setEditorContentError(error.message || 'Failed to fetch editor content');
       // toast({
       //   title: 'Error',
       //   description: error.message || 'Failed to fetch editor content',
       //   variant: 'destructive',
       // });
-    } finally {
-      setEditorContentLoading(false);
     }
   }, [article?._id]);
 
@@ -391,52 +454,9 @@ export default function ArticleDetails() {
       // Immediately fetch the latest editor content
       fetchEditorContent();
     }
-    // Only run when activeTab or article._id changes
+    // Only run when activeTab or article.id changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, article?._id]);
-
-  // --- SSE integration ---
-  useEffect(() => {
-    const activeConnections: EventSource[] = [];
-    
-    aiProviders.forEach((provider) => {
-      const requestId = sseRequestIds[provider.id];
-      if (!requestId) return;
-      
-      const url = `${import.meta.env.VITE_API_BASE_URL}/sse/${requestId}`;
-      const eventSource = new EventSource(url);
-      activeConnections.push(eventSource);
-      
-      eventSource.onmessage = async (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          if (data.type === 'content_update' && article?._id) {
-            try {
-              const updated = await getArticleAIContent(article._id);
-              setAIContent(updated);
-              toast({
-                title: 'AI content ready!',
-                description: `The ${data.content.model} content is now available.`,
-              });
-            } catch {}
-            setSseRequestIds((prev) => ({ ...prev, [provider.id]: null }));
-            setGeneratingProviders((prev) => ({ ...prev, [provider.id]: false }));
-          }
-        } catch (error) {
-          console.error('Error parsing SSE data:', error);
-        }
-      };
-      
-      eventSource.onerror = (error) => {
-        console.error('SSE connection error:', error);
-        eventSource.close();
-      };
-    });
-    
-    return () => {
-      activeConnections.forEach(connection => connection.close());
-    };
-  }, [sseRequestIds, article?._id]);
 
   // Placeholder handlers to fix linter errors
   const handleRemoveSecondaryKeyword = async (idx: number) => {
@@ -450,10 +470,10 @@ export default function ArticleDetails() {
     }
     setAddingKeyword(true);
     const updatedKeywords = article.secondaryKeywords.filter(
-      (_: string, i: number) => i !== idx
+      (_: any, i: number) => i !== idx
     );
     try {
-      await updateArticle(article._id, { secondary_keywords: updatedKeywords });
+      await updateArticle(article._id, { secondary_keywords: updatedKeywords.map(kw => typeof kw === 'string' ? kw : kw.keyword) });
       setArticle((prev: any) =>
         prev ? { ...prev, secondaryKeywords: updatedKeywords } : prev
       );
@@ -483,12 +503,18 @@ export default function ArticleDetails() {
     }
     if (!newSecondaryKeyword.trim()) return;
     setAddingKeyword(true);
+    const newKeywordObj = {
+      keyword: newSecondaryKeyword.trim(),
+      volume: null,
+      competition: null,
+      article_type: null
+    };
     const updatedKeywords = [
       ...(article.secondaryKeywords || []),
-      newSecondaryKeyword.trim(),
+      newKeywordObj,
     ];
     try {
-      await updateArticle(article._id, { secondary_keywords: updatedKeywords });
+      await updateArticle(article._id, { secondary_keywords: updatedKeywords.map(kw => typeof kw === 'string' ? kw : kw.keyword) });
       setArticle((prev: any) =>
         prev ? { ...prev, secondaryKeywords: updatedKeywords } : prev
       );
@@ -519,9 +545,15 @@ export default function ArticleDetails() {
     }
     if (keywords.length === 0) return;
     setAddingKeyword(true);
-    const updatedKeywords = [...(article.secondaryKeywords || []), ...keywords];
+    const keywordObjects = keywords.map(keyword => ({
+      keyword: keyword.trim(),
+      volume: null,
+      competition: null,
+      article_type: null
+    }));
+    const updatedKeywords = [...(article.secondaryKeywords || []), ...keywordObjects];
     try {
-      await updateArticle(article._id, { secondary_keywords: updatedKeywords });
+      await updateArticle(article._id, { secondary_keywords: updatedKeywords.map(kw => kw.keyword) });
       setArticle((prev: any) =>
         prev ? { ...prev, secondaryKeywords: updatedKeywords } : prev
       );
@@ -663,29 +695,38 @@ export default function ArticleDetails() {
     providerId: 'open_ai' | 'gemini' | 'claude'
   ) => {
     if (!article?._id) return;
+
+    // Set regeneration mode and reset selected provider states
+    
+    setAIContent((prev) => (prev ? { ...prev, selected_content: providerId } : prev));
+
     setRegeneratingProviders((prev) => ({ ...prev, [providerId]: true }));
     setGeneratingProviders((prev) => ({ ...prev, [providerId]: true }));
     try {
-      const requestId = Math.random().toString(36).substring(2, 18);
-      setSseRequestIds((prev) => ({ ...prev, [providerId]: requestId }));
-      const res = await generateArticleAIContent(
-        article._id,
-        providerId,
-        requestId
-      );
+      const res = await generateArticleAIContent(article._id, providerId);
+      console.log('Generate AI Content Response:', res); // Debug log
+      
       if (res.status && res.data) {
-        setAIContent((prev) => ({ ...prev, ...res.data }));
+        // The markdown content is now in the data key
+        console.log('Setting AI content:', res.data); // Debug log
+        setAIContent((prev) =>
+          prev
+            ? {
+                ...prev,
+                [`${providerId}_content`]: res.data, // res.data contains the markdown content
+              }
+            : null
+        );
+        
+        // Wait a bit for the webhook to process, then fetch the latest content
+        setTimeout(async () => {
+          console.log('Fetching AI content after delay...'); // Debug log
+          await fetchAIContent();
+        }, 2000);
+        
         toast({
           title: 'Success',
           description: `Regenerated ${providerId.replace('_', ' ')} content.`,
-        });
-      } else if (
-        res.message &&
-        res.message.toLowerCase().includes('generation requested successfully')
-      ) {
-        toast({
-          title: 'Requested',
-          description: res.message,
         });
       } else {
         throw new Error(res.message || 'Failed to regenerate content');
@@ -698,9 +739,8 @@ export default function ArticleDetails() {
           (err.message || 'Failed to regenerate content'),
         variant: 'destructive',
       });
-      setSseRequestIds((prev) => ({ ...prev, [providerId]: null }));
-      setGeneratingProviders((prev) => ({ ...prev, [providerId]: false }));
     } finally {
+      setGeneratingProviders((prev) => ({ ...prev, [providerId]: false }));
       setRegeneratingProviders((prev) => ({ ...prev, [providerId]: false }));
     }
   };
@@ -899,9 +939,9 @@ export default function ArticleDetails() {
     providerName: string
   ) => {
     if (!article) return;
-    setProceedingProvider(apiProvider);
+
     try {
-      const res = await selectArticleAIContent(article._id, apiProvider);
+      const res = await selectArticleAIContent(article._id, apiProvider, sessionId);
       if (res.status) {
         setAIContent((prev) =>
           prev
@@ -911,7 +951,7 @@ export default function ArticleDetails() {
             }
             : prev
         );
-        setSelectedProvider(apiProvider);
+
         toast({
           title: 'Success',
           description: `You have selected ${providerName} content to proceed with.`,
@@ -930,144 +970,12 @@ export default function ArticleDetails() {
         description: err.message || 'Failed to select content',
         variant: 'destructive',
       });
-    } finally {
-      setProceedingProvider(null);
     }
   };
 
   const editorRef = useRef<any>(null);
 
-  const handleCopyWithFormatting = async () => {
-    try {
-      if (!editorRef.current) throw new Error('Editor not ready');
 
-      // Deep copy the document to avoid mutating the live editor state
-      const editorDocument = JSON.parse(
-        JSON.stringify((editorRef.current as any).editor.document)
-      );
-
-      // Recursively process blocks to ensure link nodes have originalHref/originalUrl
-      const processBlocksForCopy = (blocks: any[]) => {
-        return blocks.map((block: any) => {
-          if (block.content) {
-            block.content = block.content.map((node: any) => {
-              if (node.type === 'link') {
-                // Ensure node.props exists
-                if (!node.props) {
-                  node.props = {};
-                }
-                // Determine the most accurate href to use
-                let sourceHref = node.href; // Prioritize node.href directly
-
-                // If node.href is not an external URL, check node.props.href
-                if (
-                  !sourceHref ||
-                  (!sourceHref.startsWith('http://') &&
-                    !sourceHref.startsWith('https://'))
-                ) {
-                  sourceHref = node.props.href;
-                }
-
-                // Fallback to existing originalHref if it's a valid external URL
-                if (
-                  !sourceHref ||
-                  (!sourceHref.startsWith('http://') &&
-                    !sourceHref.startsWith('https://'))
-                ) {
-                  if (
-                    node.props.originalHref &&
-                    (node.props.originalHref.startsWith('http://') ||
-                      node.props.originalHref.startsWith('https://'))
-                  ) {
-                    sourceHref = node.props.originalHref;
-                  }
-                }
-
-                // Ensure originalHref and originalUrl are set from the determined sourceHref
-                if (
-                  sourceHref &&
-                  (sourceHref.startsWith('http://') ||
-                    sourceHref.startsWith('https://'))
-                ) {
-                  node.props.originalHref = sourceHref;
-                  node.props.originalUrl = sourceHref;
-                } else {
-                  // If no valid external URL is found, ensure originalHref/Url are cleared or set to a safe default
-                  delete node.props.originalHref;
-                  delete node.props.originalUrl;
-                }
-              }
-              return node;
-            });
-          }
-          return block;
-        });
-      };
-
-      const processedDocument = processBlocksForCopy(editorDocument);
-
-      const markdown = blocksToMarkdown(processedDocument) as string;
-      let html: string;
-      const parsed = marked.parse(markdown);
-      if (parsed instanceof Promise) {
-        html = await parsed;
-      } else {
-        html = parsed as string;
-      }
-      const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = html;
-      tempDiv.querySelectorAll('*').forEach((el) => {
-        el.removeAttribute('class');
-        el.removeAttribute('id');
-        for (let i = el.attributes.length - 1; i >= 0; i--) {
-          const attr = el.attributes[i];
-          if (attr.name.startsWith('data-')) el.removeAttribute(attr.name);
-        }
-        if (el instanceof HTMLElement) el.removeAttribute('style');
-      });
-      const htmlContent = tempDiv.innerHTML;
-      const plainText = tempDiv.textContent || tempDiv.innerText || markdown;
-      if (navigator.clipboard && window.ClipboardItem) {
-        try {
-          const clipboardItem = new window.ClipboardItem({
-            'text/html': new Blob([htmlContent], { type: 'text/html' }),
-            'text/plain': new Blob([plainText], { type: 'text/plain' }),
-          });
-          await navigator.clipboard.write([clipboardItem]);
-          toast({
-            title: 'Copied!',
-            description: 'Content copied with formatting.',
-          });
-        } catch (err) {
-          console.error(
-            'Failed to copy HTML, falling back to plain text:',
-            err
-          );
-          await navigator.clipboard.writeText(plainText);
-          toast({
-            title: 'Copied!',
-            description:
-              'Content copied as plain text (formatting not supported in your browser).',
-          });
-        }
-      } else {
-        await navigator.clipboard.writeText(plainText);
-        toast({
-          title: 'Copied!',
-          description:
-            'Content copied as plain text (formatting not supported in your browser).',
-        });
-      }
-    } catch (err) {
-      console.error('Failed to copy: ', err);
-      toast({
-        title: 'Copy failed',
-        description:
-          'Could not copy content. Your browser might not support this feature or requires a secure connection (HTTPS).',
-        variant: 'destructive',
-      });
-    }
-  };
 
   const [mergeModalOpen, setMergeModalOpen] = useState(false);
   const [mergeCurrentBlocks] = useState<any[]>([]);
@@ -1075,16 +983,33 @@ export default function ArticleDetails() {
 
   // Compute total word count from editor content
   const totalWordCount = useMemo(() => {
-    if (
-      editorContent &&
-      editorContent.snapshot_data &&
-      editorContent.snapshot_data.data
-    ) {
+    if (editorContent && editorContent.snapshot_data) {
       try {
-        const buffer = new Uint8Array(editorContent.snapshot_data.data);
-        const jsonString = new TextDecoder().decode(buffer);
-        const blocks = JSON.parse(jsonString);
-        return countWordsInBlocks(blocks);
+        let jsonString = '';
+        if (typeof editorContent.snapshot_data === 'string') {
+          const str = editorContent.snapshot_data;
+          try {
+            // Try to decode as base64 - be more lenient with detection
+            if (str.length > 0 && !/^[\s\[\{]/.test(str)) {
+              // If it doesn't start with whitespace, [, or {, try base64 decode
+              jsonString = atob(str);
+            } else {
+              jsonString = str;
+            }
+          } catch {
+            // If base64 decode fails, use as-is
+            jsonString = str;
+          }
+        } else if ((editorContent.snapshot_data as any).data) {
+          // Legacy format support
+          const buffer = new Uint8Array((editorContent.snapshot_data as any).data);
+          jsonString = new TextDecoder().decode(buffer);
+        }
+        
+        if (jsonString) {
+          const blocks = JSON.parse(jsonString);
+          return countWordsInBlocks(blocks);
+        }
       } catch {
         return 0;
       }
@@ -1563,7 +1488,7 @@ export default function ArticleDetails() {
         <SecondaryKeywordModal
           open={showAddKeywordModal}
           onOpenChange={setShowAddKeywordModal}
-          initialKeywords={article.secondaryKeywords || []}
+          initialKeywords={(article.secondaryKeywords || []).map(kw => typeof kw === 'string' ? kw : kw.keyword)}
           recommendedKeywords={recommendedKeywords}
           topicTitle={article.title}
           primaryKeyword={article.keyword}
@@ -1898,14 +1823,7 @@ export default function ArticleDetails() {
                         : article.status.charAt(0).toUpperCase() +
                         article.status.slice(1)}
                     </Badge>
-                    <Button
-                      onClick={() => setShowVersionHistory(true)}
-                      variant="outline"
-                      size="sm"
-                    >
-                      <History className="h-4 w-4 mr-2" />
-                      Version History
-                    </Button>
+
                   </div>
                 </div>
               </CardHeader>
@@ -1915,7 +1833,7 @@ export default function ArticleDetails() {
                   onValueChange={setActiveTab}
                   className="w-full"
                 >
-                  <TabsList className="grid w-full grid-cols-4">
+                  <TabsList className="grid w-full grid-cols-3">
                     {aiProviders.map((provider) => (
                       <TabsTrigger
                         key={provider.id}
@@ -1928,20 +1846,6 @@ export default function ArticleDetails() {
                         {provider.name}
                       </TabsTrigger>
                     ))}
-                    <div className="relative w-full">
-                      <TabsTrigger
-                        value="editor"
-                        className="flex items-center gap-2 w-full justify-center"
-                        disabled={false} // Always allow tab switch
-                        style={{ pointerEvents: 'auto' }}
-                      >
-                        <Edit className="h-4 w-4" />
-                        Editor
-                        {!aiContent?.selected_content && !hasEditorContent && (
-                          <Lock className="h-4 w-4 ml-1 text-muted-foreground" />
-                        )}
-                      </TabsTrigger>
-                    </div>
                   </TabsList>
 
                   {/* AI Provider Tabs */}
@@ -1989,51 +1893,81 @@ export default function ArticleDetails() {
                                   )}
                                   Regenerate
                                 </Button>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={async () => {
-                                    if (!article) return;
-                                    const apiProvider =
-                                      provider.id === 'open_ai'
-                                        ? 'open_ai'
-                                        : (provider.id as 'gemini' | 'claude');
-                                    if (
-                                      (selectedProvider &&
-                                        selectedProvider !== apiProvider) ||
-                                      (aiContent?.selected_content &&
-                                        aiContent.selected_content !==
-                                        apiProvider)
-                                    ) {
-                                      setConfirmProvider(apiProvider);
-                                      setShowConfirmDialog(true);
-                                      return;
-                                    }
-                                    await handleProceed(
-                                      apiProvider,
-                                      provider.name
-                                    );
-                                  }}
-                                  disabled={
-                                    proceedingProvider === provider.id ||
-                                    selectedProvider === provider.id ||
-                                    (aiContent?.selected_content &&
-                                      aiContent.selected_content === provider.id)
-                                  }
-                                  className={
-                                    proceedingProvider === provider.id ||
-                                      selectedProvider === provider.id ||
-                                      (aiContent?.selected_content &&
-                                        aiContent.selected_content === provider.id)
-                                      ? 'opacity-50 pointer-events-none' // faded and not clickable
-                                      : ''
-                                  }
-                                >
-                                  {proceedingProvider === provider.id ? (
-                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                  ) : null}
-                                  Proceed with this
-                                </Button>
+                                
+                                {/* Share Options */}
+                                <div className="flex gap-1">
+                                  {/* Download Options */}
+                                  <div className="relative group">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="px-2"
+                                    >
+                                      <Download className="h-4 w-4" />
+                                    </Button>
+                                    <div className="absolute top-full left-0 mt-1 bg-popover border rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 min-w-[120px]">
+                                      <div className="p-1">
+                                        <button
+                                          onClick={() => handleDownloadAIContent('Markdown', provider.id)}
+                                          className="w-full text-left px-2 py-1 text-sm hover:bg-accent rounded flex items-center gap-2"
+                                        >
+                                          <FileDown className="h-3 w-3" />
+                                          Markdown
+                                        </button>
+                                        <button
+                                          onClick={() => handleDownloadAIContent('HTML', provider.id)}
+                                          className="w-full text-left px-2 py-1 text-sm hover:bg-accent rounded flex items-center gap-2"
+                                        >
+                                          <Globe className="h-3 w-3" />
+                                          HTML
+                                        </button>
+                                        <button
+                                          onClick={() => handleDownloadAIContent('TXT', provider.id)}
+                                          className="w-full text-left px-2 py-1 text-sm hover:bg-accent rounded flex items-center gap-2"
+                                        >
+                                          <FileText className="h-3 w-3" />
+                                          Text
+                                        </button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  
+                                  {/* Copy Options */}
+                                  <div className="relative group">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="px-2"
+                                    >
+                                      <Copy className="h-4 w-4" />
+                                    </Button>
+                                    <div className="absolute top-full left-0 mt-1 bg-popover border rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 min-w-[120px]">
+                                      <div className="p-1">
+                                        <button
+                                          onClick={() => handleCopyAIContent('Markdown', provider.id)}
+                                          className="w-full text-left px-2 py-1 text-sm hover:bg-accent rounded flex items-center gap-2"
+                                        >
+                                          <Copy className="h-3 w-3" />
+                                          Markdown
+                                        </button>
+                                        <button
+                                          onClick={() => handleCopyAIContent('HTML', provider.id)}
+                                          className="w-full text-left px-2 py-1 text-sm hover:bg-accent rounded flex items-center gap-2"
+                                        >
+                                          <Copy className="h-3 w-3" />
+                                          HTML
+                                        </button>
+                                        <button
+                                          onClick={() => handleCopyAIContent('TXT', provider.id)}
+                                          className="w-full text-left px-2 py-1 text-sm hover:bg-accent rounded flex items-center gap-2"
+                                        >
+                                          <Copy className="h-3 w-3" />
+                                          Text
+                                        </button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
                               </div>
                             )}
                         </div>
@@ -2128,20 +2062,10 @@ export default function ArticleDetails() {
                                     innovative and contextually rich content for
                                     your articles.
                                   </p>
-                                  <Button
-                                    onClick={() =>
-                                      handleRegenerateAIContent('gemini')
-                                    }
-                                    disabled={regeneratingProviders['gemini']}
-                                    className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white"
-                                  >
-                                    {regeneratingProviders['gemini'] ? (
-                                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                    ) : (
-                                      <Sparkles className="h-4 w-4 mr-2" />
-                                    )}
-                                    Generate with Gemini
-                                  </Button>
+                                  <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium opacity-60 cursor-not-allowed">
+                                    <Sparkles className="h-4 w-4 mr-2 inline" />
+                                    Coming Soon
+                                  </div>
                                 </div>
                               )}
                             </div>
@@ -2177,20 +2101,10 @@ export default function ArticleDetails() {
                                     thoughtful, well-structured content with
                                     enhanced reasoning capabilities.
                                   </p>
-                                  <Button
-                                    onClick={() =>
-                                      handleRegenerateAIContent('claude')
-                                    }
-                                    disabled={regeneratingProviders['claude']}
-                                    className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white"
-                                  >
-                                    {regeneratingProviders['claude'] ? (
-                                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                    ) : (
-                                      <Zap className="h-4 w-4 mr-2" />
-                                    )}
-                                    Generate with Claude
-                                  </Button>
+                                  <div className="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-4 py-2 rounded-md text-sm font-medium opacity-60 cursor-not-allowed">
+                                    <Zap className="h-4 w-4 mr-2 inline" />
+                                    Coming Soon
+                                  </div>
                                 </div>
                               )}
                             </div>
@@ -2200,146 +2114,7 @@ export default function ArticleDetails() {
                     </TabsContent>
                   ))}
 
-                  {/* Editor Tab */}
-                  <TabsContent value="editor" className="mt-6">
-                    {/* Time Tracker removed for single-user application */}
-                    {!aiContent?.selected_content && !hasEditorContent ? (
-                      <div className="text-center py-12 text-muted-foreground">
-                        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-gray-400 to-gray-500 flex items-center justify-center">
-                          <Lock className="h-8 w-8 text-white" />
-                        </div>
-                        <h3 className="text-lg font-semibold mb-2">
-                          Editor Locked
-                        </h3>
-                        <p className="mb-6 max-w-md mx-auto">
-                          Please select and proceed with an AI-generated content
-                          before editing. Once you proceed, the editor will be
-                          enabled.
-                        </p>
-                        <div className="flex justify-center">
-                          <Link to={`/article-editor/${article._id}`}>
-                            <Button variant="outline" size="sm">
-                              <Edit className="h-4 w-4 mr-2" />
-                              Open Expanded View
-                            </Button>
-                          </Link>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-2 justify-between w-full">
-                          <div className="flex items-center gap-2">
-                            <h3 className="text-lg font-semibold">
-                              Collaborative Content Editor
-                            </h3>
-                            <button
-                              type="button"
-                              className="inline-flex items-center px-2 py-1 text-xs font-medium rounded hover:bg-muted/50 transition"
-                              title="Copy with Formatting"
-                              onClick={handleCopyWithFormatting}
-                            >
-                              <Copy className="w-4 h-4 mr-1" /> Copy
-                            </button>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Link to={`/article-editor/${article._id}`}>
-                              <Button variant="outline" size="sm">
-                                <Edit className="h-4 w-4 mr-2" />
-                                Open Expanded View
-                              </Button>
-                            </Link>
-                            <span className="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 border border-green-200">
-                              <span className="h-2 w-2 rounded-full bg-green-500 mr-2 inline-block"></span>
-                              Real-time Collaboration
-                            </span>
-                          </div>
-                        </div>
 
-                        {editorContentLoading ? (
-                          <div className="flex items-center justify-center py-8">
-                            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                          </div>
-                        ) : editorContentError ? (
-                          <div className="text-center py-8 text-destructive">
-                            {editorContentError}
-                          </div>
-                        ) : !editorContent ||
-                          !editorContent.snapshot_data ||
-                          !editorContent.snapshot_data.data ? (
-                          <div className="text-center py-8 text-muted-foreground">
-                            No content available for this article.
-                          </div>
-                        ) : (
-                          <div className="space-y-4">
-                            <div className="bg-white border rounded-lg overflow-hidden shadow-sm">
-                              <EditorProvider
-                                ref={editorRef}
-                                docId={article?._id || ''}
-                                initialContent={(() => {
-                                  const buffer = new Uint8Array(
-                                    editorContent.snapshot_data.data
-                                  );
-                                  const jsonString = new TextDecoder().decode(
-                                    buffer
-                                  );
-                                  try {
-                                    return JSON.parse(jsonString);
-                                  } catch (e) {
-                                    console.error(
-                                      'Failed to parse editor content JSON:',
-                                      e,
-                                      jsonString
-                                    );
-                                    return [];
-                                  }
-                                })()}
-                                onSave={(content: any) => {
-                                  setEditorContent((prev) => ({
-                                    created_at: prev?.created_at || '',
-                                    updated_at: prev?.updated_at || '',
-                                    version: prev?.version || 0,
-                                    snapshot_data: {
-                                      type:
-                                        prev?.snapshot_data?.type || 'default',
-                                      data: Array.from(
-                                        new TextEncoder().encode(
-                                          JSON.stringify(content)
-                                        )
-                                      ),
-                                    },
-                                  }));
-
-                                  toast({
-                                    title: 'Content saved',
-                                    description:
-                                      'Your changes have been saved automatically.',
-                                  });
-                                }}
-                                // Removed onTokenReceived prop - not supported in current EditorProvider
-                              />
-                            </div>
-
-                            {editorContent && (
-                              <div
-                                className="flex items-center justify-between px-4 py-3 bg-muted/30 rounded-lg"
-                                key={editorRefreshKey}
-                              >
-                                <div className="text-sm text-muted-foreground">
-                                  Version: {editorContent.version}
-                                </div>
-                                <div className="text-sm text-muted-foreground">
-                                  Last updated:{' '}
-                                  {new Date(
-                                    editorContent.updated_at
-                                  ).toLocaleString()}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </TabsContent>
                 </Tabs>
               </CardContent>
             </Card>
@@ -2395,14 +2170,7 @@ export default function ArticleDetails() {
                   prev
                     ? {
                       ...prev,
-                      snapshot_data: {
-                        ...prev.snapshot_data,
-                        data: Array.from(
-                          new TextEncoder().encode(
-                            JSON.stringify(mergedBlocks)
-                          )
-                        ),
-                      },
+                      snapshot_data: JSON.stringify(mergedBlocks),
                     }
                     : prev
                 );
@@ -2414,8 +2182,7 @@ export default function ArticleDetails() {
                   editorRef.current.replaceBlocks(mergedBlocks);
                 }
 
-                // Switch to editor tab first
-                setActiveTab('editor');
+                // Editor tab removed - keeping current tab
 
                 // Save the content to trigger the update API
                 setTimeout(async () => {
@@ -2445,17 +2212,7 @@ export default function ArticleDetails() {
           </div>
         </div>
 
-        {/* Version History Modal */}
-        {showVersionHistory && (
-          <ArticleVersionHistory
-            articleId={article._id}
-            open={showVersionHistory}
-            onOpenChange={setShowVersionHistory}
-            onFinish={() => {
-              fetchEditorContent();
-            }}
-          />
-        )}
+
 
         {/* Publish Modal */}
         {showPublishModal && (

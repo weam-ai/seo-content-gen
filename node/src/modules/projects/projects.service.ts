@@ -97,7 +97,8 @@ export class ProjectsService {
         project,
         createProjectDto.targeted_keywords,
         [],
-        true, // skipTitleGeneration = true, titles will be generated after sitemap
+        true,
+        user
       );
     }
 
@@ -147,7 +148,7 @@ export class ProjectsService {
     matchStage.user = toObjectId(user._id);
     
     // Filter out deleted projects
-    matchStage.deleted_at = null;
+    matchStage.deletedAt = null;
 
     // Search filtering
     if (search) {
@@ -254,6 +255,8 @@ export class ProjectsService {
     if (user && user._id) {
       matchStage.user = toObjectId(user._id);
     }
+    // Filter out deleted projects
+    matchStage.deletedAt = null;
     pipeline.push({ $match: matchStage });
 
     // Lookup project creator
@@ -302,7 +305,7 @@ export class ProjectsService {
                 { keywords: { $exists: true } },
                 { keywords: { $ne: '' } }
               ],
-              deleted_at: null
+              deletedAt: null
             }
           },
           {
@@ -499,6 +502,8 @@ export class ProjectsService {
       project,
       keywords,
       secondary_keywords,
+      false,
+      user,
     );
   }
 
@@ -718,7 +723,7 @@ export class ProjectsService {
       {
         $match: {
           project: new Types.ObjectId(projectId),
-          deleted_at: null
+          deletedAt: null
         }
       },
       {
@@ -746,7 +751,7 @@ export class ProjectsService {
 
   async generateBusinessSummary(website_url: string, authToken?: string) {
     console.log('hi')
-    const result = await this.pythonService.companyBusinessSummary(website_url, authToken);
+    const result = await this.pythonService.companyBusinessSummary(website_url);
 
     if (!result.company_details) {
       throw new InternalServerErrorException(

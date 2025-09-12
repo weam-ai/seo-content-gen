@@ -11,7 +11,6 @@ import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { updateArticle } from '@/lib/services/topics.service';
 import { toast } from '@/components/ui/use-toast';
-import RatingModel from './RatingModel';
 
 interface ArticlePublishModelProps {
   open: boolean;
@@ -28,7 +27,7 @@ const ArticlePublishModel: React.FC<ArticlePublishModelProps> = ({
 }: ArticlePublishModelProps) => {
   const [publishUrl, setPublishUrl] = useState('');
   const [publishUrlError, setPublishUrlError] = useState('');
-  const [showRatingModal, setShowRatingModal] = useState(false);
+  // Rating modal removed for simplified flow
 
   const handlePublishSubmit = async () => {
     setPublishUrlError('');
@@ -52,8 +51,7 @@ const ArticlePublishModel: React.FC<ArticlePublishModelProps> = ({
       onOpenChange(false);
       setPublishUrl('');
       onFinish(publishUrl);
-      // Show rating modal after publish
-      setShowRatingModal(true);
+      // Rating modal flow skipped
     } catch (err: any) {
       toast({
         title: 'Error',
@@ -112,13 +110,6 @@ const ArticlePublishModel: React.FC<ArticlePublishModelProps> = ({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      {/* Rating Modal */}
-      <RatingModel
-        articleId={articleId}
-        open={showRatingModal}
-        onOpenChange={setShowRatingModal}
-      />
     </>
   );
 };

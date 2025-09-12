@@ -7,6 +7,7 @@ import { CreatePromptTypeDto } from './dto/create-prompt-type.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { PromptType, PromptTypeDocument } from './entities/prompt-type.entity';
+import { Article, ArticleDocument } from '../article/entities/article.entity';
 import { SystemPromptsService } from '../system-prompts/system-prompts.service';
 import { SYSTEM_PROMPT_TYPES } from '@/shared/types/system-prompt.t';
 import { PROMPT_TYPES_STRING } from '@/shared/utils/string.utils';
@@ -22,6 +23,8 @@ export class PromptTypesService {
   constructor(
     @InjectModel(PromptType.name)
     private readonly promptTypeModel: Model<PromptTypeDocument>,
+    @InjectModel(Article.name)
+    private readonly articleModel: Model<ArticleDocument>,
     private readonly systemPrompService: SystemPromptsService,
   ) {}
 
@@ -48,6 +51,7 @@ export class PromptTypesService {
     const isExistPromptType = await this.promptTypeModel.findOne({
       name: createPromptTypeDto.name,
       user: toObjectId(userId),
+      deletedAt: null,
     });
     if (isExistPromptType)
       throw new ConflictException(
@@ -79,8 +83,8 @@ export class PromptTypesService {
   > {
     const { search } = query;
     
-    // Build query with user filter
-    const mongoQuery: any = { user: toObjectId(userId) };
+    // Build query with user filter and exclude deleted items
+    const mongoQuery: any = { user: toObjectId(userId), deletedAt: null };
     if (search) {
       mongoQuery.name = { $regex: search, $options: 'i' };
     }
@@ -155,7 +159,7 @@ export class PromptTypesService {
   }
 
   async findOne(id: string, user?: any) {
-    const query: any = { _id: id };
+    const query: any = { _id: id, deletedAt: null };
     if (user && user._id) {
       query.user = user._id;
     }
@@ -200,6 +204,7 @@ export class PromptTypesService {
       name: updatePromptTypeDto.name,
       user: toObjectId(userId),
       _id: { $ne: id },
+      deletedAt: null,
     });
     if (isExistPromptType)
       throw new ConflictException(
@@ -222,15 +227,28 @@ export class PromptTypesService {
 
   async remove(id: string, userId: string) {
     await this.checkIsPromptTypeExists(id, userId);
+    
+    // Check if any articles are using this prompt type in their secondary_keywords
+    const articlesUsingPromptType = await this.articleModel.countDocuments({
+      'secondary_keywords.article_type': id,
+      deletedAt: null
+    });
+    
+    if (articlesUsingPromptType > 0) {
+      throw new BadRequestException(
+        `Cannot delete this article type as it is being used by ${articlesUsingPromptType} article(s). Please remove it from all articles first.`
+      );
+    }
+    
     return this.promptTypeModel.findOneAndUpdate(
       { _id: id, user: toObjectId(userId) },
-      { deleted_at: new Date() },
+      { deletedAt: new Date() },
       { new: true }
     );
   }
 
   private async checkIsPromptTypeExists(id: string, userId?: string) {
-    const query: any = { _id: id };
+    const query: any = { _id: id, deletedAt: null };
     if (userId) {
       query.user = toObjectId(userId);
     }

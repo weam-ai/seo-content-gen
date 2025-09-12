@@ -25,7 +25,5 @@ export class ArticleDocumentQualityCheckDto {
   @IsNotEmpty()
   text!: string; // section/paragraph to check
 
-  @IsOptional()
-  @IsInt()
-  version?: number;
+
 }

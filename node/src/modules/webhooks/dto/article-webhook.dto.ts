@@ -8,12 +8,9 @@ import {
 } from 'class-validator';
 
 export class GenerateArticleWebhookRequest {
+  @IsString()
   @IsNotEmpty()
-  requestId: string;
-
-  @IsEnum(ArticleFrom)
-  @IsNotEmpty()
-  model: ArticleFrom;
+  model: string;
 
   @IsNotEmpty()
   @IsString()

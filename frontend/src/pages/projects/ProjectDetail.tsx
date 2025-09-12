@@ -144,6 +144,13 @@ export default function ProjectDetails() {
     <div className="">
       {/* Updated: Removed max-width constraint to match dashboard page width */}
       <div className="container mx-auto px-4">
+        {/* Back Navigation - Moved above tabs */}
+        <div className="mb-6 pt-4">
+          <Button variant="ghost" size="sm" onClick={() => navigate('/projects')}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Projects
+          </Button>
+        </div>
         <div className="flex">
           {/* Sidebar Navigation - Inspired by SEO Audit - UNCHANGED */}
           <div className="min-w-64 w-64 backdrop-blur-sm border-border/40 h-[calc(100vh-73px)] sticky top-[73px] overflow-y-auto">
@@ -176,13 +183,6 @@ export default function ProjectDetails() {
 
           {/* Main Content - UNCHANGED */}
           <main className="flex-1 p-6 ">
-            {/* Back Navigation - Now in page content */}
-            <div className="mb-6">
-              <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back
-              </Button>
-            </div>
             {/* Project Header */}
             <div className="mb-8">
               <ProjectHeader project={project} projectId={project._id} />

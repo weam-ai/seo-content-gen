@@ -85,7 +85,7 @@ class SystemPromptService {
   /**
    * Update an existing system prompt
    */
-  async updateSystemPrompt(id: string, payload: { name?: string; description?: string; type?: string }): Promise<any> {
+  async updateSystemPrompt(id: string, payload: { name?: string; description?: string; type?: string; is_default?: boolean }): Promise<any> {
     try {
       const response = await api.patch(`/system-prompts/${id}`, payload);
       return response.data;

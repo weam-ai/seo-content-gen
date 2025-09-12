@@ -337,12 +337,14 @@ export class ArticleController {
   async RequestGenerateAIContent(
     @Param('articleId', ParseObjectIdPipe) articleId: string,
     @Body() body: GenerateArticlePayloadRequest,
-    @Req() req: Request,
     @Res() res: Response,
   ) {
-    const authToken = req.headers.authorization;
-    await this.articleService.requestPythonAIContentGenerate(articleId, body, authToken);
-    return acceptedResponse(res, ARTICLES_STRING.SUCCESS.ARTICLE_AI_REQUESTED);
+    const result = await this.articleService.requestPythonAIContentGenerate(articleId, body);
+    return successResponseWithData(
+      res,
+      ARTICLES_STRING.SUCCESS.ARTICLE_AI_REQUESTED,
+      result,
+    );
   }
 
   /**
@@ -356,7 +358,6 @@ export class ArticleController {
   async ChooseAiArticleContent(
     @Param('articleId', ParseObjectIdPipe) articleId: string,
     @Body() data: SelectArticleContent,
-    @Req() req: Request,
     @Res() res: Response,
   ) {
     await this.articleService.chooseAIArticleContent(
@@ -419,42 +420,13 @@ export class ArticleController {
   async generateTitles(
     @Param('articleId', ParseObjectIdPipe) articleId: string,
     @Query('is_save', new ParseBoolPipe({ optional: true })) is_save: boolean,
-    @Req() req: Request,
     @Res() res: Response,
   ) {
-    const authToken = req.headers.authorization;
-    const topic = await this.articleService.regenerateTitle(articleId, is_save, authToken);
+    const topic = await this.articleService.regenerateTitle(articleId, is_save);
     return successResponseWithData(
       res,
       ARTICLES_STRING.SUCCESS.TOPIC_GENERATED,
       topic,
-    );
-  }
-
-  /**
-   * @description This API is used to generate topics for article with AI model
-   * @param articleId
-   * @param body
-   * @param res
-   * @returns
-   */
-  @Post(':articleId/topics')
-  async generateTopicsWithAI(
-    @Param('articleId', ParseObjectIdPipe) articleId: string,
-    @Body() body: GenerateArticlePayloadRequest,
-    @Res() res: Response,
-  ) {
-    const { model, requestId } = body;
-    
-    if (!model || !requestId) {
-      throw new BadRequestException('Both model and requestId are required');
-    }
-    
-    const topics = await this.articleService.generateTopicsWithAI(articleId, model, requestId);
-    return successResponseWithData(
-      res,
-      ARTICLES_STRING.SUCCESS.TOPIC_ADDED,
-      topics,
     );
   }
 
@@ -463,14 +435,11 @@ export class ArticleController {
     @Param('projectId', ParseObjectIdPipe) projectId: string,
     @Body('title', new ValidationPipe({ transform: true, whitelist: true }))
     title: string,
-    @Req() req: Request,
     @Res() res: Response,
   ) {
-    const authToken = req.headers.authorization;
     const existingTopic = await this.articleService.checkExistinProjectTitles(
       projectId,
       title,
-      authToken,
     );
     return successResponseWithData(
       res,

@@ -1,5 +1,4 @@
-import { IsJSON, IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { DocChange } from '../entities/document-update.entity';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class ArticleDocumentUpdateContent {
   @IsNotEmpty()
@@ -8,10 +7,6 @@ export class ArticleDocumentUpdateContent {
 
   @IsNotEmpty()
   snapshot: Buffer;
-
-  @IsOptional()
-  @IsJSON()
-  changes?: DocChange;
 }
 
 export class ArticleDocumentRestoreContent {

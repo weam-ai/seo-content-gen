@@ -17,12 +17,15 @@ import { SYSTEM_PROMPT_STRING } from '@shared/utils/string.utils';
 import { CreateSystemPromptDto } from './dto/create-system-prompt.dto';
 import { SYSTEM_PROMPT_TYPES } from '@/shared/types/system-prompt.t';
 import { toObjectId } from '@/shared/types/populated-entities';
+import { PromptType, PromptTypeDocument } from '../prompt-types/entities/prompt-type.entity';
 
 @Injectable()
 export class SystemPromptsService {
   constructor(
     @InjectModel(SystemPrompt.name)
     private readonly systemPromptModel: Model<SystemPrompt>,
+    @InjectModel(PromptType.name)
+    private readonly promptTypeModel: Model<PromptTypeDocument>,
   ) {}
 
   async create(createSystemPromptDto: CreateSystemPromptDto, userId: Types.ObjectId) {
@@ -220,19 +223,21 @@ export class SystemPromptsService {
       );
     }
 
-    //if this already attached in other entities, the set to default one to them
-    // const defaultTypePrompt = await this.systemPromptModel.find({
-    //   is_default: true,
-    //   type: prompt.type,
-    // }).exec();
-    // if (defaultTypePrompt) {
-    //   const deleteRecords: Record<SYSTEM_PROMPT_TYPES, () => any> = {
-    //     article: () => Project.update({}, {}),
-    //     topic_outline: () => Article.update({}, {}),
-    //     topic_title: () => Article.update({}, {}),
-    //   };
-    //   deleteRecords[prompt.type]();
-    // }
+    // Check if this system prompt is being used by any prompt types
+    const promptTypesUsingThisPrompt = await this.promptTypeModel.countDocuments({
+      $or: [
+        { titlePrompt: id },
+        { outlinePrompt: id },
+        { articlePrompt: id }
+      ],
+      deletedAt: null
+    });
+
+    if (promptTypesUsingThisPrompt > 0) {
+      throw new BadRequestException(
+        `Cannot delete this system prompt as it is being used by ${promptTypesUsingThisPrompt} article type(s). Please update the article types to use a different system prompt first.`
+      );
+    }
 
     return await this.systemPromptModel.findOneAndDelete({ _id: id, user: toObjectId(userId) }).exec();
   }

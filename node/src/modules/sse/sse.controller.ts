@@ -6,14 +6,14 @@ import { SseService } from './sse.service';
 export class SseController {
   constructor(private readonly sseService: SseService) {}
 
-  @Get(':requestId')
-  sse(@Param('requestId') requestId: string, @Res() res: Response) {
+  @Get(':articleId')
+  sse(@Param('articleId') articleId: string, @Res() res: Response) {
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
     res.setHeader('Access-Control-Allow-Origin', '*');
 
-    this.sseService.addClient(requestId, res);
+    this.sseService.addClient(articleId, res);
     res.write(':ok\n\n');
     // Send a heartbeat every 25 seconds
     const heartbeatInterval = setInterval(() => {
@@ -22,7 +22,7 @@ export class SseController {
 
     res.on('close', () => {
       clearInterval(heartbeatInterval); // Stop heartbeat when client disconnects
-      this.sseService.removeClient(requestId);
+      this.sseService.removeClient(articleId);
     });
   }
 }

@@ -71,7 +71,7 @@ export interface Topic {
   title: string;
   relatedProject: Project;
   keyword: string;
-  secondaryKeywords: string[];
+  secondaryKeywords: SecondaryKeyword[];
   volume: number;
   keywordDifficulty: 'low' | 'medium' | 'high';
   status: TopicStatus;
@@ -88,12 +88,19 @@ export interface Topic {
   is_outline_generated?: boolean;
 }
 
+export interface SecondaryKeyword {
+  keyword: string;
+  volume: number | null;
+  competition: string | null;
+  article_type: string | null;
+}
+
 export interface Article {
   _id: string;
   title: string;
   relatedProject: Project;
   keyword: string;
-  secondaryKeywords: string[];
+  secondaryKeywords: SecondaryKeyword[];
   volume: number;
   keywordDifficulty: 'low' | 'medium' | 'high';
   status: ArticleStatus;

@@ -8,20 +8,15 @@ import {
 } from '@/components/ui/tooltip';
 import {
   CheckSquare,
-  Clock,
   Settings,
   Share2,
   Info,
-  History,
 } from 'lucide-react';
 import { SidebarSection } from '../types';
 import useEditor from '../hooks/useEditor';
 
 const sidebarItems = [
   { id: 'checklist' as const, icon: CheckSquare, label: 'Document Checker' },
-
-  { id: 'time' as const, icon: Clock, label: 'Time & History' },
-  { id: 'versions' as const, icon: History, label: 'Version History' },
   { id: 'extras' as const, icon: Info, label: 'Extra Information' },
   { id: 'settings' as const, icon: Settings, label: 'Settings' },
   { id: 'share' as const, icon: Share2, label: 'Share' },

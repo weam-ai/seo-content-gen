@@ -33,29 +33,15 @@ export class ArticleDocumentsController {
     // private readonly openAIService: OpenAIService,
   ) {}
 
-  @Get('/:articleId/versions')
-  async getDocumentVersions(
-    @Param('articleId', ParseObjectIdPipe) articleId: string,
-    @Res() res: Response,
-  ) {
-    const result =
-      await this.articleDocumentService.getDocumentVersions(articleId);
-    return successResponseWithData(
-      res,
-      ARTICLES_STRING.SUCCESS.ARTICLE_DOCUMENT_VERSIONS_GET,
-      result,
-    );
-  }
+
 
   @Get('/:articleId/content')
   async getArticleDocument(
     @Param('articleId', ParseObjectIdPipe) articleId: string,
     @Res() res: Response,
-    @Query('version', new ParseIntPipe({ optional: true })) version?: number,
   ) {
     const document = await this.articleDocumentService.getDocument(
       articleId,
-      version,
     );
 
     if (!document) {
@@ -86,24 +72,7 @@ export class ArticleDocumentsController {
     );
   }
 
-  @Post('/:articleId/versions/:version/restore')
-  async restoreToVersion(
-    @Param('articleId', ParseObjectIdPipe) articleId: string,
-    @Param('version', ParseIntPipe) version: number,
-    @Body() body: ArticleDocumentRestoreContent,
-    @Req() req: Request,
-    @Res() res: Response,
-  ) {
-    await this.articleDocumentService.restoreToVersion(
-      articleId,
-      version,
-      body,
-    );
-    return acceptedResponse(
-      res,
-      ARTICLES_STRING.SUCCESS.ARTICLE_DOCUMENT_UPDATED,
-    );
-  }
+
 
   @Post('/:articleId/check')
   async checkQuality(
