@@ -10,7 +10,7 @@ services:
     env_file:
       - ./backend_python/.env
     networks:
-      - seo-network
+      - weam_app-network
 
   # Frontend Service
   frontend:
@@ -24,7 +24,7 @@ services:
       - backend-python
       - node-backend
     networks:
-      - seo-network
+      - weam_app-network
 
   # Node.js Backend Service
   node-backend:
@@ -37,8 +37,8 @@ services:
     env_file:
       - ./node/.env
     networks:
-      - seo-network
+      - weam_app-network
 
 networks:
-  seo-network:
-    driver: bridge
+  weam_app-network:
+    external: true
