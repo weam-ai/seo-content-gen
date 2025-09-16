@@ -1,0 +1,44 @@
+services:
+  # Backend Python Service
+  backend-python:
+    build:
+      context: ./backend_python
+      dockerfile: Dockerfile
+    container_name: seo-backend-python
+    ports:
+      - "9002:9000"
+    env_file:
+      - ./backend_python/.env
+    networks:
+      - seo-network
+
+  # Frontend Service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: seo-frontend
+    ports:
+      - "3001:80"
+    depends_on:
+      - backend-python
+      - node-backend
+    networks:
+      - seo-network
+
+  # Node.js Backend Service
+  node-backend:
+    build:
+      context: ./node
+      dockerfile: Dockerfile
+    container_name: seo-node-backend
+    ports:
+      - "3003:3000"
+    env_file:
+      - ./node/.env
+    networks:
+      - seo-network
+
+networks:
+  seo-network:
+    driver: bridge
