@@ -3,10 +3,8 @@ import * as dotenv from 'dotenv';
 
 // Load environment variables from .env file
 dotenv.config();
-
-// Construct MongoDB connection URI using environment variables
-const mongoUri = `${process.env.DB_CONNECTION}://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}/${process.env.DB_DATABASE}`;
-
+// Get MongoDB URI from environment variable if available, otherwise construct it
+const mongoUri = process.env.MONOGODB_URI || `${process.env.DB_CONNECTION}://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}/${process.env.DB_DATABASE}`;
 /**
  * Establishes connection to MongoDB database
  * Uses mongoose as ODM (Object Document Mapper)
