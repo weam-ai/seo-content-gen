@@ -16,10 +16,12 @@ export const mongooseConfig = (
   const port = configService.get<number>('DB_PORT');
   const dbName = configService.get<string>('DB_DATABASE');
   const connection = configService.get<string>('DB_CONNECTION');
-  
+  const url = configService.get<string>('MONOGODB_URI');
   // Build URI based on whether authentication is provided
   let uri: string;
-  if (username && password) {
+  if (url) {
+    uri = url;
+  } else if (username && password) {
     uri = `${connection}://${username}:${password}@${hostname}/${dbName}`;
   } else {
     uri = `${connection}://${hostname}/${dbName}`;
