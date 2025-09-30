@@ -17,7 +17,8 @@ RUN npm install --silent && \
 COPY . .
 
 # Build the application with optimizations
-RUN VITE_APP_URL_PREFIX=seo-content-gen npm run build
+# RUN VITE_APP_URL_PREFIX=seo-content-gen npm run build
+RUN VITE_APP_URL_PREFIX=seo-content-gen VITE_FRONTEND_URL=/seo-content-gen/ npm run build
 
 # Production stage
 FROM nginx:alpine
@@ -54,8 +55,9 @@ RUN echo 'server { \
         return 301 /seo-content-gen/; \
     } \
     \
-    # Handle other static files \
-    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ { \
+    # Handle logo and static files under seo-content-gen \
+    location ~* ^/seo-content-gen/(.*\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot))$ { \
+        alias /usr/share/nginx/html/$1; \
         expires 1y; \
         add_header Cache-Control "public, immutable"; \
         add_header Vary "Accept-Encoding"; \
