@@ -3,10 +3,9 @@ import {
   NotFoundException,
   BadRequestException,
   InternalServerErrorException,
-  ForbiddenException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { Model } from 'mongoose';
 import { Article } from './entities/article.entity';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
@@ -22,7 +21,6 @@ import { Project } from '@modules/projects/entities/projects.entity';
 import { ListArticleDtoQuery } from './dto/list-article.dto';
 import { Pagination } from '@shared/types/response.t';
 // Removed AssignedMembersDto import
-import { DataForSeoService } from '@shared/services/dataforseo.service';
 import {
   ArticleFrom,
   ArticleStatus,
@@ -46,12 +44,9 @@ import { ArticleDocumentsService } from '../article-documents/article-documents.
 import { PromptType } from '../prompt-types/entities/prompt-type.entity';
 // Removed ArticleBulkAssignDto import - functionality no longer supported
 import { ArticleTaskPriorityDto } from './dto/article-task-priority.dto';
-import { marked } from 'marked';
 import { logger } from '@/shared/utils/logger.utils';
 import { formatedTitles } from '@/shared/utils/article.util';
 import { markdownToBlocks } from '@/shared/utils/blocknote.util';
-
-import { RecommendedKeyword } from '../projects/entities/recommended-keyword.entity';
 
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { iEventType } from '@shared/types/events.t';
@@ -59,11 +54,10 @@ import { DocumentUpdates } from '../article-documents/entities/document-update.e
 import { GeminiService } from '../gemini/gemini.service';
 import { ClaudeService } from '../claude/claude.service';
 import { OpenAIService } from '../openai/openai.service';
-import { Logger } from '@nestjs/common';
 // TODO: Re-implement when modules are available
 // import { PromptTypesService } from '../prompt-types/prompt-types.service';
 // import { TimeTrackingService } from '../time-tracking/time-tracking.service';
-import { getUserId, toObjectId, PopulatedUser } from '@/shared/types/populated-entities';
+import { toObjectId } from '@/shared/types/populated-entities';
 
 @Injectable()
 export class ArticleService {
@@ -112,6 +106,68 @@ export class ArticleService {
         status: ArticleStatus.NOT_STARTED,
         approved_at: new Date(),
       };
+
+      // Normalize secondary_keywords: accept string[] from frontend and convert to embedded objects
+      if (
+        Object.prototype.hasOwnProperty.call(
+          createArticleDto,
+          'secondary_keywords',
+        )
+      ) {
+        const sk: any = (createArticleDto as any).secondary_keywords;
+        if (sk == null) {
+          articleData.secondary_keywords = [];
+        } else if (Array.isArray(sk)) {
+          const normalized = sk.map((item: any, idx: number) => {
+            if (typeof item === 'string') {
+              const keyword = item.trim();
+              if (!keyword) {
+                throw new BadRequestException(
+                  `secondary_keywords[${idx}] cannot be empty`,
+                );
+              }
+              return {
+                keyword,
+                volume: null,
+                competition: null,
+                article_type: null,
+              };
+            }
+            if (
+              item &&
+              typeof item === 'object' &&
+              typeof item.keyword === 'string'
+            ) {
+              const keyword = item.keyword.trim();
+              if (!keyword) {
+                throw new BadRequestException(
+                  `secondary_keywords[${idx}].keyword cannot be empty`,
+                );
+              }
+              return {
+                keyword,
+                volume: typeof item.volume === 'number' ? item.volume : null,
+                competition:
+                  typeof item.competition === 'string'
+                    ? item.competition
+                    : null,
+                article_type:
+                  typeof item.article_type === 'string'
+                    ? item.article_type
+                    : null,
+              };
+            }
+            throw new BadRequestException(
+              `Invalid secondary_keywords[${idx}] item; must be a string or object with keyword`,
+            );
+          });
+          articleData.secondary_keywords = normalized;
+        } else {
+          throw new BadRequestException(
+            'secondary_keywords must be an array of strings or keyword objects',
+          );
+        }
+      }
       
       if (user && user._id) {
         articleData.user = toObjectId(user._id);
@@ -418,17 +474,68 @@ export class ArticleService {
     // Store original status for comparison
     const originalStatus = article.status;
 
-    // Store original title for comparison
-    const originalTitle = article.name || '';
-
-    // Removed assigned_members and assign_followers functionality - no longer supported
-    let newAssignees: User[] = [];
-    let newFollowers: User[] = [];
-
     const payload: any = {
       ...updateArticleDto,
       // Removed assigned_members and assign_followers - functionality no longer supported
     };
+
+    // Normalize secondary_keywords: accept string[] and convert to embedded objects expected by schema
+    if (
+      Object.prototype.hasOwnProperty.call(
+        updateArticleDto,
+        'secondary_keywords',
+      )
+    ) {
+      const sk: any = (updateArticleDto as any).secondary_keywords;
+      if (sk == null) {
+        payload.secondary_keywords = [];
+      } else if (Array.isArray(sk)) {
+        const normalized = sk.map((item: any, idx: number) => {
+          if (typeof item === 'string') {
+            const keyword = item.trim();
+            if (!keyword) {
+              throw new BadRequestException(
+                `secondary_keywords[${idx}] cannot be empty`,
+              );
+            }
+            return {
+              keyword,
+              volume: null,
+              competition: null,
+              article_type: null,
+            };
+          }
+          if (
+            item &&
+            typeof item === 'object' &&
+            typeof item.keyword === 'string'
+          ) {
+            const keyword = item.keyword.trim();
+            if (!keyword) {
+              throw new BadRequestException(
+                `secondary_keywords[${idx}].keyword cannot be empty`,
+              );
+            }
+            return {
+              keyword,
+              volume: typeof item.volume === 'number' ? item.volume : null,
+              competition:
+                typeof item.competition === 'string' ? item.competition : null,
+              article_type:
+                typeof item.article_type === 'string' ? item.article_type : null,
+            };
+          }
+          throw new BadRequestException(
+            `Invalid secondary_keywords[${idx}] item; must be a string or object with keyword`,
+          );
+        });
+        payload.secondary_keywords = normalized;
+      } else {
+        throw new BadRequestException(
+          'secondary_keywords must be an array of strings or keyword objects',
+        );
+      }
+    }
 
     // Convert project_id to project for MongoDB reference
     if (updateArticleDto.project_id) {
@@ -482,22 +589,9 @@ export class ArticleService {
       }
     }
 
-    // Send email to new assignees - disabled
-    if (newAssignees.length > 0) {
-      // Team assignment functionality removed
-
-      // Send notifications to newly assigned members
-      for (const member of newAssignees) {
-        // Notification functionality removed
-        // if (currentUser && getUserId(currentUser as any) === (member._id as any).toString()) continue; // Skip notifying the current user
-      }
-    }
-
     // Email functionality removed for single-user application
 
-    // Email functionality removed for single-user application
-
-    return updateArticleDto as any;
+    return updateArticleDto;
   }
 
   async remove(id: string) {
@@ -634,12 +728,13 @@ export class ArticleService {
     const articles = await Promise.all(
       keywords.map(async (keyword) => {
         // Convert string array to object array for secondary keywords
-        const formattedSecondaryKeywords = secondary_keywords?.map(kw => ({
-          keyword: kw,
-          volume: null,
-          competition: null,
-          article_type: null
-        })) ?? [];
+        const formattedSecondaryKeywords =
+          secondary_keywords?.map((kw) => ({
+            keyword: kw,
+            volume: null,
+            competition: null,
+            article_type: null,
+          })) ?? [];
         
         const articleData: any = {
           keywords: keyword.keyword,
@@ -976,9 +1071,12 @@ export class ArticleService {
 
     if (result.data) {
       const resultArticle = result.data.webhook_responses.open_ai;
-      await this.articleContentModel.updateOne(
-        { _id: toObjectId(article.article_content._id) },
-        { open_ai_content: resultArticle },
+      // Use centralized saver to handle both create and update cases
+      await this.saveAiContent(
+        articleId,
+        resultArticle,
+        ArticleFrom.OPEN_AI,
+        undefined as any,
       );
       return resultArticle;
     }
@@ -1105,13 +1203,10 @@ export class ArticleService {
     }
 
     const blocks = markdownToBlocks(content);
-    await this.articleDocumentService.updateDocument(
-      article._id.toString(),
-      { 
-        snapshot: Buffer.from(JSON.stringify(blocks)),
-        session_id: 'ai_content_selection'
-      }
-    );
+    await this.articleDocumentService.updateDocument(article._id.toString(), {
+      snapshot: Buffer.from(JSON.stringify(blocks)),
+      session_id: 'ai_content_selection',
+    });
 
 
 
@@ -1125,7 +1220,11 @@ export class ArticleService {
 
   // Email and notification methods removed for single-user application
 
-  async getAndGenerateArticleOutline(articleId: string, refresh?: boolean, authToken?: string) {
+  async getAndGenerateArticleOutline(
+    articleId: string,
+    refresh?: boolean,
+    _authToken?: string,
+  ) {
     const article = await this.articleModel.findById(toObjectId(articleId)).exec();
     if (!article) {
       throw new NotFoundException(ARTICLES_STRING.ERRORS.ARTICLE_NOT_FOUND);
