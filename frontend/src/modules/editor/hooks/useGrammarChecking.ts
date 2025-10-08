@@ -189,9 +189,6 @@ export function useGrammarChecking() {
       // Build accurate position mapping
       const positionMapping = buildPositionMapping(blocks);
 
-      // Debug: also extract the text to see what Harper.js is analyzing
-      const extractedText = extractTextFromDocument(blocks);
-
       // Create a copy of blocks to modify
       const updatedBlocks = JSON.parse(JSON.stringify(blocks));
 
@@ -224,8 +221,7 @@ export function useGrammarChecking() {
       >();
 
       // First pass: calculate all positions and group by node
-      filteredIssues.forEach((issue, issueIndex) => {
-
+      filteredIssues.forEach((issue) => {
         // Find the text nodes that contain this issue using accurate mapping
         const relevantMappings = positionMapping.filter(
           (mapping) =>
