@@ -129,7 +129,6 @@ export default function Topics() {
         search: debouncedSearchQuery.trim(),
       }),
     };
-    console.log('Fetching topics with params:', params);
     try {
       const res = await getTopics(params);
       setTopics(res.data);
@@ -223,11 +222,6 @@ export default function Topics() {
               search: debouncedSearchQuery.trim(),
             }),
           };
-          console.log('calendarParams', {
-            projectFilter,
-            debouncedSearchQuery,
-            calendarParams,
-          });
           const res = await getArticlesCalendarView(calendarParams);
           setCalendarStatusData(res.data || {});
           // Flatten all statuses into a single array for rendering

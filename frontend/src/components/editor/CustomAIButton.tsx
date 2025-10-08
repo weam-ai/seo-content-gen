@@ -18,9 +18,6 @@ export const CustomAIButton = ({ onAIButtonClick }: CustomAIButtonProps) => {
       return;
     }
 
-    console.log('🎯 AI button clicked with text:', selectedText);
-    console.log('📝 Selection blocks:', selection.blocks);
-
     // Call the callback if provided
     if (onAIButtonClick && selection.blocks?.[0]) {
       onAIButtonClick(selectedText, selection.blocks[0]);

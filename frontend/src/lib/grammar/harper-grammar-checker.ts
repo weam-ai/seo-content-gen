@@ -31,7 +31,6 @@ export class HarperGrammarChecker {
     if (this.isInitialized || this.initializationFailed) return;
 
     try {
-      console.log('Initializing Harper.js grammar checker from CDN...');
 
       // Ensure WebAssembly is supported
       if (typeof WebAssembly === 'undefined') {
@@ -47,17 +46,7 @@ export class HarperGrammarChecker {
         binary: binaryInlined,
       });
 
-      // Test the linter with a simple sentence to ensure it's working
-      console.log('Testing Harper.js linter...');
-      const testResult = await this.linter.lint('This is a test sentence.');
-      console.log(
-        'Harper.js test successful, found',
-        testResult.length,
-        'issues in test'
-      );
-
       this.isInitialized = true;
-      console.log('Harper.js grammar checker initialized successfully');
     } catch (error) {
       console.error('Failed to initialize Harper.js:', error);
       this.initializationFailed = true;
@@ -101,19 +90,13 @@ export class HarperGrammarChecker {
     await this.ensureInitialized();
 
     if (!this.linter || !text.trim()) {
-      console.log('Harper.js: No linter or empty text');
       return [];
     }
 
     try {
-      console.log(
-        'Harper.js: Checking text:',
-        text.substring(0, 100) + (text.length > 100 ? '...' : '')
-      );
       const lints = await this.linter.lint(text);
       const issues: HarperGrammarIssue[] = [];
 
-      console.log('Harper.js: Found', lints.length, 'lints');
 
       for (const lint of lints) {
         const span = lint.span();
@@ -147,11 +130,9 @@ export class HarperGrammarChecker {
           severity,
         };
 
-        console.log('Harper.js issue:', issue);
         issues.push(issue);
       }
 
-      console.log('Harper.js: Returning', issues.length, 'issues');
       return issues.sort((a, b) => a.start - b.start);
     } catch (error) {
       console.error('Harper.js linting error:', error);

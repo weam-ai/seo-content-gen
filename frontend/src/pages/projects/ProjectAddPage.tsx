@@ -323,7 +323,6 @@ export default function NewProject() {
                     unique_differentiator: true,
                   });
                   const formErrors = await validateForm();
-                  console.log('formErrors', formErrors);
 
                   if (formErrors && Object.keys(formErrors).length > 0) {
                     scrollToFirstError(formErrors);

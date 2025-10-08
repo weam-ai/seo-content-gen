@@ -321,15 +321,8 @@ const CountryMap: React.FC<CountryMapProps> = ({
     if (agencyData?.countryStats) {
       agencyData.countryStats.forEach((stat) => {
         const countryCode = countryNameToCode[stat.country] || stat.country;
-        console.log(
-          `Mapping "${stat.country}" to "${countryCode}" with ${stat.count} agencies`
-        );
 
         if (data[countryCode]) {
-          console.log(
-            `Combining ${countryCode}: ${data[countryCode]} + ${stat.count} = ${data[countryCode] + stat.count
-            }`
-          );
           data[countryCode] += stat.count;
           agencyInfo[countryCode].count += stat.count;
           agencyInfo[countryCode].agencies = [
@@ -350,13 +343,8 @@ const CountryMap: React.FC<CountryMapProps> = ({
     if (userCountry) {
       const userCountryCode = countryNameToCode[userCountry] || userCountry;
       userCountryData[userCountryCode] = 1;
-      console.log(
-        `User country "${userCountry}" mapped to "${userCountryCode}" for green highlighting`
-      );
     }
 
-    console.log('Final processed data:', { data, agencyInfo });
-    console.log('User country data:', userCountryData);
     return { data, agencyInfo, userCountryData };
   }, [agencyData, countryNameToCode, userCountry]);
 

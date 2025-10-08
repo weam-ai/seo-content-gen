@@ -201,7 +201,6 @@ export const ShareSection: React.FC = () => {
         description: `Downloading document as ${format.toUpperCase()}`,
       });
     } catch (e) {
-      console.log(e);
       toast({ title: 'Error', description: 'Failed to download document' });
     }
   };

@@ -101,8 +101,6 @@ export default function Projects() {
   // Add window focus event listener to refresh data when user returns to the page
   useEffect(() => {
     const handleFocus = () => {
-      // Refresh projects when window gains focus (user returns to tab)
-      console.log('[DEBUG] Window focus detected, refreshing projects');
       // Force a refresh by updating pagination
       setPagination(prev => ({ ...prev })); // This will trigger the fetchProjects useEffect
     };

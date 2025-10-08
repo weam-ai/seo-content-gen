@@ -224,16 +224,12 @@ export const BlockNoteEditor = forwardRef<any, BlockNoteEditorProps>(
       if (editor && initialContent && Array.isArray(initialContent) && initialContent.length > 0) {
         try {
           isInitialLoad.current = true;
-          console.log('[BlockNoteEditor] Loading initial content:', initialContent);
 
           // Apply preprocessing
           let processedContent = preprocessMarkdownContent(initialContent);
           processedContent = normalizeBlockTypes(processedContent);
 
-          console.log('[BlockNoteEditor] Processed initial content:', processedContent);
-
           editor.replaceBlocks(editor.document, processedContent);
-          console.log('[BlockNoteEditor] Initial content loaded successfully');
         } catch (error) {
           console.error('[BlockNoteEditor] Error loading initial content:', error);
         } finally {
@@ -257,7 +253,6 @@ export const BlockNoteEditor = forwardRef<any, BlockNoteEditorProps>(
             snapshot: documentString,
             session_id: sessionId,
           });
-          console.log('[BlockNoteEditor] Document saved successfully');
         } catch (error) {
           console.error('[BlockNoteEditor] Error saving document:', error);
         }
@@ -271,7 +266,6 @@ export const BlockNoteEditor = forwardRef<any, BlockNoteEditorProps>(
         const handleChange = () => {
           if (isInitialLoad.current) return;
           const documentSnapshot = editor.document;
-          console.log('Editor content changed');
           onContentChange(documentSnapshot);
           // Only save if there's actual user interaction, not programmatic changes
           // saveDocument(); // Removed automatic save to prevent duplicate versions

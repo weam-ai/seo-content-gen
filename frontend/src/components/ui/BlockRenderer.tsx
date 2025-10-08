@@ -147,7 +147,6 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ content }) => {
       return block;
     });
     // End patch
-    console.log('BlockRenderer blocks:', blocks); // Debug log
   } catch {
     console.error('BlockRenderer: Invalid content format', content); // Log raw content on error
     return <div className="text-red-500">Invalid content format</div>;
@@ -156,7 +155,6 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ content }) => {
   return (
     <div className="space-y-4">
       {(blocks ?? []).map((block: Block, idx) => {
-        console.log('BlockRenderer block', idx, block, block.type); // Debug log for each block
         switch (block.type) {
           case 'heading': {
             // Defensive: If no valid level, or content is too long, render as paragraph

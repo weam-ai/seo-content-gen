@@ -186,19 +186,11 @@ export function useGrammarChecking() {
     (blocks: any[], issues: any[]) => {
       if (!issues.length) return blocks;
 
-      console.log('Applying grammar markers to blocks:', { blocks, issues });
-
       // Build accurate position mapping
       const positionMapping = buildPositionMapping(blocks);
-      console.log('Position mapping:', positionMapping);
 
       // Debug: also extract the text to see what Harper.js is analyzing
       const extractedText = extractTextFromDocument(blocks);
-      console.log(
-        'Extracted text for Harper.js:',
-        JSON.stringify(extractedText)
-      );
-      console.log('Extracted text length:', extractedText.length);
 
       // Create a copy of blocks to modify
       const updatedBlocks = JSON.parse(JSON.stringify(blocks));
@@ -209,41 +201,15 @@ export function useGrammarChecking() {
         const maxLength = 50; // Skip issues longer than 50 characters
 
         if (issueLength > maxLength) {
-          console.log('Skipping long issue:', {
-            length: issueLength,
-            text: issue.originalText,
-            message: issue.message,
-          });
           return false;
         }
 
         // Also skip issues that span multiple sentences (contain periods)
         if (issue.originalText.includes('.') && issueLength > 20) {
-          console.log('Skipping multi-sentence issue:', {
-            text: issue.originalText,
-            message: issue.message,
-          });
           return false;
         }
 
         return true;
-      });
-
-      console.log(
-        `Filtered ${
-          issues.length - filteredIssues.length
-        } long issues, processing ${filteredIssues.length} issues`
-      );
-
-      // Debug: log all issues with their positions and text
-      filteredIssues.forEach((issue, index) => {
-        console.log(`Issue ${index}:`, {
-          start: issue.start,
-          end: issue.end,
-          text: issue.originalText,
-          message: issue.message,
-          type: issue.type,
-        });
       });
 
       // Group issues by block and node for batch processing
@@ -259,7 +225,6 @@ export function useGrammarChecking() {
 
       // First pass: calculate all positions and group by node
       filteredIssues.forEach((issue, issueIndex) => {
-        console.log(`Processing issue ${issueIndex}:`, issue);
 
         // Find the text nodes that contain this issue using accurate mapping
         const relevantMappings = positionMapping.filter(
@@ -267,20 +232,6 @@ export function useGrammarChecking() {
             issue.start < mapping.plainTextEnd &&
             issue.end > mapping.plainTextStart
         );
-
-        console.log(`Issue ${issueIndex} (${issue.originalText}) mappings:`, {
-          issueRange: { start: issue.start, end: issue.end },
-          foundMappings: relevantMappings.length,
-          mappings: relevantMappings.map((m) => ({
-            blockIndex: m.blockIndex,
-            nodeIndex: m.nodeIndex,
-            range: { start: m.plainTextStart, end: m.plainTextEnd },
-            nodeText:
-              updatedBlocks[m.blockIndex]?.content[
-                m.nodeIndex
-              ]?.text?.substring(0, 50) + '...',
-          })),
-        });
 
         if (relevantMappings.length === 0) {
           console.warn('No mapping found for issue:', issue);
@@ -402,36 +353,8 @@ export function useGrammarChecking() {
           );
           if (!overlaps) {
             nonOverlappingIssues.push(issue);
-          } else {
-            console.log('Skipping overlapping issue:', {
-              skipped: {
-                start: issue.relativeStart,
-                end: issue.relativeEnd,
-                text: originalNode.text.substring(
-                  issue.relativeStart,
-                  issue.relativeEnd
-                ),
-              },
-              existing: nonOverlappingIssues.map((e) => ({
-                start: e.relativeStart,
-                end: e.relativeEnd,
-                text: originalNode.text.substring(
-                  e.relativeStart,
-                  e.relativeEnd
-                ),
-              })),
-            });
           }
         }
-
-        console.log(
-          `Processing ${nonOverlappingIssues.length} non-overlapping issues for node ${nodeKey}:`,
-          nonOverlappingIssues.map((ni) => ({
-            start: ni.relativeStart,
-            end: ni.relativeEnd,
-            text: originalNode.text.substring(ni.relativeStart, ni.relativeEnd),
-          }))
-        );
 
         // Build the new content by processing issues from end to start
         let currentText = originalNode.text;
@@ -490,10 +413,6 @@ export function useGrammarChecking() {
         block.content.splice(nodeIndex, 1, ...newContent);
       });
 
-      console.log(
-        'Updated blocks with word-boundary grammar markers:',
-        updatedBlocks
-      );
       return updatedBlocks;
     },
     [findWordBoundaries, buildPositionMapping]
@@ -506,24 +425,16 @@ export function useGrammarChecking() {
     if (!editorRef?.current || !isGrammarReady) return;
 
     try {
-      console.log('Starting word and line-aware grammar check...');
 
       // Extract text from editor content with line structure preserved
       const content = editorRef.current.document;
-      console.log('Editor content:', content);
 
       // Use the hook's check function
       const result = await checkGrammarNow(content);
-      console.log('Grammar check result:', result);
 
       if (!result || !result.issues || result.issues.length === 0) {
-        console.log('No grammar issues found');
         return;
       }
-
-      console.log(
-        `Found ${result.issues.length} grammar issues, applying word-boundary markers...`
-      );
 
       // Apply grammar markers to the content with word and line awareness
       const updatedBlocks = applyGrammarMarkersToBlocks(content, result.issues);
@@ -532,13 +443,7 @@ export function useGrammarChecking() {
         updatedBlocks &&
         JSON.stringify(updatedBlocks) !== JSON.stringify(content)
       ) {
-        console.log(
-          'Applying updated blocks to editor with word-boundary markers'
-        );
         editorRef.current.replaceBlocks(content, updatedBlocks as any);
-        console.log('Applied word-aware grammar markers to editor');
-      } else {
-        console.log('No changes to apply to editor');
       }
     } catch (error) {
       console.error('Error during word-aware grammar checking:', error);

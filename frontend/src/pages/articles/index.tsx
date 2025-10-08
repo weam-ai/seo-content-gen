@@ -329,19 +329,6 @@ export default function Articles() {
   // Fetch articles when filters or pagination change
   useEffect(() => {
     async function fetchArticles() {
-      console.log('[DEBUG] fetchArticles running', {
-        viewMode,
-        page,
-        pageSize,
-        // Member and agency filters removed for single-user application
-        projectFilter,
-        debouncedSearchQuery,
-        statusFilter,
-        calendarStartDate,
-        calendarEndDate,
-        calendarView,
-        calendarModule,
-      });
       setLoading(true);
       try {
         if (viewMode === 'calendar') {
@@ -358,7 +345,6 @@ export default function Articles() {
           if (projectFilter !== 'all') calendarParams.search_by_project = projectFilter;
           if (debouncedSearchQuery.trim()) calendarParams.search = debouncedSearchQuery.trim();
           console.groupCollapsed('[DEBUG] Articles Calendar API Payload');
-          console.log('calendarParams', calendarParams);
           console.groupEnd();
           const res = await getArticlesCalendarView(calendarParams);
           setCalendarStatusData(res.data || {});
@@ -380,7 +366,6 @@ export default function Articles() {
             ...(debouncedSearchQuery.trim() && { search: debouncedSearchQuery.trim() }),
           };
           console.groupCollapsed('[DEBUG] Articles List API Payload');
-          console.log('params', params);
           console.groupEnd();
           const res = await getArticles<Article>(params);
           const filtered = Array.isArray(res.data) ? res.data : [];
@@ -398,19 +383,6 @@ export default function Articles() {
         setLoading(false);
       }
     }
-    console.log('[DEBUG] useEffect(fetchArticles) triggered', {
-      page,
-      pageSize,
-      // Member and agency filters removed for single-user application
-      projectFilter,
-      debouncedSearchQuery,
-      statusFilter,
-      viewMode,
-      calendarStartDate,
-      calendarEndDate,
-      calendarView,
-      calendarModule,
-    });
     fetchArticles();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [

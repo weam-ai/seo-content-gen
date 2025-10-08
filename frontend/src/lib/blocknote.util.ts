@@ -85,14 +85,6 @@ export const blocksToMarkdown = (blocks: Block[]): string => {
           const inner = serializeInline(node.content);
           let href = node.props?.href || '#';
 
-          // Debug: Log the href being processed
-          console.log('Serializing link:', {
-            inner,
-            href,
-            node,
-            props: node.props,
-          });
-
           // Handle corrupted local URLs that should be external
           if (
             href.includes('localhost:3000') ||
@@ -110,16 +102,11 @@ export const blocksToMarkdown = (blocks: Block[]): string => {
                 originalHref.startsWith('https://'))
             ) {
               href = originalHref;
-              console.log('Recovered original URL from props:', originalHref);
             } else {
               // Use the recovery function to find the original URL
               const recoveredUrl = recoverOriginalUrl(inner, href);
               if (recoveredUrl !== href) {
                 href = recoveredUrl;
-                console.log('Recovered URL using mapping:', {
-                  inner,
-                  recoveredUrl,
-                });
               } else {
                 console.warn('Could not recover original URL for link:', {
                   inner,
@@ -238,7 +225,6 @@ export const blocksToHTML = (blocks: Block[]): string => {
 
   // Helper to serialize a block
   const serializeBlock = (block: Block): string => {
-    console.log('block.type', block.type, block.props);
 
     // Robust heading detection
     if (block.type.startsWith('heading')) {
@@ -458,9 +444,6 @@ export const markdownToBlocks = (markdown: string): Block[] => {
           });
 
         case 'link':
-          // Enhanced link handling
-          console.log('Processing link token:', token);
-
           // Parse the tokens within the link to get its content, preserving inline styles
           const linkContent: InlineNode[] = parseInline(
             token.tokens || [],
@@ -468,7 +451,6 @@ export const markdownToBlocks = (markdown: string): Block[] => {
           );
 
           const href = token.href || '';
-          console.log('Parsed link token:', { token, href });
 
           return [
             {
@@ -615,11 +597,8 @@ export const markdownToBlocks = (markdown: string): Block[] => {
           let lastIndex = 0;
           let match;
           const textParts = [];
-
-          console.log('Processing text node for URLs:', node.text);
           // Find all URLs in the text
           while ((match = urlRegex.exec(node.text)) !== null) {
-            console.log('URL regex match:', match[0]);
             // Add text before the URL
             if (match.index > lastIndex) {
               const beforeText = node.text.substring(lastIndex, match.index);
