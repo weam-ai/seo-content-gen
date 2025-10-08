@@ -251,7 +251,6 @@ export default function ArticleDetails() {
         description: `Downloading ${provider} content as ${format}`,
       });
     } catch (e) {
-      console.log(e);
       toast({ title: 'Error', description: 'Failed to download content' });
     }
   };
@@ -412,7 +411,6 @@ export default function ArticleDetails() {
 
     try {
       const content = await getArticleAIContent(article._id);
-      console.log('Fetched AI content:', content); // Debug log
       setAIContent(content);
     } catch (error: any) {
       console.error('Error fetching AI content:', error); // Debug log
@@ -704,11 +702,9 @@ export default function ArticleDetails() {
     setGeneratingProviders((prev) => ({ ...prev, [providerId]: true }));
     try {
       const res = await generateArticleAIContent(article._id, providerId);
-      console.log('Generate AI Content Response:', res); // Debug log
       
       if (res.status && res.data) {
         // The markdown content is now in the data key
-        console.log('Setting AI content:', res.data); // Debug log
         setAIContent((prev) =>
           prev
             ? {
@@ -720,7 +716,6 @@ export default function ArticleDetails() {
         
         // Wait a bit for the webhook to process, then fetch the latest content
         setTimeout(async () => {
-          console.log('Fetching AI content after delay...'); // Debug log
           await fetchAIContent();
         }, 2000);
         

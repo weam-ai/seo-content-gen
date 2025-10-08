@@ -349,7 +349,6 @@ export const getArticleAIContent = async (
 ): Promise<ArticleAIContent> => {
   try {
     const response = await api.get(`/article/${articleId}/ai-content`);
-    console.log('Raw API response:', response.data); // Debug log
 
     if (!response.data.status) {
       throw new Error(response.data.message || 'Failed to fetch AI content');
@@ -378,7 +377,6 @@ export const getArticleEditorContent = async (
 ): Promise<ArticleEditorContent> => {
   try {
     const response = await api.get(`/article-documents/${articleId}/content`);
-    console.log('Raw editor content response:', response.data); // Debug log
 
     if (!response.data.status) {
       throw new Error(
@@ -407,7 +405,6 @@ export const updateArticleEditorContent = async (
       `/article-documents/${articleId}/update`,
       payload
     );
-    console.log('Update editor content response:', response.data); // Debug log
 
     if (!response.data.status) {
       throw new Error(

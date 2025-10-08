@@ -220,10 +220,6 @@ export const EditorContent: React.FC = () => {
   // Grammar checking functionality
   const applyGrammarMarkers = useCallback(async () => {
     if (!editor || !isGrammarReady) {
-      console.log('Grammar checking skipped:', {
-        hasEditor: !!editor,
-        isReady: isGrammarReady,
-      });
       return;
     }
 
@@ -526,9 +522,7 @@ export const EditorContent: React.FC = () => {
           console.error('Error saving content:', error);
           setSaveStatus('error', error.message || 'Failed to save changes');
         }
-      } else if (isPreviewMode) {
-          console.log('Skipping save - preview mode is active');
-        }
+      }
     }, 1000);
   }, [editor, sessionId, setSaveStatus, isPreviewMode]);
 
@@ -817,7 +811,6 @@ export const EditorContent: React.FC = () => {
                     variant="ghost"
                     size="sm"
                     onClick={() => {
-                      console.log('Grammar & spell check triggered');
                       applyGrammarMarkers();
                     }}
                     className="px-3 h-8 hover:bg-muted/50 text-xs flex items-center gap-1"

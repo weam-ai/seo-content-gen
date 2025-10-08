@@ -750,7 +750,6 @@ export class ProjectsService {
   // Removed sendAssignMailAndNotification method
 
   async generateBusinessSummary(website_url: string, authToken?: string) {
-    console.log('hi')
     const result = await this.pythonService.companyBusinessSummary(website_url);
 
     if (!result.company_details) {
