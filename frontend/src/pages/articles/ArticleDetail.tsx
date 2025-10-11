@@ -1031,7 +1031,7 @@ export default function ArticleDetails() {
   if (isTopicStyleInterface()) {
     return (
       <div>
-        <main className="container mx-auto px-4 py-8">
+        <main className="container mx-auto md:px-4 px-2 md:py-8 py-4">
           {/* Back Button - Now in content area */}
           <div className="mb-6">
             <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
@@ -1516,9 +1516,9 @@ export default function ArticleDetails() {
   // Regular article interface for non-rejected/non-pending articles
   return (
     <div className="">
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto md:px-4 px-2 md:py-8 py-4">
         <div className="mb-6">
-          <Button variant="ghost" size="sm" className="mb-4" onClick={() => navigate(-1)}>
+          <Button variant="ghost" size="sm" className="mb-0" onClick={() => navigate(-1)}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
           </Button>
@@ -1699,7 +1699,7 @@ export default function ArticleDetails() {
                     </div>
                     <div className="flex flex-col gap-1">
                       <div className="flex items-center gap-2">
-                        <BarChart3 className="h-4 w-4 text-[hsl(var(--razor-primary))]" />
+                        <BarChart3 className="h-4 w-4 text-gray-800" />
                         <span className="text-sm text-muted-foreground">
                           {aiContent?.avg_word_count &&
                             aiContent.avg_word_count > 0
@@ -1715,7 +1715,7 @@ export default function ArticleDetails() {
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <BarChart3 className="h-4 w-4 text-[hsl(var(--razor-primary))]" />
+                        <BarChart3 className="h-4 w-4 text-gray-800" />
                         <span className="text-sm text-muted-foreground">
                           {totalWordCount.toLocaleString()}
                           <span className="font- text-base ml-1">words</span>
@@ -2000,10 +2000,10 @@ export default function ArticleDetails() {
                                   <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-green-500 to-green-600 flex items-center justify-center">
                                     <Brain className="h-8 w-8 text-white" />
                                   </div>
-                                  <h3 className="text-lg font-semibold mb-2">
+                                  <h3 className="text-lg font-semibold mb-1">
                                     No OpenAI content yet
                                   </h3>
-                                  <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                                  <p className="text-muted-foreground mb-6 max-w-md mx-auto text-sm">
                                     Generate AI-powered content using OpenAI's
                                     advanced language models to create engaging
                                     articles.
@@ -2049,10 +2049,10 @@ export default function ArticleDetails() {
                                   <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center">
                                     <Sparkles className="h-8 w-8 text-white" />
                                   </div>
-                                  <h3 className="text-lg font-semibold mb-2">
+                                  <h3 className="text-lg font-semibold mb-1">
                                     No Gemini content yet
                                   </h3>
-                                  <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                                  <p className="text-muted-foreground mb-6 max-w-md mx-auto text-sm">
                                     Leverage Google's Gemini AI to create
                                     innovative and contextually rich content for
                                     your articles.
@@ -2088,10 +2088,10 @@ export default function ArticleDetails() {
                                   <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-purple-500 to-purple-600 flex items-center justify-center">
                                     <Zap className="h-8 w-8 text-white" />
                                   </div>
-                                  <h3 className="text-lg font-semibold mb-2">
+                                  <h3 className="text-lg font-semibold mb-1">
                                     No Claude content yet
                                   </h3>
-                                  <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                                  <p className="text-muted-foreground mb-6 max-w-md mx-auto text-sm">
                                     Use Anthropic's Claude AI to generate
                                     thoughtful, well-structured content with
                                     enhanced reasoning capabilities.

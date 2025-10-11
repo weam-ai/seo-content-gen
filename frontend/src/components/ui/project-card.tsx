@@ -53,14 +53,14 @@ export function ProjectCard({ project, onDelete }: ProjectCardProps) {
         <div className="flex items-start justify-between">
           <div className="space-y-1 flex-1">
             <Link to={`/projects/${project._id}`}>
-              <h3 className="font-semibold text-lg hover:text-[hsl(var(--razor-primary))] transition-colors cursor-pointer">
+              <h3 className="font-semibold text-lg hover:text-gray-800 transition-colors cursor-pointer">
                 {project.name}
               </h3>
             </Link>
             {project.description && (
               <div className="text-sm text-muted-foreground line-clamp-2">
                 <div
-                  className="prose prose-sm max-w-none prose-headings:text-foreground prose-p:text-muted-foreground prose-strong:text-foreground prose-em:text-muted-foreground prose-code:text-foreground prose-pre:bg-muted prose-pre:text-foreground prose-blockquote:border-l-[hsl(var(--razor-primary))] prose-blockquote:text-muted-foreground prose-ul:text-muted-foreground prose-ol:text-muted-foreground prose-li:text-muted-foreground prose-a:text-[hsl(var(--razor-primary))] prose-a:no-underline hover:prose-a:underline"
+                  className="prose prose-sm max-w-none prose-headings:text-foreground prose-p:text-muted-foreground prose-strong:text-foreground prose-em:text-muted-foreground prose-code:text-foreground prose-pre:bg-muted prose-pre:text-foreground prose-blockquote:border-l-[hsl(var(--razor-primary))] prose-blockquote:text-muted-foreground prose-ul:text-muted-foreground prose-ol:text-muted-foreground prose-li:text-muted-foreground prose-a:text-gray-800 prose-a:no-underline hover:prose-a:underline"
                   dangerouslySetInnerHTML={{
                     __html: DomPurify.sanitize(
                       marked.parse(project.description) as string
@@ -118,7 +118,7 @@ export function ProjectCard({ project, onDelete }: ProjectCardProps) {
               href={project.website_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[hsl(var(--razor-primary))] hover:underline truncate"
+              className="text-gray-800 hover:underline truncate"
             >
               {project.website_url}
             </a>

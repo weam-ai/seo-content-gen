@@ -33,7 +33,7 @@ export default function ProjectQuickStats({ project }: ProjectQuickStatsProps) {
       <Card className="hover-lift">
         <CardContent className="p-4">
           <div className="flex items-center gap-3">
-            <Calendar className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+            <Calendar className="h-5 w-5 text-gray-800" />
             <div>
               <p className="text-sm text-muted-foreground">Created</p>
               <p className="font-semibold">
@@ -59,7 +59,7 @@ export default function ProjectQuickStats({ project }: ProjectQuickStatsProps) {
       <Card className="hover-lift">
         <CardContent className="p-4">
           <div className="flex items-center gap-3">
-            <Globe className="h-5 w-5 text-purple-500" />
+            <Globe className="h-5 w-5 text-gray-800" />
             <div>
               <p className="text-sm text-muted-foreground">Language</p>
               <p className="font-semibold">{project.language?.toUpperCase() || 'N/A'}</p>

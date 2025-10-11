@@ -8,13 +8,13 @@ export default function SetupWelcome() {
     <div className=" flex items-center justify-center p-4">
       <div className="w-full max-w-4xl">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 bg-[hsl(var(--razor-primary))]/10 text-[hsl(var(--razor-primary))] px-4 py-2 rounded-full text-sm font-medium mb-4">
+          <div className="inline-flex items-center gap-2 bg-[hsl(var(--razor-primary))]/10 text-gray-800 px-4 py-2 rounded-full text-sm font-medium mb-4">
             <Star className="h-4 w-4" />
             Welcome to RazorCopy
           </div>
           <h1 className="text-4xl font-bold tracking-tight mb-4">
             Let's get your content platform
-            <span className="text-[hsl(var(--razor-primary))]">
+            <span className="text-gray-800">
               {' '}
               up and running
             </span>
@@ -31,7 +31,7 @@ export default function SetupWelcome() {
           <Card className="text-center">
             <CardHeader>
               <div className="w-12 h-12 bg-[hsl(var(--razor-primary))]/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Zap className="h-6 w-6 text-[hsl(var(--razor-primary))]" />
+                <Zap className="h-6 w-6 text-gray-800" />
               </div>
               <CardTitle className="text-lg">Business Info</CardTitle>
             </CardHeader>
@@ -45,7 +45,7 @@ export default function SetupWelcome() {
           <Card className="text-center">
             <CardHeader>
               <div className="w-12 h-12 bg-[hsl(var(--razor-primary))]/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <CheckCircle className="h-6 w-6 text-[hsl(var(--razor-primary))]" />
+                <CheckCircle className="h-6 w-6 text-gray-800" />
               </div>
               <CardTitle className="text-lg">Preferences</CardTitle>
             </CardHeader>

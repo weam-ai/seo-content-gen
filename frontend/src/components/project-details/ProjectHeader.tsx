@@ -39,7 +39,7 @@ export default function ProjectHeader({
           {project.description && (
             <div className="text-muted-foreground text-lg max-w-4xl">
               <div
-                className="prose prose-lg max-w-none prose-headings:text-foreground prose-p:text-muted-foreground prose-strong:text-foreground prose-em:text-muted-foreground prose-code:text-foreground prose-pre:bg-muted prose-pre:text-foreground prose-blockquote:border-l-[hsl(var(--razor-primary))] prose-blockquote:text-muted-foreground prose-ul:text-muted-foreground prose-ol:text-muted-foreground prose-li:text-muted-foreground prose-a:text-[hsl(var(--razor-primary))] prose-a:no-underline hover:prose-a:underline line-clamp-2"
+                className="prose prose-lg max-w-none prose-headings:text-foreground prose-p:text-muted-foreground prose-strong:text-foreground prose-em:text-muted-foreground prose-code:text-foreground prose-pre:bg-muted prose-pre:text-foreground prose-blockquote:border-l-[hsl(var(--razor-primary))] prose-blockquote:text-muted-foreground prose-ul:text-muted-foreground prose-ol:text-muted-foreground prose-li:text-muted-foreground prose-a:text-gray-800 prose-a:no-underline hover:prose-a:underline line-clamp-2"
                 dangerouslySetInnerHTML={{
                   __html: DOMPurify.sanitize(
                     marked.parse(
