@@ -19,15 +19,13 @@ export function Logo({ className = '', showText = true, onClick }: LogoProps) {
       onClick={onClick}
     >
       <div className={`relative ${isHovered ? 'wiggle' : ''}`}>
-        <img src={`${import.meta.env.VITE_FRONTEND_URL}logo.svg`} alt="Weam" className="h-8 w-8 object-contain" />
+        <img src={`${import.meta.env.VITE_FRONTEND_URL}logo.svg`} alt="Weam AI" className="h-8 w-8 object-contain" />
       </div>
       {showText && (
         <span
-          className={`text-2xl font-bold razor-gradient-text transition-all duration-300 ${
-            isHovered ? 'scale-105' : ''
-          }`}
+          className={`font-semibold text-gray-900 dark:text-white`}
         >
-          Weam
+          Weam AI
         </span>
       )}
     </div>
