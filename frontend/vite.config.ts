@@ -4,7 +4,6 @@ import path from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
-  // const base = mode === 'production'? '/seo-content-gen/' : '/';
   const env = loadEnv(mode, process.cwd(), '');
   const base = env.VITE_APP_URL_PREFIX? `/${env.VITE_APP_URL_PREFIX}/` : '/';
   return {

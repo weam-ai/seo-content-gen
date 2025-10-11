@@ -18,7 +18,7 @@ export function Header() {
     <header className="border-b border-border/40 bg-background/80 backdrop-blur-sm sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-8">
+          <div className="flex items-center gap-16">
             <Logo onClick={() => navigate('/projects')} />
             <MainNavigation />
           </div>
@@ -30,7 +30,7 @@ export function Header() {
               className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back to Weam
+              Back to App
             </Button>
           </div>
         </div>
