@@ -589,13 +589,14 @@ export default function Topics() {
 
       <div className="">
         {/* Main Content */}
-        <main className="container mx-auto px-4 py-8">
+        <main className="container mx-auto md:px-4 px-2 md:py-8 py-4">
           <PageHeader
             title="Topics"
             description="Manage content topics awaiting approval or review"
           >
             <Button
-              className="razor-gradient hover:opacity-90 transition-opacity"
+              className=""
+              size="sm"
               asChild
             >
               <Link to="/topics/new">
@@ -628,19 +629,19 @@ export default function Topics() {
           {loading ? (
             <div className="text-center py-12">
               <div className="subtle-float">
-                <div className="w-24 h-24 mx-auto mb-4 rounded-full razor-gradient flex items-center justify-center gentle-glow">
-                  <Target className="h-12 w-12 text-white" />
+                <div className="md:w-24 md:h-24 w-16 h-16 mx-auto mb-4 rounded-full bg-gray-700 flex items-center justify-center gentle-glow">
+                  <Target className="md:h-12 md:w-12 h-9 w-9 text-white" />
                 </div>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Loading topics...</h3>
-              <p className="text-muted-foreground mb-6">
+              <h3 className="text-xl font-semibold mb-1">Loading topics...</h3>
+              <p className="text-muted-foreground mb-6 text-sm">
                 {searchQuery ||
                 statusFilter !== 'all' ||
                 projectFilter !== 'all'
                   ? 'Please wait while we load the topics'
                   : 'Get started by creating your first topic'}
               </p>
-              <Button className="razor-gradient" asChild>
+              <Button className="" asChild>
                 <Link to="/topics/new">
                   <Plus className="h-4 w-4 mr-2" />
                   Create Topic
@@ -650,21 +651,21 @@ export default function Topics() {
           ) : error ? (
             <div className="text-center py-12">
               <div className="subtle-float">
-                <div className="w-24 h-24 mx-auto mb-4 rounded-full razor-gradient flex items-center justify-center gentle-glow">
-                  <Target className="h-12 w-12 text-white" />
+                <div className="md:w-24 md:h-24 w-16 h-16 mx-auto mb-4 rounded-full bg-gray-700 flex items-center justify-center gentle-glow">
+                  <Target className="md:h-12 md:w-12 h-9 w-9 text-white" />
                 </div>
               </div>
-              <h3 className="text-xl font-semibold mb-2">
+              <h3 className="text-xl font-semibold mb-1">
                 Error loading topics
               </h3>
-              <p className="text-muted-foreground mb-6">
+              <p className="text-muted-foreground mb-6 text-sm">
                 {searchQuery ||
                 statusFilter !== 'all' ||
                 projectFilter !== 'all'
                   ? 'Try adjusting your search or filters'
                   : 'Get started by creating your first topic'}
               </p>
-              <Button className="razor-gradient" asChild>
+              <Button className="" asChild>
                 <Link to="/topics/new">
                   <Plus className="h-4 w-4 mr-2" />
                   Create Topic
@@ -674,19 +675,19 @@ export default function Topics() {
           ) : viewMode !== 'calendar' && filteredTopics.length === 0 ? (
             <div className="text-center py-12">
               <div className="subtle-float">
-                <div className="w-24 h-24 mx-auto mb-4 rounded-full razor-gradient flex items-center justify-center gentle-glow">
-                  <Target className="h-12 w-12 text-white" />
+                <div className="md:w-24 md:h-24 w-16 h-16 mx-auto mb-4 rounded-full bg-gray-700 flex items-center justify-center gentle-glow">
+                  <Target className="md:h-12 md:w-12 h-9 w-9 text-white" />
                 </div>
               </div>
-              <h3 className="text-xl font-semibold mb-2">No topics found</h3>
-              <p className="text-muted-foreground mb-6">
+              <h3 className="text-xl font-semibold mb-1">No topics found</h3>
+              <p className="text-muted-foreground mb-6 text-sm">
                 {searchQuery ||
                 statusFilter !== 'all' ||
                 projectFilter !== 'all'
                   ? 'Try adjusting your search or filters'
                   : 'Get started by creating your first topic'}
               </p>
-              <Button className="razor-gradient" asChild>
+              <Button className="" asChild>
                 <Link to="/topics/new">
                   <Plus className="h-4 w-4 mr-2" />
                   Create Topic
@@ -707,7 +708,7 @@ export default function Topics() {
                         <div className="flex items-start justify-between">
                           <div className="space-y-2 flex-1">
                             <Link to={`/topics/${topic._id}`}>
-                              <h3 className="font-semibold text-lg hover:text-[hsl(var(--razor-primary))] transition-colors cursor-pointer">
+                              <h3 className="font-semibold text-lg hover:text-gray-800 transition-colors cursor-pointer">
                                 {topic.title}
                               </h3>
                             </Link>
@@ -717,8 +718,8 @@ export default function Topics() {
                                   to={`/projects/${topic.relatedProject._id}`}
                                   className="flex items-center gap-1 group"
                                 >
-                                  <ExternalLink className="h-3 w-3 group-hover:text-[hsl(var(--razor-primary))] transition-colors" />
-                                  <span className="truncate group-hover:text-[hsl(var(--razor-primary))] transition-colors">
+                                  <ExternalLink className="h-3 w-3 group-hover:text-gray-800 transition-colors" />
+                                  <span className="truncate group-hover:text-gray-800 transition-colors">
                                     {topic.relatedProject.name}
                                   </span>
                                 </Link>
@@ -895,7 +896,7 @@ export default function Topics() {
                             <div className="flex items-start gap-4">
                               <div className="flex-1">
                                 <Link to={`/topics/${topic._id}`}>
-                                  <h3 className="font-semibold text-lg hover:text-[hsl(var(--razor-primary))] transition-colors cursor-pointer">
+                                  <h3 className="font-semibold text-lg hover:text-gray-800 transition-colors cursor-pointer">
                                     {topic.title}
                                   </h3>
                                 </Link>
@@ -905,8 +906,8 @@ export default function Topics() {
                                       to={`/projects/${topic.relatedProject._id}`}
                                       className="flex items-center gap-1 group"
                                     >
-                                      <ExternalLink className="h-3 w-3 group-hover:text-[hsl(var(--razor-primary))] transition-colors" />
-                                      <span className="truncate group-hover:text-[hsl(var(--razor-primary))] transition-colors">
+                                      <ExternalLink className="h-3 w-3 group-hover:text-gray-800 transition-colors" />
+                                      <span className="truncate group-hover:text-gray-800 transition-colors">
                                         {topic.relatedProject.name}
                                       </span>
                                     </Link>

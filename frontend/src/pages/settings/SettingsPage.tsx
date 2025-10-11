@@ -72,7 +72,7 @@ export default function Settings() {
 
   return (
     <div className="">
-      <main className="container mx-auto px-4 py-8 max-w-6xl">
+      <main className="container mx-auto md:px-4 px-2 md:py-8 py-4 max-w-6xl">
         {/* Back Button - Now in content area */}
         <div className="mb-6">
           <Link to="/">
@@ -128,7 +128,7 @@ export default function Settings() {
                 <Card className="hover-lift bg-card/50 backdrop-blur-sm border-border/40">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <Shield className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+                      <Shield className="h-5 w-5 text-gray-800" />
                       Privacy & Security
                     </CardTitle>
                   </CardHeader>
@@ -202,7 +202,7 @@ export default function Settings() {
                 <Card className="hover-lift bg-card/50 backdrop-blur-sm border-border/40">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <Lock className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+                      <Lock className="h-5 w-5 text-gray-800" />
                       Security Actions
                     </CardTitle>
                   </CardHeader>
@@ -237,7 +237,7 @@ export default function Settings() {
               <Card className="hover-lift bg-card/50 backdrop-blur-sm border-border/40">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Palette className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+                    <Palette className="h-5 w-5 text-gray-800" />
                     App Preferences
                   </CardTitle>
                 </CardHeader>
@@ -335,7 +335,7 @@ export default function Settings() {
               <Card className="hover-lift bg-card/50 backdrop-blur-sm border-border/40">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Zap className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+                    <Zap className="h-5 w-5 text-gray-800" />
                     AI Assistant Settings
                   </CardTitle>
                 </CardHeader>
@@ -394,7 +394,7 @@ export default function Settings() {
 
                   <div className="p-4 bg-gradient-to-r from-[hsl(var(--razor-primary))]/10 to-[hsl(var(--razor-secondary))]/10 rounded-lg border border-[hsl(var(--razor-primary))]/20">
                     <div className="flex items-start gap-3">
-                      <Zap className="h-5 w-5 text-[hsl(var(--razor-primary))] mt-0.5" />
+                      <Zap className="h-5 w-5 text-gray-800 mt-0.5" />
                       <div>
                         <h4 className="font-semibold mb-1">
                           AI Usage This Month

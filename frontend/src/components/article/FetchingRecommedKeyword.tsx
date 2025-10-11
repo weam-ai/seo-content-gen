@@ -67,7 +67,7 @@ const FetchingRecommendedKeyword: React.FC<FetchingRecommendedKeywordProps> = ({
       {...restProps}
     >
       {children ?? (
-        <span className="text-xs text-[hsl(var(--razor-primary))] cursor-pointer">
+        <span className="text-xs text-gray-800 cursor-pointer underline">
           {fetchingRecommended
             ? 'Fetching Recommendations...'
             : 'Fetch Recommendations'}

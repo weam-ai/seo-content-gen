@@ -23,7 +23,7 @@ export function Logo({ className = '', showText = true, onClick }: LogoProps) {
       </div>
       {showText && (
         <span
-          className={`text-2xl font-bold razor-gradient-text transition-all duration-300 ${
+          className={`text-xl font-bold text-black transition-all duration-300 ${
             isHovered ? 'scale-105' : ''
           }`}
         >

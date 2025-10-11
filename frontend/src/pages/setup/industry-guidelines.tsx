@@ -194,21 +194,21 @@ export default function IndustryGuidelinesPage() {
   return (
     <div className="">
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto md:px-4 px-2 md:py-8 py-4">
         <PageHeader
           title="Industry Guidelines Management"
           description="Manage industry-specific content guidelines and best practices"
         >
           {canCreateIndustryGuidelines && (
             <Link to="/setup/industry-guidelines/new">
-              <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700">
+              <Button className="" size="sm" variant="outline">
                 Add Guideline
               </Button>
             </Link>
           )}
         </PageHeader>
         {/* Filters and Search - System Prompts style */}
-        <div className="flex flex-col sm:flex-row gap-4 py-6 items-center">
+        <div className="flex flex-col sm:flex-row gap-2 py-6 items-center">
           <div className="flex flex-1 items-center gap-2">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />

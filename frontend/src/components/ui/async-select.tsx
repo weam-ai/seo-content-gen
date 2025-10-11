@@ -104,7 +104,7 @@ const AsyncSelect: React.FC<AsyncSelectProps> = ({
       borderColor: state.isFocused ? 'hsl(var(--ring))' : 'hsl(var(--border))',
       borderRadius: 'calc(var(--radius) - 2px)',
       borderWidth: '1px',
-      boxShadow: state.isFocused ? '0 0 0 2px hsl(var(--ring))' : 'none',
+      boxShadow: state.isFocused ? '' : 'none',
       backgroundColor: 'hsl(var(--background))',
       fontSize: '0.875rem',
       '&:hover': {
