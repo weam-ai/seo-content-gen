@@ -244,7 +244,7 @@ export default function SecondaryKeywordModal({
           <Button
             onClick={handleApprove}
             disabled={modalLoading}
-            className="razor-gradient flex items-center"
+            className=""
           >
             {modalLoading || loading ? (
               <Loader2 className="animate-spin h-4 w-4 mr-2" />

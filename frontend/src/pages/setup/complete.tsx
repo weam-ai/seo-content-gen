@@ -24,14 +24,14 @@ export default function SetupComplete() {
         <Card className="mb-8">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+              <Sparkles className="h-5 w-5 text-gray-800" />
               What's Next?
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-start gap-3">
               <div className="w-8 h-8 bg-[hsl(var(--razor-primary))]/10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                <span className="text-[hsl(var(--razor-primary))] font-semibold text-sm">
+                <span className="text-gray-800 font-semibold text-sm">
                   1
                 </span>
               </div>
@@ -46,7 +46,7 @@ export default function SetupComplete() {
 
             <div className="flex items-start gap-3">
               <div className="w-8 h-8 bg-[hsl(var(--razor-primary))]/10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                <span className="text-[hsl(var(--razor-primary))] font-semibold text-sm">
+                <span className="text-gray-800 font-semibold text-sm">
                   2
                 </span>
               </div>
@@ -61,7 +61,7 @@ export default function SetupComplete() {
 
             <div className="flex items-start gap-3">
               <div className="w-8 h-8 bg-[hsl(var(--razor-primary))]/10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                <span className="text-[hsl(var(--razor-primary))] font-semibold text-sm">
+                <span className="text-gray-800 font-semibold text-sm">
                   3
                 </span>
               </div>
@@ -105,14 +105,14 @@ export default function SetupComplete() {
             Need help? Check out our{' '}
             <a
               href="#"
-              className="text-[hsl(var(--razor-primary))] hover:underline"
+              className="text-gray-800 hover:underline"
             >
               documentation
             </a>{' '}
             or{' '}
             <a
               href="#"
-              className="text-[hsl(var(--razor-primary))] hover:underline"
+              className="text-gray-800 hover:underline"
             >
               contact support
             </a>

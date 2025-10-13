@@ -47,7 +47,7 @@ export function ArticleCard({ article, onDelete }: ArticleCardProps) {
         <div className="flex items-start justify-between">
           <div className="space-y-1 flex-1">
             <Link to={`/articles/${article._id}`}>
-              <h3 className="font-semibold text-lg hover:text-[hsl(var(--razor-primary))] transition-colors cursor-pointer">
+              <h3 className="font-semibold text-lg hover:text-gray-800 transition-colors cursor-pointer">
                 {article.title}
               </h3>
             </Link>
@@ -102,7 +102,7 @@ export function ArticleCard({ article, onDelete }: ArticleCardProps) {
             {article.relatedProject?._id ? (
               <Link
                 to={`/projects/${article.relatedProject._id}`}
-                className="text-[hsl(var(--razor-primary))] hover:underline truncate"
+                className="text-gray-800 hover:underline truncate"
               >
                 {article.relatedProject.name}
               </Link>

@@ -169,7 +169,7 @@ const ImplementMergeModal: React.FC<ImplementMergeModalProps> = ({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button className="razor-gradient" onClick={handleApply}>
+          <Button className="" onClick={handleApply}>
             <Check className="h-4 w-4 mr-2" /> Apply Changes
           </Button>
         </div>

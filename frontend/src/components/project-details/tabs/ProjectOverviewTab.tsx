@@ -78,21 +78,21 @@ export default function ProjectOverviewTab({ project }: OverviewTabProps) {
           <Card className="hover-lift">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Globe className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+                <Globe className="h-5 w-5 text-gray-800" />
                 Project Details
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
-                  <Globe className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+                  <Globe className="h-5 w-5 text-gray-800" />
                   <div>
                     <p className="text-sm font-semibold mb-1">Website</p>
                     <a
                       href={project.website_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-[hsl(var(--razor-primary))] hover:underline flex items-center gap-1 text-sm"
+                      className="text-gray-800 hover:underline flex items-center gap-1 text-sm"
                     >
                       {project.website_url.replace('https://', '')}
                       <ExternalLink className="h-3 w-3" />
@@ -100,7 +100,7 @@ export default function ProjectOverviewTab({ project }: OverviewTabProps) {
                   </div>
                 </div>
                 <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
-                  <MapPin className="h-5 w-6 text-[hsl(var(--razor-primary))]" />
+                  <MapPin className="h-5 w-6 text-gray-800" />
                   <div>
                     <p className="text-sm font-semibold mb-1">Location</p>
                     <p className="text-sm text-muted-foreground">
@@ -113,7 +113,7 @@ export default function ProjectOverviewTab({ project }: OverviewTabProps) {
               </div>
               <div className="p-3 bg-muted/30 rounded-lg">
                 <div className="flex items-center gap-2 mb-1">
-                  <Building2 className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+                  <Building2 className="h-5 w-5 text-gray-800" />
                   <p className="text-sm font-semibold">
                     Industry Guideline Type
                   </p>
@@ -126,7 +126,7 @@ export default function ProjectOverviewTab({ project }: OverviewTabProps) {
               {/* Project-Specific Guidelines */}
               <div className="p-3 bg-muted/30 rounded-lg">
                 <div className="flex items-center gap-2 mb-1">
-                  <Globe className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+                  <Globe className="h-5 w-5 text-gray-800" />
                   <p className="text-sm font-semibold">
                     Project-Specific Guidelines
                   </p>
@@ -134,7 +134,7 @@ export default function ProjectOverviewTab({ project }: OverviewTabProps) {
                 {project.guideline_description ? (
                   <div className="text-muted-foreground leading-relaxed">
                     <div
-                      className={`prose prose-sm max-w-none prose-headings:text-foreground prose-p:text-muted-foreground prose-strong:text-foreground prose-em:text-muted-foreground prose-code:text-foreground prose-pre:bg-muted prose-pre:text-foreground prose-blockquote:border-l-[hsl(var(--razor-primary))] prose-blockquote:text-muted-foreground prose-ul:text-muted-foreground prose-ol:text-muted-foreground prose-li:text-muted-foreground prose-a:text-[hsl(var(--razor-primary))] prose-a:no-underline hover:prose-a:underline ${
+                      className={`prose prose-sm max-w-none prose-headings:text-foreground prose-p:text-muted-foreground prose-strong:text-foreground prose-em:text-muted-foreground prose-code:text-foreground prose-pre:bg-muted prose-pre:text-foreground prose-blockquote:border-l-[hsl(var(--razor-primary))] prose-blockquote:text-muted-foreground prose-ul:text-muted-foreground prose-ol:text-muted-foreground prose-li:text-muted-foreground prose-a:text-gray-800 prose-a:no-underline hover:prose-a:underline ${
                         !isGuidelinesExpanded ? 'line-clamp-3' : ''
                       }`}
                       dangerouslySetInnerHTML={{
@@ -161,7 +161,7 @@ export default function ProjectOverviewTab({ project }: OverviewTabProps) {
                         onClick={() =>
                           setIsGuidelinesExpanded(!isGuidelinesExpanded)
                         }
-                        className="px-0 h-auto text-[hsl(var(--razor-primary))] mt-2"
+                        className="px-0 h-auto text-gray-800 mt-2"
                       >
                         {isGuidelinesExpanded ? 'Read Less' : 'Read More'}
                       </Button>
@@ -180,7 +180,7 @@ export default function ProjectOverviewTab({ project }: OverviewTabProps) {
           <Card className="hover-lift">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Building2 className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+                <Building2 className="h-5 w-5 text-gray-800" />
                 Business Overview
               </CardTitle>
             </CardHeader>
@@ -188,7 +188,7 @@ export default function ProjectOverviewTab({ project }: OverviewTabProps) {
               <div className="grid grid-cols-1 gap-4">
                 <div className="p-4 bg-muted/30 rounded-lg">
                   <div className="flex items-center gap-2 mb-2">
-                    <Users className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+                    <Users className="h-5 w-5 text-gray-800" />
                     <p className="text-sm font-semibold">Target Audience</p>
                   </div>
                   <p className="text-sm text-muted-foreground">
@@ -198,7 +198,7 @@ export default function ProjectOverviewTab({ project }: OverviewTabProps) {
                 {/* Author Bio */}
                 <div className="p-4 bg-muted/30 rounded-lg">
                   <div className="flex items-center gap-2 mb-2">
-                    <Building2 className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+                    <Building2 className="h-5 w-5 text-gray-800" />
                     <span className="text-sm font-semibold">Author Bio</span>
                   </div>
                   <p className="text-sm text-muted-foreground">
@@ -213,7 +213,7 @@ export default function ProjectOverviewTab({ project }: OverviewTabProps) {
                       variant="link"
                       size="sm"
                       onClick={() => toggleExpand('authorBio')}
-                      className="px-0 h-auto text-[hsl(var(--razor-primary))] mt-2"
+                      className="px-0 h-auto text-gray-800 mt-2"
                     >
                       {expanded.authorBio ? 'Read Less' : 'Read More'}
                     </Button>
@@ -223,13 +223,13 @@ export default function ProjectOverviewTab({ project }: OverviewTabProps) {
               <div className="grid grid-cols-1 gap-4">
                 <div className="p-4 bg-muted/30 rounded-lg">
                   <div className="flex items-center gap-2 mb-2">
-                    <Building2 className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+                    <Building2 className="h-5 w-5 text-gray-800" />
                     <p className="text-sm font-semibold">Business Summary</p>
                   </div>
                   {project.description ? (
                     <div className="text-muted-foreground leading-relaxed">
                       <div
-                        className={`prose prose-sm max-w-none prose-headings:text-foreground prose-p:text-muted-foreground prose-strong:text-foreground prose-em:text-muted-foreground prose-code:text-foreground prose-pre:bg-muted prose-pre:text-foreground prose-blockquote:border-l-[hsl(var(--razor-primary))] prose-blockquote:text-muted-foreground prose-ul:text-muted-foreground prose-ol:text-muted-foreground prose-li:text-muted-foreground prose-a:text-[hsl(var(--razor-primary))] prose-a:no-underline hover:prose-a:underline ${
+                        className={`prose prose-sm max-w-none prose-headings:text-foreground prose-p:text-muted-foreground prose-strong:text-foreground prose-em:text-muted-foreground prose-code:text-foreground prose-pre:bg-muted prose-pre:text-foreground prose-blockquote:border-l-[hsl(var(--razor-primary))] prose-blockquote:text-muted-foreground prose-ul:text-muted-foreground prose-ol:text-muted-foreground prose-li:text-muted-foreground prose-a:text-gray-800 prose-a:no-underline hover:prose-a:underline ${
                           !isSummaryExpanded ? 'line-clamp-3' : ''
                         }`}
                         dangerouslySetInnerHTML={{
@@ -249,7 +249,7 @@ export default function ProjectOverviewTab({ project }: OverviewTabProps) {
                           onClick={() =>
                             setIsSummaryExpanded(!isSummaryExpanded)
                           }
-                          className="px-0 h-auto text-[hsl(var(--razor-primary))] mt-2"
+                          className="px-0 h-auto text-gray-800 mt-2"
                         >
                           {isSummaryExpanded ? 'Read Less' : 'Read More'}
                         </Button>
@@ -268,7 +268,7 @@ export default function ProjectOverviewTab({ project }: OverviewTabProps) {
           <Card className="hover-lift">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Building2 className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+                <Building2 className="h-5 w-5 text-gray-800" />
                 Organization Insights
               </CardTitle>
             </CardHeader>
@@ -277,7 +277,7 @@ export default function ProjectOverviewTab({ project }: OverviewTabProps) {
                 {/* Archetype */}
                 <div className="p-4 bg-muted/30 rounded-lg">
                   <div className="flex items-center gap-2 mb-2">
-                    <Building2 className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+                    <Building2 className="h-5 w-5 text-gray-800" />
                     <span className="text-sm font-semibold">Archetype</span>
                   </div>
                   <p className="text-sm text-muted-foreground">
@@ -294,7 +294,7 @@ export default function ProjectOverviewTab({ project }: OverviewTabProps) {
                         variant="link"
                         size="sm"
                         onClick={() => toggleExpand('archetype')}
-                        className="px-0 h-auto text-[hsl(var(--razor-primary))] mt-2"
+                        className="px-0 h-auto text-gray-800 mt-2"
                       >
                         {expanded.archetype ? 'Read Less' : 'Read More'}
                       </Button>
@@ -303,7 +303,7 @@ export default function ProjectOverviewTab({ project }: OverviewTabProps) {
                 {/* Brand Spokesperson */}
                 <div className="p-4 bg-muted/30 rounded-lg">
                   <div className="flex items-center gap-2 mb-2">
-                    <Building2 className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+                    <Building2 className="h-5 w-5 text-gray-800" />
                     <span className="text-sm font-semibold">
                       Brand Spokesperson
                     </span>
@@ -322,7 +322,7 @@ export default function ProjectOverviewTab({ project }: OverviewTabProps) {
                         variant="link"
                         size="sm"
                         onClick={() => toggleExpand('spokesperson')}
-                        className="px-0 h-auto text-[hsl(var(--razor-primary))] mt-2"
+                        className="px-0 h-auto text-gray-800 mt-2"
                       >
                         {expanded.spokesperson ? 'Read Less' : 'Read More'}
                       </Button>
@@ -331,7 +331,7 @@ export default function ProjectOverviewTab({ project }: OverviewTabProps) {
                 {/* Most Important Thing */}
                 <div className="p-4 bg-muted/30 rounded-lg">
                   <div className="flex items-center gap-2 mb-2">
-                    <Building2 className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+                    <Building2 className="h-5 w-5 text-gray-800" />
                     <span className="text-sm font-semibold">
                       Most Important Thing
                     </span>
@@ -350,7 +350,7 @@ export default function ProjectOverviewTab({ project }: OverviewTabProps) {
                         variant="link"
                         size="sm"
                         onClick={() => toggleExpand('mostImportant')}
-                        className="px-0 h-auto text-[hsl(var(--razor-primary))] mt-2"
+                        className="px-0 h-auto text-gray-800 mt-2"
                       >
                         {expanded.mostImportant ? 'Read Less' : 'Read More'}
                       </Button>
@@ -359,7 +359,7 @@ export default function ProjectOverviewTab({ project }: OverviewTabProps) {
                 {/* Unique Differentiator */}
                 <div className="p-4 bg-muted/30 rounded-lg">
                   <div className="flex items-center gap-2 mb-2">
-                    <Building2 className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+                    <Building2 className="h-5 w-5 text-gray-800" />
                     <span className="text-sm font-semibold">
                       Unique Differentiator
                     </span>
@@ -378,7 +378,7 @@ export default function ProjectOverviewTab({ project }: OverviewTabProps) {
                         variant="link"
                         size="sm"
                         onClick={() => toggleExpand('differentiator')}
-                        className="px-0 h-auto text-[hsl(var(--razor-primary))] mt-2"
+                        className="px-0 h-auto text-gray-800 mt-2"
                       >
                         {expanded.differentiator ? 'Read Less' : 'Read More'}
                       </Button>
@@ -397,7 +397,7 @@ export default function ProjectOverviewTab({ project }: OverviewTabProps) {
           <Card className="hover-lift">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+                <TrendingUp className="h-5 w-5 text-gray-800" />
                 Competitors
               </CardTitle>
             </CardHeader>
@@ -414,7 +414,7 @@ export default function ProjectOverviewTab({ project }: OverviewTabProps) {
                     href={competitor}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[hsl(var(--razor-primary))] hover:text-[hsl(var(--razor-primary))]/80 ml-2"
+                    className="text-gray-800 hover:text-gray-800/80 ml-2"
                   >
                     <ExternalLink className="h-4 w-4" />
                   </a>

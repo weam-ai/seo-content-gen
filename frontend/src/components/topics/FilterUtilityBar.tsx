@@ -112,7 +112,7 @@ export const FilterUtilityBar: React.FC<TopicToolbarProps> = ({
   ];
   const effectiveSortOptions = sortOptions || defaultSortOptions;
   return (
-    <div className="flex flex-col sm:flex-row gap-4 py-6">
+    <div className="flex flex-col sm:flex-row gap-2 py-6">
       <div className="relative flex-1">
         <svg
           className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"
@@ -131,7 +131,7 @@ export const FilterUtilityBar: React.FC<TopicToolbarProps> = ({
           className="pl-10"
         />
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 md:flex-row flex-col">
         {/* Status Filter */}
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-[160px]">

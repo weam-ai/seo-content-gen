@@ -138,7 +138,7 @@ export default function ProjectSitemapTab({
       <Card className="hover-lift">
         <CardHeader className="flex flex-row items-center justify-between">
           <span className="flex items-center gap-2">
-            <Globe className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+            <Globe className="h-5 w-5 text-gray-800" />
             Sitemap Overview
           </span>
           <div className="flex items-center gap-2">
@@ -220,7 +220,7 @@ export default function ProjectSitemapTab({
           {/* Stats Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
             <div className="p-4 bg-muted/30 rounded-lg text-center">
-              <p className="text-2xl font-bold text-[hsl(var(--razor-primary))]">
+              <p className="text-2xl font-bold text-gray-800">
                 {sitemapData?.total_pages ?? 'N/A'}
               </p>
               <p className="text-sm text-muted-foreground">Total Pages</p>
@@ -298,7 +298,7 @@ export default function ProjectSitemapTab({
                   render: (row: any) => (
                     <a
                       href={row.url}
-                      className="text-[hsl(var(--razor-primary))] hover:underline text-sm"
+                      className="text-gray-800 hover:underline text-sm"
                       target="_blank"
                       rel="noopener noreferrer"
                     >

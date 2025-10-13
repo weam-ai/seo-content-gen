@@ -398,8 +398,8 @@ export default function ArticleAddPage() {
   return (
     <div className="">
       {/* Back Button - Positioned below the logo */}
-      <div className="container mx-auto px-4 mt-4">
-        <Button variant="ghost" className="gap-2 pl-0" onClick={() => navigate(-1)}>
+      <div className="container mx-auto md:px-4 px-2 md:py-8 py-4">
+        <Button variant="ghost" className="gap-2" onClick={() => navigate(-1)}>
           <ArrowLeft className="h-4 w-4" />
           Back
         </Button>
@@ -452,7 +452,7 @@ export default function ArticleAddPage() {
                     <Card>
                       <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                          <FileText className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+                          <FileText className="h-5 w-5 text-gray-800" />
                           Article Information
                         </CardTitle>
                       </CardHeader>
@@ -477,7 +477,7 @@ export default function ArticleAddPage() {
                     <Card>
                       <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                          <Building className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+                          <Building className="h-5 w-5 text-gray-800" />
                           Project Selection
                         </CardTitle>
                       </CardHeader>
@@ -553,7 +553,7 @@ export default function ArticleAddPage() {
                     <Card>
                       <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                          <Target className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+                          <Target className="h-5 w-5 text-gray-800" />
                           Keywords & Article Type
                         </CardTitle>
                       </CardHeader>
@@ -921,7 +921,7 @@ export default function ArticleAddPage() {
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle className="flex items-center gap-2">
-                      <Sparkles className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+                      <Sparkles className="h-5 w-5 text-gray-800" />
                       Article Outline
                     </CardTitle>
                     <Button
@@ -978,7 +978,7 @@ export default function ArticleAddPage() {
                       <Button
                         type="submit"
                         disabled={isSubmitting}
-                        className="bg-[hsl(var(--razor-primary))] text-white"
+                        className=""
                       >
                         {isSubmitting ? 'Creating...' : 'Create Article'}
                       </Button>
@@ -1012,7 +1012,7 @@ export default function ArticleAddPage() {
                     <Card>
                       <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                          <Building className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+                          <Building className="h-5 w-5 text-gray-800" />
                           Project Selection
                         </CardTitle>
                       </CardHeader>
@@ -1088,7 +1088,7 @@ export default function ArticleAddPage() {
                     <Card>
                       <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                          <Target className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+                          <Target className="h-5 w-5 text-gray-800" />
                           Keywords & SEO
                         </CardTitle>
                       </CardHeader>
@@ -1469,7 +1469,7 @@ export default function ArticleAddPage() {
                       <Button
                         type="submit"
                         disabled={isSubmitting}
-                        className="bg-[hsl(var(--razor-primary))] text-white"
+                        className=""
                       >
                         {isSubmitting ? 'Creating...' : 'Create Topic'}
                       </Button>
