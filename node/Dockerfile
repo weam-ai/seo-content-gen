@@ -40,6 +40,8 @@ RUN npm prune --production && \
     npm cache clean --force && \
     rm -rf /tmp/* /var/tmp/*
 
+RUN mkdir -p /app/logs && chown -R nextjs:nodejs /app/logs
+
 # Switch to non-root user
 USER nextjs
 

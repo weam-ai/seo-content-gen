@@ -18,7 +18,7 @@ COPY . .
 
 # Build the application with optimizations
 # RUN VITE_APP_URL_PREFIX=seo-content-gen npm run build
-RUN VITE_APP_URL_PREFIX=seo-content-gen VITE_FRONTEND_URL=/seo-content-gen/ npm run build
+RUN npm run build
 
 # Production stage
 FROM nginx:alpine
