@@ -187,7 +187,7 @@ export default function ProjectContentTab({ project }: ProjectContentTabProps) {
             {/* Action Buttons */}
             <div className="flex gap-2">
               <Link to={`/articles/new?project=${project._id}`}>
-                <Button className="bg-[hsl(var(--razor-primary))] text-white hover:opacity-90">
+                <Button className="" variant="outline" size="sm">
                   <Plus className="h-4 w-4 mr-2" />
                   New Article
                 </Button>
@@ -220,10 +220,10 @@ export default function ProjectContentTab({ project }: ProjectContentTabProps) {
               <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
                 <FileText className="h-8 w-8 text-muted-foreground" />
               </div>
-              <h3 className="text-lg font-semibold mb-2">
+              <h3 className="text-lg font-semibold mb-1">
                 No articles found
               </h3>
-              <p className="text-muted-foreground mb-6">
+              <p className="text-muted-foreground mb-6 text-sm">
                 {searchQuery || statusFilter !== 'all'
                   ? 'Try adjusting your search or filters.'
                   : 'Create your first article to get started.'}

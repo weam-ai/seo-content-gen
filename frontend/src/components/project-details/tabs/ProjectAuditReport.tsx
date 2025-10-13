@@ -365,7 +365,7 @@ const ProjectAuditReport = ({ projectId }: { projectId: string }) => {
                         isCompleted
                           ? 'text-green-700'
                           : isCurrent
-                          ? 'text-[hsl(var(--razor-primary))] font-semibold'
+                          ? 'text-gray-800 font-semibold'
                           : 'text-muted-foreground'
                       }`}
                     >
@@ -440,8 +440,8 @@ const ProjectAuditReport = ({ projectId }: { projectId: string }) => {
 
             {/* Content */}
             <div>
-              <h3 className="text-lg font-semibold mb-2">No audit data yet.</h3>
-              <p className="text-muted-foreground mb-6 text-center">
+              <h3 className="text-lg font-semibold mb-1">No audit data yet.</h3>
+              <p className="text-muted-foreground mb-6 text-center text-sm">
                 Get a comprehensive SEO analysis of your website including
                 technical issues, content optimization opportunities, and
                 actionable recommendations.
@@ -451,7 +451,7 @@ const ProjectAuditReport = ({ projectId }: { projectId: string }) => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <Card>
                   <CardContent className="p-4 text-center">
-                    <Target className="w-6 h-6 text-[hsl(var(--razor-primary))] mx-auto mb-2" />
+                    <Target className="w-6 h-6 text-gray-800 mx-auto mb-2" />
                     <h4 className="font-medium text-sm mb-1">Technical SEO</h4>
                     <p className="text-xs text-muted-foreground">
                       Meta tags, headers, structure
@@ -460,7 +460,7 @@ const ProjectAuditReport = ({ projectId }: { projectId: string }) => {
                 </Card>
                 <Card>
                   <CardContent className="p-4 text-center">
-                    <Eye className="w-6 h-6 text-[hsl(var(--razor-primary))] mx-auto mb-2" />
+                    <Eye className="w-6 h-6 text-gray-800 mx-auto mb-2" />
                     <h4 className="font-medium text-sm mb-1">
                       Content Analysis
                     </h4>
@@ -471,7 +471,7 @@ const ProjectAuditReport = ({ projectId }: { projectId: string }) => {
                 </Card>
                 <Card>
                   <CardContent className="p-4 text-center">
-                    <Settings className="w-6 h-6 text-[hsl(var(--razor-primary))] mx-auto mb-2" />
+                    <Settings className="w-6 h-6 text-gray-800 mx-auto mb-2" />
                     <h4 className="font-medium text-sm mb-1">Performance</h4>
                     <p className="text-xs text-muted-foreground">
                       Speed, accessibility, best practices
@@ -507,7 +507,7 @@ const ProjectAuditReport = ({ projectId }: { projectId: string }) => {
                   <span className="text-sm font-medium">Site:</span>
                   <a
                     href={auditData.url || auditData.canonical_url}
-                    className="text-[hsl(var(--razor-primary))] hover:underline text-sm"
+                    className="text-gray-800 hover:underline text-sm"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -579,7 +579,7 @@ const ProjectAuditReport = ({ projectId }: { projectId: string }) => {
           <Card className="hover-lift">
             <CardContent className="p-6">
               <div className="flex items-center gap-2 mb-4">
-                <FileText className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+                <FileText className="h-5 w-5 text-gray-800" />
                 <h3 className="text-lg font-semibold">Meta Tags</h3>
               </div>
               <div className="space-y-4">
@@ -660,7 +660,7 @@ const ProjectAuditReport = ({ projectId }: { projectId: string }) => {
           <Card className="hover-lift">
             <CardContent className="p-6">
               <div className="flex items-center gap-2 mb-4">
-                <BarChart3 className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+                <BarChart3 className="h-5 w-5 text-gray-800" />
                 <h3 className="text-lg font-semibold">Headings</h3>
               </div>
               <div className="space-y-4">
@@ -671,7 +671,7 @@ const ProjectAuditReport = ({ projectId }: { projectId: string }) => {
                       variant="outline"
                       className={
                         (auditData.analysis?.headings?.[level]?.length || 0) > 0
-                          ? 'border-[hsl(var(--razor-primary))] text-[hsl(var(--razor-primary))]'
+                          ? 'border-[hsl(var(--razor-primary))] text-gray-800'
                           : 'border-gray-300 text-gray-500'
                       }
                     >
@@ -714,7 +714,7 @@ const ProjectAuditReport = ({ projectId }: { projectId: string }) => {
           <Card className="hover-lift">
             <CardContent className="p-6">
               <div className="flex items-center gap-2 mb-4">
-                <BarChart3 className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+                <BarChart3 className="h-5 w-5 text-gray-800" />
                 <h3 className="text-lg font-semibold">Content Analysis</h3>
               </div>
               <div className="space-y-4">
@@ -759,7 +759,7 @@ const ProjectAuditReport = ({ projectId }: { projectId: string }) => {
           <Card className="hover-lift">
             <CardContent className="p-6">
               <div className="flex items-center gap-2 mb-4">
-                <Settings className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+                <Settings className="h-5 w-5 text-gray-800" />
                 <h3 className="text-lg font-semibold">Technical SEO</h3>
               </div>
               <p className="text-sm text-muted-foreground mb-4">
@@ -883,7 +883,7 @@ const ProjectAuditReport = ({ projectId }: { projectId: string }) => {
                 <div className="flex gap-4">
                   <Badge
                     variant="outline"
-                    className="border-[hsl(var(--razor-primary))] text-[hsl(var(--razor-primary))]"
+                    className="border-[hsl(var(--razor-primary))] text-gray-800"
                   >
                     Total Images: {(auditData.analysis?.images || []).length}
                   </Badge>
@@ -967,7 +967,7 @@ const ProjectAuditReport = ({ projectId }: { projectId: string }) => {
                 {/* Internal Links */}
                 <div>
                   <div className="flex items-center gap-2 mb-2">
-                    <LucideLink className="h-4 text-[hsl(var(--razor-primary))]" />
+                    <LucideLink className="h-4 text-gray-800" />
                     <span className="font-medium text-sm">Internal Links</span>
                     <Badge variant="secondary" className="ml-2 text-xs">
                       {(auditData.analysis?.links?.internal_links || []).length}
@@ -1253,7 +1253,7 @@ const ProjectAuditReport = ({ projectId }: { projectId: string }) => {
           <Card className="hover-lift">
             <CardContent className="p-6">
               <div className="flex items-center gap-2 mb-4">
-                <FileText className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+                <FileText className="h-5 w-5 text-gray-800" />
                 <h3 className="text-lg font-semibold">Schema Markup</h3>
               </div>
               <div className="space-y-4">
@@ -1518,7 +1518,7 @@ const ProjectAuditReport = ({ projectId }: { projectId: string }) => {
           <Card className="hover-lift">
             <CardContent className="p-6">
               <div className="flex items-center gap-2 mb-4">
-                <FileText className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+                <FileText className="h-5 w-5 text-gray-800" />
                 <h3 className="text-lg font-semibold">Redirect Chain</h3>
               </div>
               <div className="space-y-4">
@@ -1686,7 +1686,7 @@ const ProjectAuditReport = ({ projectId }: { projectId: string }) => {
           <Card className="hover-lift">
             <CardContent className="p-6">
               <div className="flex items-center gap-2 mb-6">
-                <BarChart3 className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+                <BarChart3 className="h-5 w-5 text-gray-800" />
                 <h3 className="text-lg font-semibold">Sitemap Analysis</h3>
               </div>
 
@@ -1911,7 +1911,7 @@ const ProjectAuditReport = ({ projectId }: { projectId: string }) => {
           <Card className="hover-lift">
             <CardContent className="p-6">
               <div className="flex items-center gap-2 mb-4">
-                <BarChart3 className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+                <BarChart3 className="h-5 w-5 text-gray-800" />
                 <h3 className="text-lg font-semibold">WWW Resolve</h3>
               </div>
               <div className="space-y-4">
@@ -2008,7 +2008,7 @@ const ProjectAuditReport = ({ projectId }: { projectId: string }) => {
           <Card className="hover-lift">
             <CardContent className="p-6">
               <div className="flex items-center gap-2 mb-4">
-                <FileText className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+                <FileText className="h-5 w-5 text-gray-800" />
                 <h3 className="text-lg font-semibold">
                   Inner Pages Meta Audit
                 </h3>
@@ -3177,7 +3177,7 @@ const ProjectAuditReport = ({ projectId }: { projectId: string }) => {
                 onClick={() => scrollToSection(item.id)}
                 className={`w-full flex items-center gap-2 px-2 py-1.5 text-left rounded-lg transition-all text-xs ${
                   activeSection === item.id
-                    ? 'bg-[hsl(var(--razor-primary))]/20 text-[hsl(var(--razor-primary))] font-medium'
+                    ? 'bg-[hsl(var(--razor-primary))]/20 text-gray-800 font-medium'
                     : 'hover:bg-muted/50 text-muted-foreground hover:text-foreground'
                 }`}
               >

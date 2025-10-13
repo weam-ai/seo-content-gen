@@ -18,7 +18,7 @@ export function MainLayout({ children }: MainLayoutProps) {
       
       <div className="flex">
         {/* Main content */}
-        <main className="flex-1 px-6 bg-gradient-to-br from-background via-background to-muted/20 razor-mesh">
+        <main className="flex-1 md:px-6 px-2 bg-gradient-to-br from-background via-background to-muted/20 razor-mesh">
           {children || <Outlet />}
         </main>
       </div>

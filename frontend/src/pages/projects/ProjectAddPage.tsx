@@ -198,10 +198,10 @@ export default function NewProject() {
   return (
     <div className="">
       {/* Back Button - Positioned below the logo */}
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto md:px-4 px-2 md:py-8 py-4">
         <Button
           variant="ghost"
-          className="gap-2 mb-4"
+          className="gap-2 mb-0"
           onClick={() => navigate(-1)}
         >
           <ArrowLeft className="h-4 w-4" />
@@ -210,13 +210,13 @@ export default function NewProject() {
       </div>
 
       {/* Main Content */}
-      <main className="container mx-auto">
+      <main className="container mx-auto md:px-4 px-2 md:py-8 py-4">
         <div className="max-w-4xl mx-auto">
           <PageHeader
             title="Create New Project"
             description="Set up your content writing project with AI-powered insights"
           />
-          <CardContent className="p-8">
+          <CardContent className="py-8 px-0">
             <Formik
               innerRef={formRef}
               initialValues={initialValues}
@@ -391,7 +391,7 @@ export default function NewProject() {
                     <Card>
                       <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                          <FileText className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+                          <FileText className="h-5 w-5 text-gray-800" />
                           Basic Information
                         </CardTitle>
                       </CardHeader>
@@ -508,7 +508,7 @@ export default function NewProject() {
                     <Card>
                       <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                          <Globe className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+                          <Globe className="h-5 w-5 text-gray-800" />
                           Competitor Websites
                         </CardTitle>
                       </CardHeader>
@@ -579,7 +579,7 @@ export default function NewProject() {
                     <Card>
                       <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                          <Target className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+                          <Target className="h-5 w-5 text-gray-800" />
                           Keywords & SEO
                         </CardTitle>
                       </CardHeader>
@@ -590,7 +590,7 @@ export default function NewProject() {
                               Targeted Keywords *
                             </Label>
                             <span
-                              className="text-xs text-[hsl(var(--razor-primary))] cursor-pointer"
+                              className="text-xs text-gray-800 cursor-pointer underline"
                               onClick={() => fileInputRef.current?.click()}
                             >
                               Import CSV
@@ -793,7 +793,7 @@ export default function NewProject() {
                     <Card>
                       <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                          <FileText className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+                          <FileText className="h-5 w-5 text-gray-800" />
                           Content Guidelines *
                         </CardTitle>
                       </CardHeader>
@@ -834,7 +834,7 @@ export default function NewProject() {
                               Project-Specific Guidelines
                             </Label>
                             <span
-                              className="text-xs text-[hsl(var(--razor-primary))] cursor-pointer"
+                              className="text-xs text-gray-800 cursor-pointer underline"
                               onClick={() =>
                                 document
                                   .getElementById('guideline-import-file')
@@ -890,9 +890,9 @@ export default function NewProject() {
                     {/* AI-Powered Fields */}
                     <Card>
                       <CardHeader>
-                        <div className="flex items-center justify-between">
+                        <div className="flex md:items-center justify-between flex-col md:flex-row gap-y-2 md:gap-y-0">
                           <CardTitle className="flex items-center gap-2">
-                            <Building className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+                            <Building className="h-5 w-5 text-gray-800" />
                             Business Description
                           </CardTitle>
                           <Button
@@ -1112,7 +1112,7 @@ export default function NewProject() {
                       <Button
                         type="submit"
                         disabled={isSubmitting}
-                        className="bg-[hsl(var(--razor-primary))] text-white"
+                        className=""
                       >
                         {isSubmitting ? 'Creating...' : 'Create Project'}
                       </Button>

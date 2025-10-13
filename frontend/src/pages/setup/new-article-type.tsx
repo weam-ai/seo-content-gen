@@ -204,7 +204,7 @@ export default function NewArticleTypePage() {
                   <Button
                     type="submit"
                     disabled={!isFormValid || loading}
-                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                    className=""
                   >
                     {loading ? <span className="animate-spin mr-2">⏳</span> : null}
                     Save Article Type

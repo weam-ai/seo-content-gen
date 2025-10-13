@@ -209,14 +209,14 @@ export default function ArticleTypesPage() {
   return (
     <div className="">
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto md:px-4 px-2 md:py-8 py-4">
         <PageHeader
           title="Article Types Management"
           description="Manage article types and their configurations for your organization"
         >
           {canCreateSystemPrompts && (
             <Link to="/setup/article-types/new">
-              <Button className="gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+              <Button className="" size="sm" variant="outline">
                 <Plus className="h-4 w-4" />
                 Add Article Type
               </Button>
@@ -224,8 +224,7 @@ export default function ArticleTypesPage() {
           )}
         </PageHeader>
           {/* Filters and Search - System Prompts style */}
-          <div className="flex flex-col sm:flex-row gap-4 py-6 items-center">
-            <div className="flex flex-1 items-center gap-2">
+          <div className="flex flex-col sm:flex-row gap-2 py-6 items-center">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -257,8 +256,8 @@ export default function ArticleTypesPage() {
               >
                 <span style={{ display: 'none' }} />
               </ExportToExcel>
-            </div>
           </div>
+          <div className='overflow-x-auto max-w-[100vw]'>
           {/* ServerDataTable */}
           <ServerDataTable
             columns={columns}
@@ -278,6 +277,7 @@ export default function ArticleTypesPage() {
             hideInternalSearch={true}
             hideInternalExport={true}
           />
+          </div>
         </div>
     </div>
   );

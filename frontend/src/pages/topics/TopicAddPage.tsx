@@ -226,7 +226,7 @@ export default function TopicAddPage() {
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <Building className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+                      <Building className="h-5 w-5 text-gray-800" />
                       Project Selection
                     </CardTitle>
                   </CardHeader>
@@ -273,7 +273,7 @@ export default function TopicAddPage() {
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <Target className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+                      <Target className="h-5 w-5 text-gray-800" />
                       Keywords & SEO
                     </CardTitle>
                   </CardHeader>
@@ -656,7 +656,7 @@ export default function TopicAddPage() {
                   <Button
                     type="submit"
                     disabled={isSubmitting}
-                    className="bg-[hsl(var(--razor-primary))] text-white"
+                    className=""
                   >
                     {isSubmitting ? 'Creating...' : 'Create Topic'}
                   </Button>

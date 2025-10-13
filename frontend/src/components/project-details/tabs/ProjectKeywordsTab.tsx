@@ -585,7 +585,7 @@ export default function ProjectKeywordsTab({
           <CardHeader className="pb-1">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Target className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+                <Target className="h-5 w-5 text-gray-800" />
                 <CardTitle className="text-lg">Targeted Keywords</CardTitle>
               </div>
               <div className="flex items-center gap-2">
@@ -991,7 +991,7 @@ export default function ProjectKeywordsTab({
           <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Brain className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+                <Brain className="h-5 w-5 text-gray-800" />
                 <CardTitle className="text-lg">Recommended Keywords</CardTitle>
               </div>
               <div className="flex items-center gap-2">

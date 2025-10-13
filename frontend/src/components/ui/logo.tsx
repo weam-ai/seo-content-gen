@@ -23,7 +23,9 @@ export function Logo({ className = '', showText = true, onClick }: LogoProps) {
       </div>
       {showText && (
         <span
-          className={`font-semibold text-gray-900 dark:text-white`}
+          className={`text-xl font-bold text-black transition-all duration-300 ${
+            isHovered ? 'scale-105' : ''
+          }`}
         >
           Weam AI
         </span>

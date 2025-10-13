@@ -30,14 +30,14 @@ export default function SetupPreferences() {
     <div className=" flex items-center justify-center p-4">
       <div className="w-full max-w-2xl">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 bg-[hsl(var(--razor-primary))]/10 text-[hsl(var(--razor-primary))] px-4 py-2 rounded-full text-sm font-medium mb-4">
+          <div className="inline-flex items-center gap-2 bg-[hsl(var(--razor-primary))]/10 text-gray-800 px-4 py-2 rounded-full text-sm font-medium mb-4">
             <Settings className="h-4 w-4" />
             Step 3 of 4
           </div>
-          <h1 className="text-3xl font-bold tracking-tight mb-4">
+          <h1 className="md:text-2xl text-lg font-bold tracking-tight mb-4">
             Customize your preferences
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground md:text-base text-sm">
             Set up your workspace preferences to make RazorCopy work best for
             you.
           </p>
