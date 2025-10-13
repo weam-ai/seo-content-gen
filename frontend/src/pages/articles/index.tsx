@@ -739,13 +739,15 @@ export default function Articles() {
       {/* End Minimal Tooltip Test Block */}
       <div className="">
         {/* Main Content */}
-        <main className="container mx-auto px-4 py-8">
+        <main className="container mx-auto md:px-4 px-2 md:py-8 py-4">
           <PageHeader
             title="Articles"
             description="Create, manage, and track content articles from approval to publication"
           >
             <Button
-              className="razor-gradient hover:opacity-90 transition-opacity"
+              className=""
+              variant="outline"
+              size="sm"
               onClick={() => navigate('/articles/new')}
             >
               <Plus className="h-4 w-4 mr-2" />
@@ -780,12 +782,12 @@ export default function Articles() {
           {loading ? (
             <div className="text-center py-12">
               <div className="subtle-float">
-                <div className="w-24 h-24 mx-auto mb-4 rounded-full razor-gradient flex items-center justify-center gentle-glow">
-                  <FileText className="h-12 w-12 text-white" />
+                <div className="md:w-24 md:h-24 w-16 h-16 mx-auto mb-4 rounded-full bg-gray-700 flex items-center justify-center gentle-glow">
+                  <FileText className="md:h-12 md:w-12 h-9 w-9 text-white" />
                 </div>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Loading articles...</h3>
-              <p className="text-muted-foreground mb-6">
+              <h3 className="text-xl font-semibold mb-1">Loading articles...</h3>
+              <p className="text-muted-foreground mb-6 text-sm">
                 {searchQuery || statusFilter !== 'all' || projectFilter !== 'all'
                   ? 'Please wait while we load the articles'
                   : 'Articles will appear here once topics are approved'}
@@ -794,18 +796,18 @@ export default function Articles() {
           ) : viewMode !== 'calendar' && articles.length === 0 ? (
             <div className="text-center py-12">
               <div className="subtle-float">
-                <div className="w-24 h-24 mx-auto mb-4 rounded-full razor-gradient flex items-center justify-center gentle-glow">
-                  <FileText className="h-12 w-12 text-white" />
+                <div className="md:w-24 md:h-24 w-16 h-16 mx-auto mb-4 rounded-full bg-gray-700 flex items-center justify-center gentle-glow">
+                  <FileText className="md:h-12 md:w-12 h-9 w-9 text-white" />
                 </div>
               </div>
-              <h3 className="text-xl font-semibold mb-2">No articles found</h3>
-              <p className="text-muted-foreground mb-6">
+              <h3 className="text-xl font-semibold mb-1">No articles found</h3>
+              <p className="text-muted-foreground mb-6 text-sm">
                 {searchQuery || statusFilter !== 'all' || projectFilter !== 'all'
                   ? 'Try adjusting your search or filters'
                   : 'Articles will appear here once topics are approved'}
               </p>
               <Button
-                className="razor-gradient"
+                className=""
                 onClick={() => navigate('/articles/new')}
               >
                 <Plus className="h-4 w-4 mr-2" />
@@ -826,15 +828,15 @@ export default function Articles() {
                         <div className="flex items-start justify-between">
                           <div className="space-y-2 flex-1">
                             <Link to={`/articles/${article._id}`}>
-                              <h3 className="font-semibold text-lg hover:text-[hsl(var(--razor-primary))] transition-colors cursor-pointer">
+                              <h3 className="font-semibold text-lg hover:text-gray-800 transition-colors cursor-pointer">
                                 {article.title}
                               </h3>
                             </Link>
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                               {article.relatedProject ? (
                                 <Link to={`/projects/${article.relatedProject._id}`} className="flex items-center gap-1 group">
-                                  <ExternalLink className="h-3 w-3 group-hover:text-[hsl(var(--razor-primary))] transition-colors" />
-                                  <span className="truncate group-hover:text-[hsl(var(--razor-primary))] transition-colors">{article.relatedProject.name}</span>
+                                  <ExternalLink className="h-3 w-3 group-hover:text-gray-800 transition-colors" />
+                                  <span className="truncate group-hover:text-gray-800 transition-colors">{article.relatedProject.name}</span>
                                 </Link>
                               ) : (
                                 <span className="text-red-500">No Project</span>
@@ -974,15 +976,15 @@ export default function Articles() {
                             <div className="flex items-start gap-4">
                               <div className="flex-1">
                                 <Link to={`/articles/${article._id}`}>
-                                  <h3 className="font-semibold text-lg hover:text-[hsl(var(--razor-primary))] transition-colors cursor-pointer">
+                                  <h3 className="font-semibold text-lg hover:text-gray-800 transition-colors cursor-pointer">
                                     {article.title}
                                   </h3>
                                 </Link>
                                 <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
                                   {article.relatedProject ? (
                                     <Link to={`/projects/${article.relatedProject._id}`} className="flex items-center gap-1 group">
-                                      <ExternalLink className="h-3 w-3 group-hover:text-[hsl(var(--razor-primary))] transition-colors" />
-                                      <span className="truncate group-hover:text-[hsl(var(--razor-primary))] transition-colors">{article.relatedProject.name}</span>
+                                      <ExternalLink className="h-3 w-3 group-hover:text-gray-800 transition-colors" />
+                                      <span className="truncate group-hover:text-gray-800 transition-colors">{article.relatedProject.name}</span>
                                     </Link>
                                   ) : (
                                     <span className="text-red-500">No Project</span>

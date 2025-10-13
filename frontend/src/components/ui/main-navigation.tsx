@@ -77,10 +77,10 @@ export function MainNavigation() {
           <Link key={item.name} to={item.href}>
             <div
               className={cn(
-                'px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-[hsl(var(--razor-primary))]/10 hover:text-[hsl(var(--razor-primary))]',
+                'px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-gray-100',
                 isActive(item.href)
-                  ? 'bg-[hsl(var(--razor-primary))]/15 text-[hsl(var(--razor-primary))] font-semibold border border-[hsl(var(--razor-primary))]/20'
-                  : 'text-muted-foreground'
+                  ? 'bg-black text-white hover:text-white hover:bg-black'
+                  : ''
               )}
             >
               {item.name}
@@ -96,9 +96,9 @@ export function MainNavigation() {
               variant="ghost"
               size="sm"
               className={cn(
-                'gap-2 px-3 py-2 rounded-lg transition-all duration-200 hover:bg-[hsl(var(--razor-primary))]/10 hover:text-[hsl(var(--razor-primary))]',
+                'gap-2 px-3 py-2 rounded-lg transition-all duration-200 hover:bg-gray-100',
                 isSetupActive()
-                  ? 'bg-[hsl(var(--razor-primary))]/15 text-[hsl(var(--razor-primary))] font-semibold border border-[hsl(var(--razor-primary))]/20'
+                  ? 'bg-black text-white hover:text-white hover:bg-black'
                   : 'text-muted-foreground'
               )}
             >
@@ -133,8 +133,8 @@ export function MainNavigation() {
                         className={cn(
                           'gap-2 cursor-pointer',
                           isActive(item.href)
-                            ? 'bg-[hsl(var(--razor-primary))]/10 text-[hsl(var(--razor-primary))]'
-                            : 'hover:bg-[hsl(var(--razor-primary))]/5'
+                            ? 'bg-gray-100'
+                            : ''
                         )}
                       >
                         <item.icon className="h-4 w-4" />

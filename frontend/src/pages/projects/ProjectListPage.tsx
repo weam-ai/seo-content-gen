@@ -246,13 +246,13 @@ export default function Projects() {
   return (
     <TooltipProvider>
       <div className="">
-        <main className="container mx-auto px-4 py-8">
+        <main className="container mx-auto md:px-4 px-2 md:py-8 py-4">
           <PageHeader
             title="Projects"
             description="Manage your content writing projects and collaborate with your team"
           >
             <Link to="/projects/new">
-              <Button className="razor-gradient hover:opacity-90 transition-opacity">
+              <Button className="" size="sm" variant="outline">
                 <Plus className="h-4 w-4 mr-2" />
                 New Project
               </Button>
@@ -260,7 +260,7 @@ export default function Projects() {
           </PageHeader>
 
           {/* Filters and Search */}
-          <div className="flex flex-col sm:flex-row gap-4 py-6">
+          <div className="flex flex-col sm:flex-row gap-2 py-6">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -273,7 +273,7 @@ export default function Projects() {
                 className="pl-10"
               />
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 md:flex-row flex-col">
               <Select
                 value={sortOrder}
                 onValueChange={(value) => {
@@ -329,15 +329,15 @@ export default function Projects() {
           {/* Projects Grid/List */}
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-12 w-12 animate-spin text-[hsl(var(--razor-primary))]" />
+              <Loader2 className="h-12 w-12 animate-spin text-gray-800" />
             </div>
           ) : projects.length === 0 ? (
             <div className="text-center py-12">
-              <div className="w-24 h-24 mx-auto mb-4 rounded-full razor-gradient flex items-center justify-center">
-                <Search className="h-12 w-12 text-white" />
+              <div className="md:w-24 md:h-24 w-16 h-16 mx-auto mb-4 rounded-full bg-gray-700 flex items-center justify-center">
+                <Search className="md:h-12 md:w-12 h-9 w-9 text-white" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">No projects found</h3>
-              <p className="text-muted-foreground mb-6">
+              <h3 className="text-xl font-semibold mb-1">No projects found</h3>
+              <p className="text-muted-foreground mb-6 text-sm">
                 Try adjusting your search or filters.
               </p>
             </div>

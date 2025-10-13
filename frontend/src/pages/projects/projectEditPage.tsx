@@ -263,10 +263,10 @@ export default function EditProject() {
   return (
     <div className="">
       {/* Back Button - Positioned below the logo */}
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto md:px-4 px-2 md:py-8 py-4">
         <Button
           variant="ghost"
-          className="gap-2 mb-4"
+          className="gap-2 mb-0"
           onClick={() => navigate(-1)}
         >
           <ArrowLeft className="h-4 w-4" />
@@ -402,7 +402,7 @@ export default function EditProject() {
                     <Card className="hover-lift">
                       <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                          <Globe className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+                          <Globe className="h-5 w-5 text-gray-800" />
                           Basic Information
                         </CardTitle>
                       </CardHeader>
@@ -503,7 +503,7 @@ export default function EditProject() {
                     <Card className="hover-lift">
                       <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                          <Globe2 className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+                          <Globe2 className="h-5 w-5 text-gray-800" />
                           Competitor Websites
                         </CardTitle>
                       </CardHeader>
@@ -582,7 +582,7 @@ export default function EditProject() {
                     <Card className="hover-lift">
                       <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                          <Target className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+                          <Target className="h-5 w-5 text-gray-800" />
                           Keywords & SEO
                           <Badge variant="secondary" className="text-xs">
                             Read-only
@@ -631,7 +631,7 @@ export default function EditProject() {
                     <Card className="hover-lift">
                       <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                          <FileText className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+                          <FileText className="h-5 w-5 text-gray-800" />
                           Content Guidelines *
                         </CardTitle>
                       </CardHeader>
@@ -672,7 +672,7 @@ export default function EditProject() {
                               Project-Specific Guidelines
                             </Label>
                             <span
-                              className="text-xs text-[hsl(var(--razor-primary))] cursor-pointer"
+                              className="text-xs text-gray-800 cursor-pointer underline"
                               onClick={() =>
                                 document
                                   .getElementById('guideline-import-file')
@@ -729,7 +729,7 @@ export default function EditProject() {
                       <CardHeader>
                         <div className="flex items-center justify-between">
                           <CardTitle className="flex items-center gap-2">
-                            <Building className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+                            <Building className="h-5 w-5 text-gray-800" />
                             Business Description
                           </CardTitle>
                           <Button
@@ -953,7 +953,7 @@ export default function EditProject() {
                       <Button
                         type="submit"
                         disabled={isSubmitting}
-                        className="bg-[hsl(var(--razor-primary))] text-white"
+                        className=""
                       >
                         {isSubmitting ? 'Updating...' : 'Update Project'}
                       </Button>

@@ -218,7 +218,7 @@ export const TaskSidebar: React.FC<TaskSidebarProps> = ({
     <Card className="hover-lift bg-card/50 backdrop-blur-sm border-border/40">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Info className="h-5 w-5 text-[hsl(var(--razor-primary))]" />
+          <Info className="h-5 w-5 text-gray-800" />
           Task Information
         </CardTitle>
       </CardHeader>
@@ -230,12 +230,12 @@ export const TaskSidebar: React.FC<TaskSidebarProps> = ({
           </label>
           <a
             href={`/projects/${projectName.id}`}
-            className="flex items-center gap-1 group text-sm font-medium hover:text-[hsl(var(--razor-primary))] transition-colors"
+            className="flex items-center gap-1 group text-sm font-medium hover:text-gray-800 transition-colors"
             target="_blank"
             rel="noopener noreferrer"
           >
-            {/* <svg className="h-3 w-3 group-hover:text-[hsl(var(--razor-primary))] transition-colors" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M18 13v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6m7-1V7m0 0h-4m4 0L10 17" /></svg> */}
-            <span className="truncate group-hover:text-[hsl(var(--razor-primary))] transition-colors">
+            {/* <svg className="h-3 w-3 group-hover:text-gray-800 transition-colors" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M18 13v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6m7-1V7m0 0h-4m4 0L10 17" /></svg> */}
+            <span className="truncate group-hover:text-gray-800 transition-colors">
               {projectName.name}
             </span>
           </a>
@@ -267,7 +267,7 @@ export const TaskSidebar: React.FC<TaskSidebarProps> = ({
             Primary Keyword
           </label>
           <div className="flex items-center gap-2">
-            <Target className="h-4 w-4 text-[hsl(var(--razor-primary))]" />
+            <Target className="h-4 w-4 text-gray-800" />
             <span className="text-sm font-medium">{primaryKeyword.value}</span>
           </div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">

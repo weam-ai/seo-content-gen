@@ -47,7 +47,7 @@ export default function NewIndustryGuidelinePage() {
 
   return (
     <div className="">
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto md:px-4 px-2 md:py-8 py-4">
         <div className="mb-6">
           <Link to="/setup/industry-guidelines">
             <Button variant="ghost" className="gap-2 mb-4">
@@ -101,7 +101,7 @@ export default function NewIndustryGuidelinePage() {
                     <Button variant="outline" disabled={loading}>Cancel</Button>
                   </Link>
                   <Button
-                    className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                    className=""
                     type="submit"
                     disabled={loading}
                   >

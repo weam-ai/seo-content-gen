@@ -164,7 +164,7 @@ export default function TopicDetail() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="w-24 h-24 mx-auto mb-4 rounded-full razor-gradient flex items-center justify-center gentle-glow" />
+          <div className="md:w-24 md:h-24 w-16 h-16 mx-auto mb-4 rounded-full bg-gray-700 flex items-center justify-center gentle-glow" />
           <h1 className="text-2xl font-bold mb-2">Loading topic...</h1>
         </div>
       </div>
@@ -395,7 +395,7 @@ export default function TopicDetail() {
 
   return (
     <div>
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto md:px-4 px-2 md:py-8 py-4">
         {/* Back Button - Now in content area */}
         <div className="mb-6">
           <Link to="/topics">
