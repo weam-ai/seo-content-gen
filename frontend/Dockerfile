@@ -17,7 +17,7 @@ RUN npm install --silent && \
 COPY . .
 
 # Build the application with optimizations
-# RUN VITE_APP_URL_PREFIX=seo-content-gen npm run build
+# RUN VITE_APP_URL_PREFIX=blog-engine npm run build
 RUN npm run build
 
 # Production stage
@@ -37,7 +37,7 @@ RUN echo 'server { \
     index index.html; \
     \
     # Handle static assets with subdirectory \
-    location ~* ^/seo-content-gen/assets/(.*)$ { \
+    location ~* ^/blog-engine/assets/(.*)$ { \
         alias /usr/share/nginx/html/assets/$1; \
         expires 1y; \
         add_header Cache-Control "public, immutable"; \
@@ -45,18 +45,18 @@ RUN echo 'server { \
     } \
     \
     # Handle subdirectory routing for HTML pages \
-    location /seo-content-gen/ { \
+    location /blog-engine/ { \
         alias /usr/share/nginx/html/; \
         try_files $uri $uri/ /index.html; \
     } \
     \
     # Handle root redirect to subdirectory \
     location = / { \
-        return 301 /seo-content-gen/; \
+        return 301 /blog-engine/; \
     } \
     \
-    # Handle logo and static files under seo-content-gen \
-    location ~* ^/seo-content-gen/(.*\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot))$ { \
+    # Handle logo and static files under blog-engine \
+    location ~* ^/blog-engine/(.*\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot))$ { \
         alias /usr/share/nginx/html/$1; \
         expires 1y; \
         add_header Cache-Control "public, immutable"; \
